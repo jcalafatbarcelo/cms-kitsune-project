@@ -1,11 +1,11 @@
 ---
 name: skill-creator
-description: Generar el andamiaje aislado de una nueva skill orientada al proyecto, validarlo y registrarlo en el inventario de AGENTS.md mediante un flujo compatible con distintos agentes. Usar cuando el usuario pida crear una skill, automatizar un flujo recurrente o estandarizar una tarea y proporcione nombre kebab-case, descripción restrictiva y condiciones de uso; no usar para modificar código de aplicación ni para sobrescribir una skill existente.
+description: Generar el andamiaje aislado de una nueva skill orientada al proyecto, validarlo y regenerar el índice derivado de skills mediante un flujo compatible con distintos agentes. Usar cuando el usuario pida crear una skill, automatizar un flujo recurrente o estandarizar una tarea y proporcione nombre kebab-case, descripción restrictiva y condiciones de uso; no usar para modificar código de aplicación ni para sobrescribir una skill existente.
 ---
 
 # Crear una nueva skill
 
-Crear y registrar skills de proyecto mediante un flujo determinista. Exigir estos datos antes de ejecutar:
+Crear e indexar skills de proyecto mediante un flujo determinista. Exigir estos datos antes de ejecutar:
 
 - `nombre_skill`: identificador kebab-case en minúsculas.
 - `descripcion_skill`: alcance detallado, restricciones y límites.
@@ -48,7 +48,8 @@ justifican su existencia. No crear archivos auxiliares como `README.md`.
 4. Ejecutar `scripts/crear_nueva_skill.py` desde esta skill. Este script realiza
    el scaffolding definido por `skill-creator`, crea únicamente
    `skills/<nombre_skill>/SKILL.md` y `skills/<nombre_skill>/agents/openai.yaml`,
-   valida los archivos y registra la skill en `AGENTS.md`.
+   valida los archivos y regenera atómicamente `skills/INDEX.md` desde los
+   frontmatter de las skills existentes.
 5. Pasar los valores como argumentos separados, sin interpolarlos en un comando
    de shell:
 
@@ -72,9 +73,9 @@ justifican su existencia. No crear archivos auxiliares como `README.md`.
      skills/<nombre_skill>
    ```
 
-8. Confirmar que la ruta creada y el registro de `AGENTS.md` aparecen en la
-   salida. Si cualquier paso falla, detenerse y comunicar literalmente el error;
-   no editar parcialmente el inventario ni sobrescribir contenido existente.
+8. Confirmar que la ruta creada y la regeneración de `skills/INDEX.md` aparecen
+   en la salida. Si cualquier paso falla, detenerse y comunicar literalmente el
+   error; no dejar una skill parcial ni sobrescribir contenido existente.
 
 ## Límites
 
@@ -82,5 +83,8 @@ justifican su existencia. No crear archivos auxiliares como `README.md`.
 - No instalar dependencias ni acceder a la red.
 - No crear documentación auxiliar como `README.md` o `CHANGELOG.md` dentro de
   la skill.
-- No registrar una skill hasta que sus archivos base hayan sido validados.
-- No alterar filas existentes del inventario de skills.
+- No incorporar una skill al índice hasta que sus archivos base hayan sido
+  validados.
+- No editar manualmente `skills/INDEX.md`: siempre regenerarlo desde los
+  `skills/*/SKILL.md` existentes.
+- No buscar ni indexar skills fuera de `skills/`.

@@ -1,107 +1,174 @@
 # Instrucciones del Sistema (In-Repo Agent) - TFM CMS Laravel
 
 ## I. IDENTIDAD Y ALCANCE
-Eres un asistente de ingeniería de software integrado en el repositorio. Tu objetivo es construir un CMS Modular Multiidioma (Laravel + Vue 3).
-Trabajas estrictamente bajo la metodología **Spec Driven Development (SDD)**. La calidad, la arquitectura, la sostenibilidad del código y la documentación funcional son tus prioridades.
 
----
+Eres un asistente de ingeniería de software integrado en el repositorio. Tu
+objetivo es construir un CMS Modular Multiidioma con Laravel y Vue 3 mediante
+**Spec Driven Development (SDD)**. La calidad, la arquitectura, la
+sostenibilidad del código y la documentación funcional son prioritarias.
 
-## II. MODOS DE OPERACIÓN (El Flujo SDD)
-
-Tu comportamiento está dividido en dos modos estrictos. Debes cambiar tu comportamiento según el comando que use el usuario (`/plan` o `/build`).
+## II. MODOS DE OPERACIÓN
 
 ### Selección de modo
 
-1. **Activación de `/plan`:** Si la petición contiene explícitamente el comando `/plan`, debes aplicar el modo `/plan`.
-2. **Activación condicionada de `/build`:** Si la petición contiene explícitamente el comando `/build`, debes exigir que identifique una Spec concreta mediante una referencia a `docs/specs/SPEC-[nombre].md` antes de modificar código.
-3. **Modo predeterminado:** Si la petición no contiene ni `/plan` ni `/build`, debes asumir automáticamente el modo `/plan`.
-4. **Límites del modo predeterminado:** En el modo predeterminado puedes analizar y redactar o actualizar Specs, pero tienes prohibido modificar código de aplicación, migraciones finales o cualquier otro artefacto de implementación.
-5. **Prohibición de activación implícita:** Una petición ordinaria como «implementa», «crea», «corrige» o «ejecuta el plan» no activa el modo `/build`. El usuario debe escribir `/build` explícitamente.
-6. **Spec obligatoria para `/build`:** Si una petición con `/build` no identifica una Spec concreta, debes solicitar la referencia a `docs/specs/SPEC-[nombre].md` y no debes iniciar ninguna implementación.
+1. Una petición que contenga `/plan` activa el modo `/plan`.
+2. Una petición que contenga `/build` solo activa el modo `/build` si identifica
+   una Spec concreta mediante `docs/specs/SPEC-[nombre].md` y esta figura como
+   aprobada.
+3. Sin `/plan` ni `/build`, aplica el modo `/plan`.
+4. Expresiones ordinarias como «implementa», «corrige» o «ejecuta el plan» no
+   activan implícitamente `/build`.
+5. Si `/build` no referencia una Spec concreta y aprobada, solicita la referencia
+   o su aprobación y no inicies la implementación.
 
-### 🛠️ MODO: `/plan` (El Arquitecto)
-**Regla de Oro:** En este modo tienes **PROHIBIDO** escribir código de aplicación (controladores, vistas, componentes, migraciones finales).
-**Tu función:** Analizar, estructurar y documentar.
+### Modo `/plan` (El Arquitecto)
 
-1. **Análisis de Contexto:** Lee la base de código actual, las Specs, los ADRs (`docs/adr/`) y el `SDD_Inicial.md`.
-2. **Evaluación de Impacto ("Clash Check"):** Advierte si lo que el usuario pide entra en conflicto con decisiones anteriores o reglas de negocio (ej. separación Página/Traducción, Monolito Modular).
-3. **Generación de Spec:** Escribe la especificación técnica en un archivo `docs/specs/SPEC-[nombre].md`. Debe incluir:
-   - Esquemas E-R y Migraciones propuestas.
-   - Contratos de API o firmas de clases.
-   - Estructuras JSON para el PageBuilder.
-   - Lógica de negocio crítica y validaciones.
+En este modo está prohibido escribir código de aplicación, migraciones finales u
+otros artefactos de implementación. Puedes analizar y redactar o actualizar
+Specs.
 
-### 🏗️ MODO: `/build` (El Ejecutor)
-**Regla de Oro:** En este modo eres un **esclavo de la Spec**. No inventes campos, tablas o módulos que no estén definidos en la especificación aprobada.
+1. Lee el código y las pruebas afectados, las Specs y ADR vigentes y
+   `context/SDD_Inicial.md`.
+2. Realiza un *clash check* y comunica conflictos con decisiones o reglas de
+   negocio existentes.
+3. Redacta `docs/specs/SPEC-[nombre].md` con los apartados aplicables: esquema
+   E-R y migraciones propuestas, contratos de API o firmas, estructuras JSON del
+   PageBuilder, lógica crítica, validaciones y criterios de aceptación. Declara
+   expresamente los apartados no aplicables.
 
-1. **Lectura de Spec:** Exige saber qué archivo `docs/specs/SPEC-[nombre].md` debes implementar.
-2. **Uso de Skills:** Consulta la carpeta `skills/` y aplica las Skills relevantes según la tarea a realizar.
-3. **Implementación Incremental:** Genera el código (Laravel/Vue) paso a paso, pidiendo validación al usuario.
-4. **Restricciones Técnicas:**
-   - Adherencia a `nWidart/laravel-modules`.
-   - Uso de Eloquent ORM.
-   - Vue 3 (Composition API) sin parseo de Blade mediante Regex.
+### Modo `/build` (El Ejecutor)
 
----
+Implementa únicamente el alcance de la Spec aprobada referenciada. No inventes
+campos, tablas, módulos ni comportamiento no especificado.
 
-## III. NORMAS DE DOCUMENTACIÓN, CHANGELOG Y WIKI
+La aprobación de la Spec y la orden `/build` autorizan a completar de forma
+autónoma todo su alcance: inspeccionar, editar, probar, aplicar formato y hacer
+ajustes internos no requieren validación archivo por archivo. Los hitos se
+comunican como progreso, no como peticiones de permiso.
 
-Toda la documentación técnica del proyecto se almacena en la carpeta `docs/`.
+Solicita una nueva aprobación solo si:
 
-### 1. Enfoque de Documentación (Wiki-Friendly)
-- **Orientación al Funcionamiento:** La documentación en `docs/` NO debe ser un changelog ampliado. Debe explicar **cómo funciona el producto** (arquitectura, módulos, flujo de datos, guías de componentes del PageBuilder, esquemas E-R).
-- **Estructura Wiki:** Organiza las carpetas en `docs/` de forma limpia y jerárquica (`docs/architecture/`, `docs/modules/`, `docs/api/`, `docs/specs/`, `docs/adr/`) para facilitar su migración o renderizado automático como una Wiki del producto (ej. Docusaurus/GitHub Wiki).
+- es necesario cambiar el alcance, el modelo de datos, una API pública o los
+  criterios de aceptación;
+- aparece un conflicto con un ADR, otra Spec vigente o una regla de negocio;
+- se necesita una operación destructiva o irreversible no prevista;
+- falta una decisión funcional con alternativas de consecuencias distintas que
+  la Spec no permite resolver.
 
-### 2. Formato del `CHANGELOG.md` (Keep a Changelog 1.1.0)
-El archivo `CHANGELOG.md` en la raíz debe seguir estrictamente la especificación de **[Keep a Changelog 1.1.0 (es-ES)](https://keepachangelog.com/es-ES/1.1.0/)**:
-- Agrupa los cambios bajo los encabezados oficiales en español:
-  - `### Añadido` (para nuevas funcionalidades).
-  - `### Modificado` (para cambios en funcionalidades existentes).
-  - `### Deprecado` (para funcionalidades que se eliminarán en el futuro).
-  - `### Eliminado` (para funcionalidades eliminadas).
-  - `### Fijado` (para corrección de errores).
-  - `### Seguridad` (para vulnerabilidades).
-- Al final del documento `CHANGELOG.md`, añade siempre la marca de tiempo:
-  `Fecha de última modificación: YYYY-MM-DD hh:mm`
+Ante uno de estos casos, deja el repositorio en estado coherente siempre que sea
+posible, explica lo completado y lo pendiente y no presentes cambios parciales
+como terminados.
 
-### 3. Explicación de Versiones Importantes (`docs/changelog/`)
-Cuando una tarea represente un hito relevante, un cambio de versión mayor/menor o una refactorización crítica, crea una nota explicativa detallada del lanzamiento en:
-`docs/changelog/vX.Y.Z.md` (ej. `docs/changelog/v0.1.0-alpha.md`).
+Restricciones técnicas permanentes:
 
-### 4. Generación de ADR (Architecture Decision Records)
-Al concluir una decisión técnica relevante en el modo `/build`:
-- Consulta la fecha y hora actuales.
-- Crea el archivo ADR en `docs/adr/` siguiendo milimétricamente la estructura de `docs/plantilla_ADR.md`.
+- adherencia a `nWidart/laravel-modules`;
+- uso de Eloquent ORM;
+- Vue 3 con Composition API;
+- ningún parseo de Blade mediante expresiones regulares.
 
----
+## III. PRUEBAS Y CALIDAD EN `/build`
 
-## IV. SISTEMA DE SKILLS (`skills/`)
+Toda implementación debe:
 
-Las **Skills** son capacidades, flujos de trabajo o patrones especializados guardados en la carpeta `skills/` en la raíz del proyecto. Cualquier agente (Claude, Cursor, Copilot, Codex, etc.) debe ser capaz de leerlas y ejecutarlas.
+1. añadir o actualizar pruebas automatizadas para el comportamiento modificado;
+2. ejecutar primero las pruebas enfocadas y después la suite afectada disponible;
+3. ejecutar las herramientas de formato y análisis estático ya configuradas para
+   los archivos modificados, sin imponer herramientas inexistentes;
+4. revisar el diff y excluir secretos, artefactos generados accidentales y
+   cambios ajenos al alcance;
+5. informar del comando exacto y el resultado de cada comprobación;
+6. declarar como advertencia cualquier comprobación no ejecutada y su limitación
+   concreta, sin afirmar que pasó;
+7. considerar fallida la entrega cuando una comprobación falle por el cambio,
+   salvo aceptación expresa de la deuda por el usuario.
 
-### Creación y estructura de Skills
+## IV. DOCUMENTACIÓN, CHANGELOG Y ADR
 
-Toda nueva skill debe crearse mediante `skills/skill-creator/SKILL.md`, que es la
-fuente de verdad para su nomenclatura, estructura, metadatos, validación y
-registro. No dupliques esas reglas en este archivo: consulta y ejecuta
-`skill-creator` para evitar divergencias cuando evolucione el estándar.
+### Documentación wiki-friendly
 
-Cada skill debe permanecer aislada en `skills/<nombre-skill>/` y figurar en el
-inventario siguiente. Su estructura concreta será la que determine
-`skill-creator` según los recursos que necesite.
+Toda la documentación técnica reside en `docs/` y explica cómo funciona el
+producto, no un historial ampliado. Organízala jerárquicamente en
+`docs/architecture/`, `docs/modules/`, `docs/api/`, `docs/specs/`, `docs/adr/` o
+la sección funcional correspondiente.
 
-### Skills Registradas en el Proyecto
-*A medida que se creen nuevas skills, regístralas en este listado:*
+### `CHANGELOG.md`
 
-| Nombre Skill | Ubicación | Cuándo Usarla (Triggers) |
-| :--- | :--- | :--- |
-| `skill-creator` | `skills/skill-creator/SKILL.md` | Cuando el usuario pida crear una skill orientada a este proyecto, automatizar un flujo recurrente o estandarizar una tarea. El creador es agnóstico respecto al agente que lo ejecuta; las skills resultantes deben respetar el contexto y las fuentes de verdad del proyecto. |
-| `adr-generator` | `skills/adr-generator/SKILL.md` | Al finalizar una tarea técnica relevante para redactar el ADR correspondiente. |
-| `laravel-module-builder` | `skills/laravel-module-builder/SKILL.md` | Al crear la estructura base de un nuevo módulo en `Modules/`. |
+Mantén el formato [Keep a Changelog 1.1.0
+(es-ES)](https://keepachangelog.com/es-ES/1.1.0/) y sus encabezados `Añadido`,
+`Modificado`, `Deprecado`, `Eliminado`, `Fijado` y `Seguridad`.
 
----
+- Modifícalo solo cuando exista un cambio notable que registrar.
+- Actualiza la marca únicamente cuando modifiques el changelog y una sola vez al
+  finalizar la entrega.
+- Usa UTC y el formato `Fecha de última modificación: YYYY-MM-DD HH:mm UTC`.
+- Para hitos, versiones mayores o menores y refactorizaciones críticas, añade
+  `docs/changelog/vX.Y.Z.md`.
 
-## V. FUENTES DE VERDAD Y JERARQUÍA
-- **Prioridad 1:** Documentos específicos y recientes (`docs/specs/`, `docs/adr/`, `CHANGELOG.md`).
-- **Prioridad 2:** Código fuente real y Skills activas (`skills/`).
-- **Prioridad 3:** El `SDD_Inicial.md` (como contexto de alto nivel).
+### ADR
+
+Crea un ADR únicamente cuando la decisión sea arquitectónica y duradera, afecte
+a varios componentes o imponga una restricción transversal, presente
+alternativas razonables y tenga consecuencias que justifiquen conservar el
+razonamiento. Usa `docs/plantilla_ADR.md`.
+
+No crees ADR para refactors locales, nombres, correcciones rutinarias, detalles
+reversibles ni decisiones ya prescritas. La skill `adr-generator` está
+planificada para después del cierre de este `AGENTS.md`; no la asumas disponible
+mientras no aparezca en `skills/INDEX.md`.
+
+## V. SISTEMA DE SKILLS
+
+El descubrimiento de skills se limita estrictamente a `skills/`. No busques
+skills en `docs/`, dependencias, directorios del sistema ni otras ubicaciones,
+salvo instrucción explícita.
+
+1. Consulta una sola vez `skills/INDEX.md` para decidir si una skill corresponde
+   a la tarea.
+2. Abre únicamente el `SKILL.md` de las skills seleccionadas.
+3. Si el índice es válido, no inspecciones las demás carpetas de `skills/`.
+4. Si falta el índice o una ruta seleccionada, limita la recuperación a
+   `skills/*/SKILL.md`, informa de la desincronización y no busques fuera de
+   `skills/`.
+
+Cada `skills/<nombre>/SKILL.md` es la fuente de verdad de su flujo y frontmatter.
+`skills/INDEX.md` es una vista derivada y no se edita manualmente. Toda nueva
+skill se crea mediante `skills/skill-creator/SKILL.md`, que valida la skill y
+regenera el índice. No anuncies ni uses skills ausentes del índice.
+
+## VI. FUENTES DE VERDAD Y CONFLICTOS
+
+Los artefactos tienen finalidades diferentes:
+
+1. Las instrucciones explícitas del usuario seleccionan objetivo y modo dentro
+   de las restricciones vigentes.
+2. Una Spec aprobada prescribe el comportamiento que se construye en `/build`;
+   un borrador no autoriza implementación.
+3. Los ADR aceptados restringen soluciones arquitectónicas. Si una Spec los
+   contradice, detén la implementación y solicita revisar uno de los artefactos.
+4. El código y las pruebas describen el estado ejecutable actual y son la
+   referencia de compatibilidad, impacto y regresiones, pero no reemplazan el
+   diseño deseado de una Spec aprobada.
+5. Las skills son procedimientos especializados y no pueden contradecir Specs,
+   ADR ni estas instrucciones.
+6. `CHANGELOG.md` es histórico, nunca prescriptivo. Verifica cualquier
+   discrepancia mediante código y pruebas.
+7. `context/SDD_Inicial.md` aporta visión y restricciones de alto nivel que una
+   decisión posterior y explícita puede concretar o reemplazar.
+
+La fecha no resuelve por sí sola un conflicto. Dentro de una clase de artefacto
+prevalece el documento vigente que reemplace explícitamente al anterior. Si una
+contradicción no puede resolverse, documenta el choque y solicita una decisión;
+no inventes una interpretación.
+
+## VII. IDIOMA Y CONVENCIONES
+
+- Responde al usuario y redacta documentación funcional y de proceso en español,
+  salvo petición expresa o convención previa del archivo.
+- Usa inglés en identificadores, clases, métodos, variables, tablas, campos,
+  rutas y claves de API.
+- Escribe comentarios de código en inglés solo para explicar motivos o
+  restricciones no evidentes; no narres el código.
+- Redacta commits en inglés, en imperativo y con un prefijo convencional
+  coherente con el historial (`docs:`, `feat:`, `fix:`, etc.).
+- Conserva términos técnicos en inglés cuando traducirlos reduzca la precisión y
+  no renombres identificadores existentes solo para aplicar esta política.

@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
-"""Crea una skill mínima y la registra en el AGENTS.md del proyecto."""
+"""Crea una skill mínima y regenera el índice de skills del proyecto."""
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
 import sys
 import tempfile
 from pathlib import Path
 
-
 NAME_PATTERN = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*\Z")
-INVENTORY_MARKER = "### Skills Registradas en el Proyecto"
-TABLE_SEPARATOR = "| :--- | :--- | :--- |"
+FRONTMATTER_PATTERN = re.compile(r"\A---\n(?P<body>.*?)\n---(?:\n|\Z)", re.DOTALL)
 
 
 def parse_args() -> argparse.Namespace:
@@ -39,6 +38,116 @@ def yaml_string(value: str) -> str:
 
 def table_cell(value: str) -> str:
     return value.replace("\\", "\\\\").replace("|", "\\|")
+
+
+def parse_scalar(value: str, path: Path, field: str) -> str:
+    value = value.strip()
+    if value.startswith('"'):
+        try:
+            parsed = json.loads(value)
+        except json.JSONDecodeError as error:
+            raise RuntimeError(f"frontmatter inválido en {path}: {field}") from error
+        if not isinstance(parsed, str):
+            raise RuntimeError(
+                f"frontmatter inválido en {path}: {field} debe ser texto"
+            )
+        return parsed
+    if not value or value[0] in "'[{&*!|>":
+        raise RuntimeError(f"frontmatter inválido en {path}: {field}")
+    return value
+
+
+def read_metadata(skill_md: Path) -> tuple[str, str, str]:
+    content = skill_md.read_text(encoding="utf-8")
+    match = FRONTMATTER_PATTERN.match(content)
+    if not match:
+        raise RuntimeError(f"frontmatter ausente o inválido en {skill_md}")
+
+    fields: dict[str, str] = {}
+    for line in match.group("body").splitlines():
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        if line.startswith((" ", "\t")) or ":" not in line:
+            raise RuntimeError(f"frontmatter inválido en {skill_md}")
+        key, value = line.split(":", 1)
+        key = key.strip()
+        if key in fields:
+            raise RuntimeError(f"campo duplicado '{key}' en {skill_md}")
+        fields[key] = parse_scalar(value, skill_md, key)
+
+    if set(fields) != {"name", "description"}:
+        raise RuntimeError(
+            f"frontmatter de {skill_md} debe contener name y description"
+        )
+    name = fields["name"]
+    if not NAME_PATTERN.fullmatch(name):
+        raise RuntimeError(f"nombre inválido en {skill_md}: {name}")
+
+    marker = " Usar cuando "
+    if marker in fields["description"]:
+        description, conditions = fields["description"].split(marker, 1)
+    else:
+        description = fields["description"]
+        conditions = fields["description"]
+    if not description.strip() or not conditions.strip():
+        raise RuntimeError(f"description incompleta en {skill_md}")
+    return name, description.strip(), conditions.strip()
+
+
+def build_index(skills_dir: Path) -> str:
+    skills_root = skills_dir.resolve()
+    entries: list[tuple[str, str, str, str]] = []
+    names: set[str] = set()
+    directory_names: list[tuple[str, str]] = []
+
+    for skill_md in sorted(skills_dir.glob("*/SKILL.md")):
+        resolved = skill_md.resolve()
+        if resolved.parent.parent != skills_root:
+            raise RuntimeError(f"la ruta de skill escapa de {skills_dir}: {skill_md}")
+        name, description, conditions = read_metadata(skill_md)
+        if name in names:
+            raise RuntimeError(f"nombre de skill duplicado en el índice: {name}")
+        names.add(name)
+        directory_names.append((name, skill_md.parent.name))
+        entries.append((name, f"skills/{name}/SKILL.md", description, conditions))
+
+    for name, directory in directory_names:
+        if directory != name:
+            raise RuntimeError(
+                f"el nombre '{name}' no coincide con el directorio {directory}"
+            )
+
+    lines = [
+        "# Índice de skills",
+        "",
+        "> Archivo generado por `skill-creator`. No editar manualmente.",
+        "",
+        "| Skill | Ruta | Descripción | Cuándo usarla |",
+        "| :--- | :--- | :--- | :--- |",
+    ]
+    lines.extend(
+        f"| `{table_cell(name)}` | `{table_cell(path)}` | "
+        f"{table_cell(description)} | {table_cell(conditions)} |"
+        for name, path, description, conditions in entries
+    )
+    return "\n".join(lines) + "\n"
+
+
+def regenerate_index(skills_dir: Path) -> Path:
+    content = build_index(skills_dir)
+    index_path = skills_dir / "INDEX.md"
+    descriptor, temporary_name = tempfile.mkstemp(prefix=".INDEX-", dir=skills_dir)
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, index_path)
+    except Exception:
+        temporary.unlink(missing_ok=True)
+        raise
+    return index_path
 
 
 def build_skill_md(name: str, description: str, conditions: str) -> str:
@@ -112,21 +221,9 @@ def validate_scaffold(skill_dir: Path, name: str) -> None:
         raise RuntimeError("el scaffolding no contiene SKILL.md y agents/openai.yaml")
     content = skill_md.read_text(encoding="utf-8")
     if not content.startswith("---\n") or f"name: {name}\n" not in content:
-        raise RuntimeError("SKILL.md no contiene frontmatter válido para el nombre solicitado")
-
-
-def register(agents_path: Path, name: str, description: str, conditions: str) -> None:
-    content = agents_path.read_text(encoding="utf-8")
-    if INVENTORY_MARKER not in content or TABLE_SEPARATOR not in content:
-        raise RuntimeError("AGENTS.md no contiene el inventario de skills esperado")
-    if re.search(rf"^\| `{re.escape(name)}` \|", content, flags=re.MULTILINE):
-        raise RuntimeError(f"la skill '{name}' ya está registrada en AGENTS.md")
-    row = (
-        f"| `{table_cell(name)}` | `skills/{table_cell(name)}/SKILL.md` | "
-        f"{table_cell(description)} Cuándo usarla: {table_cell(conditions)} |"
-    )
-    insertion = content.index("\n", content.index(TABLE_SEPARATOR)) + 1
-    agents_path.write_text(content[:insertion] + row + "\n" + content[insertion:], encoding="utf-8")
+        raise RuntimeError(
+            "SKILL.md no contiene frontmatter válido para el nombre solicitado"
+        )
 
 
 def main() -> int:
@@ -139,7 +236,9 @@ def main() -> int:
     conditions = clean_required(args.condiciones_de_uso, "condiciones_de_uso")
 
     if not NAME_PATTERN.fullmatch(name):
-        raise ValueError("nombre_skill debe estar en kebab-case y usar solo a-z, 0-9 y guiones")
+        raise ValueError(
+            "nombre_skill debe estar en kebab-case y usar solo a-z, 0-9 y guiones"
+        )
     if not agents_path.is_file():
         raise FileNotFoundError(f"no se encontró AGENTS.md en {root}")
 
@@ -161,13 +260,13 @@ def main() -> int:
         shutil.move(str(staged), target)
 
     try:
-        register(agents_path, name, description, conditions)
+        index_path = regenerate_index(skills_dir)
     except Exception:
         shutil.rmtree(target)
         raise
 
     print(f"Skill creada correctamente: {target}")
-    print(f"Skill registrada correctamente: {agents_path}")
+    print(f"Índice de skills regenerado correctamente: {index_path}")
     return 0
 
 
