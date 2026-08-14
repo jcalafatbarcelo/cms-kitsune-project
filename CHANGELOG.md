@@ -9,11 +9,19 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 ### Añadido
 
 - Skill `skill-creator` para generar, validar y registrar de forma determinista nuevas skills de proyecto.
+- Índice derivado `skills/INDEX.md` para descubrir skills sin cargar instrucciones
+  no relacionadas con la tarea.
+- Pruebas automatizadas del registro atómico de skills, validación de frontmatter,
+  duplicados y límites de ruta.
 
 ### Modificado
 
 - Aclarado que la agnosticidad de `skill-creator` se refiere al agente ejecutor y no obliga a que las skills generadas sean genéricas; estas deben orientarse al contexto del proyecto.
 - Documentada la estructura estándar de cada skill, diferenciando los archivos base de los directorios opcionales de scripts, referencias y recursos.
 - Simplificado `AGENTS.md` para delegar en `skill-creator` la estructura y las condiciones de creación, evitando mantener reglas duplicadas.
+- Definida la gobernanza SDD sobre fuentes de verdad, aprobaciones de `/build`,
+  calidad, ADR, changelog e idioma.
+- Adaptada `skill-creator` para regenerar el índice desde los `SKILL.md`
+  existentes sin modificar `AGENTS.md`.
 
-Fecha de última modificación: 2026-08-14 15:06
+Fecha de última modificación: 2026-08-14 16:12 UTC
