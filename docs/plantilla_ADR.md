@@ -1,55 +1,11 @@
-# ADR: [Título descriptivo de la decisión]
+# Plantilla ADR
 
-- **Fecha:** [Fecha de la decisión] (YYYY-MM-DD hh:mm)
-- **Estado:** [Propuesto | Aceptado | Rechazado | Obsoleto | Reemplazado]
-- **Autores:** [Nombres de los autores]
+La plantilla canónica para nuevos Architecture Decision Records reside en:
 
----
+```text
+skills/adr-generator/templates/plantilla_ADR.md
+```
 
-## Contexto
-
-Explica la situación que llevó a la necesidad de tomar esta decisión.
-
-- ¿Qué problema se está resolviendo?
-- ¿Qué restricciones tenemos (tecnológicas, de negocio, de tiempo, equipo...)?
-- ¿Qué alternativas se han considerado previamente?
-
----
-
-## Decisión
-
-Describe la decisión que se ha tomado de forma clara y concisa.
-
-- ¿Qué opción se ha elegido?
-- ¿Por qué?
-- ¿Qué criterios pesaron más en la elección (rendimiento, coste, simplicidad, seguridad, ...)?
-
----
-
-## Consecuencias
-
-Explica las implicacioens de esta decisión.
-
-- **Positivas:** beneficios esperados, mejoras, ventajas.
-- **Negativas:** riesgos, costes adicionales, posibles problemas futuros.
-- **Impacto en el equipo/proyecto:** cambios en la forma de trabajar, necesidad de formación, nuevas responsabilidades, etc.
-
----
-
-## Alternativas consideradas
-
-(Opcional, pero recomendado)
-
-- Alternativa 1: Descripción breve, pros y contras.
-- Alternativa 2: Descripción breve, pros y contras.
-
----
-
-## Revisión futura
-
-(Opcional)
-Indica cuándo o en qué condiciones edbería revisarse esta decisión.
-
-Ejemplo: "Esta decisión será revisada en 6 meses para evaluar su efectividad y considerar posibles mejoras."
-
----
+Este archivo se conserva solo como referencia documental para evitar una segunda
+fuente de verdad. Para crear, revisar o actualizar ADR, usa la skill
+`adr-generator` cuando esté publicada en `skills/INDEX.md`.
