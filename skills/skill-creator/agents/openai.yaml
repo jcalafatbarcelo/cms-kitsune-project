@@ -1,0 +1,4 @@
+interface:
+  display_name: "Skill Creator"
+  short_description: "Genera y registra skills de proyecto"
+  default_prompt: "Usa $skill-creator para crear y registrar una skill nueva en el proyecto."

@@ -79,22 +79,23 @@ Al concluir una decisión técnica relevante en el modo `/build`:
 
 Las **Skills** son capacidades, flujos de trabajo o patrones especializados guardados en la carpeta `skills/` en la raíz del proyecto. Cualquier agente (Claude, Cursor, Copilot, Codex, etc.) debe ser capaz de leerlas y ejecutarlas.
 
-### Estructura de una Skill
-Cada skill vive en su propia subcarpeta: `skills/<nombre-skill>/` y contiene:
-- `SKILL.md`: Archivo principal con metadatos (YAML frontmatter), disparadores (*triggers*) y las instrucciones paso a paso.
+### Creación y estructura de Skills
 
-### Metodología de Creación de Skills (`skill-creator`)
-Para crear una nueva skill, sigue el patrón agnóstico de `skill-creator`:
-1. **Name:** Identificador en minúsculas y separado por guiones (kebab-case).
-2. **Description:** Qué hace la skill y cuándo debe activarse (*triggers* explícitos).
-3. **Workflow:** Pasos secuenciales y deterministas que el agente debe ejecutar.
+Toda nueva skill debe crearse mediante `skills/skill-creator/SKILL.md`, que es la
+fuente de verdad para su nomenclatura, estructura, metadatos, validación y
+registro. No dupliques esas reglas en este archivo: consulta y ejecuta
+`skill-creator` para evitar divergencias cuando evolucione el estándar.
+
+Cada skill debe permanecer aislada en `skills/<nombre-skill>/` y figurar en el
+inventario siguiente. Su estructura concreta será la que determine
+`skill-creator` según los recursos que necesite.
 
 ### Skills Registradas en el Proyecto
 *A medida que se creen nuevas skills, regístralas en este listado:*
 
 | Nombre Skill | Ubicación | Cuándo Usarla (Triggers) |
 | :--- | :--- | :--- |
-| `skill-creator` | `skills/skill-creator/SKILL.md` | Cuando el usuario pida "crear una nueva skill", "automatizar un flujo recurrente" o "estandarizar una tarea". |
+| `skill-creator` | `skills/skill-creator/SKILL.md` | Cuando el usuario pida crear una skill orientada a este proyecto, automatizar un flujo recurrente o estandarizar una tarea. El creador es agnóstico respecto al agente que lo ejecuta; las skills resultantes deben respetar el contexto y las fuentes de verdad del proyecto. |
 | `adr-generator` | `skills/adr-generator/SKILL.md` | Al finalizar una tarea técnica relevante para redactar el ADR correspondiente. |
 | `laravel-module-builder` | `skills/laravel-module-builder/SKILL.md` | Al crear la estructura base de un nuevo módulo en `Modules/`. |
 
