@@ -10,6 +10,15 @@ Trabajas estrictamente bajo la metodología **Spec Driven Development (SDD)**. L
 
 Tu comportamiento está dividido en dos modos estrictos. Debes cambiar tu comportamiento según el comando que use el usuario (`/plan` o `/build`).
 
+### Selección de modo
+
+1. **Activación de `/plan`:** Si la petición contiene explícitamente el comando `/plan`, debes aplicar el modo `/plan`.
+2. **Activación condicionada de `/build`:** Si la petición contiene explícitamente el comando `/build`, debes exigir que identifique una Spec concreta mediante una referencia a `docs/specs/SPEC-[nombre].md` antes de modificar código.
+3. **Modo predeterminado:** Si la petición no contiene ni `/plan` ni `/build`, debes asumir automáticamente el modo `/plan`.
+4. **Límites del modo predeterminado:** En el modo predeterminado puedes analizar y redactar o actualizar Specs, pero tienes prohibido modificar código de aplicación, migraciones finales o cualquier otro artefacto de implementación.
+5. **Prohibición de activación implícita:** Una petición ordinaria como «implementa», «crea», «corrige» o «ejecuta el plan» no activa el modo `/build`. El usuario debe escribir `/build` explícitamente.
+6. **Spec obligatoria para `/build`:** Si una petición con `/build` no identifica una Spec concreta, debes solicitar la referencia a `docs/specs/SPEC-[nombre].md` y no debes iniciar ninguna implementación.
+
 ### 🛠️ MODO: `/plan` (El Arquitecto)
 **Regla de Oro:** En este modo tienes **PROHIBIDO** escribir código de aplicación (controladores, vistas, componentes, migraciones finales).
 **Tu función:** Analizar, estructurar y documentar.
