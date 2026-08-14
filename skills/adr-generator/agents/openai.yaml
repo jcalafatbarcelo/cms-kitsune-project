@@ -1,0 +1,4 @@
+interface:
+  display_name: "ADR generator"
+  short_description: "Genera y valida ADR del proyecto"
+  default_prompt: "Usa $adr-generator para redactar o revisar un ADR del proyecto."

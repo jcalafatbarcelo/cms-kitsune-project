@@ -2,21 +2,32 @@
 
 ## 1. Estado y objetivo
 
-- **Estado:** Propuesta.
+- **Estado:** Completada.
 - **Artefactos objetivo de una futura implementación:**
-  `docs/plantilla_ADR.md`, `skills/adr-generator/SKILL.md`, los recursos y pruebas
-  propios de la skill, `skills/INDEX.md` y `CHANGELOG.md`.
+  `skills/adr-generator/SKILL.md`,
+  `skills/adr-generator/templates/plantilla_ADR.md`, los recursos y pruebas
+  propios de la skill, `docs/plantilla_ADR.md`, `AGENTS.md`,
+  `skills/INDEX.md` y `CHANGELOG.md`.
 - **Objetivo:** establecer un formato canónico y verificable para los
   Architecture Decision Records (ADR), y crear una skill que guíe su generación
-  sin duplicar el formato de salida dentro del procedimiento.
+  manteniendo la plantilla canónica dentro de los recursos propios de la skill.
 - **Fuera de alcance:** crear ADR sobre decisiones que aún no existan, modificar
   decisiones arquitectónicas del CMS, alterar código de aplicación, introducir
-  migraciones o contratos HTTP y cambiar la gobernanza general de agentes.
+  migraciones o contratos HTTP y alterar las reglas generales de gobernanza de
+  agentes más allá de actualizar la referencia a la plantilla ADR canónica.
 
-La revisión de `docs/plantilla_ADR.md` forma parte expresa del alcance. La
-plantilla será la fuente de verdad del formato del documento resultante;
-`skills/adr-generator/SKILL.md` conservará las condiciones de uso, las
-comprobaciones y las reglas del procedimiento.
+La revisión de `docs/plantilla_ADR.md` forma parte expresa del alcance porque
+actualmente es la ubicación publicada de la plantilla. La futura implementación
+trasladará la fuente de verdad del formato a
+`skills/adr-generator/templates/plantilla_ADR.md`, como recurso versionado de la
+skill que lo consume. `skills/adr-generator/SKILL.md` conservará las condiciones
+de uso, las comprobaciones y las reglas del procedimiento, y no copiará el
+esqueleto de salida.
+
+`docs/plantilla_ADR.md` no seguirá siendo una segunda plantilla mantenible. La
+implementación deberá convertirlo en una referencia breve hacia el recurso
+canónico de la skill o eliminarlo si todas las referencias vigentes se actualizan
+sin romper la documentación existente.
 
 ## 2. Contexto y *clash check*
 
@@ -24,6 +35,12 @@ comprobaciones y las reglas del procedimiento.
 a varios componentes o impongan una restricción transversal. También exige
 alternativas razonables y consecuencias que justifiquen conservar el
 razonamiento. Esta Spec concreta ese mandato y no modifica sus umbrales.
+
+Sí hay un ajuste de gobernanza documental: `AGENTS.md` menciona actualmente
+`docs/plantilla_ADR.md` como plantilla ADR. Si esta Spec se aprueba, la futura
+implementación deberá actualizar esa referencia para que apunte a
+`skills/adr-generator/templates/plantilla_ADR.md` o a la referencia documental
+que quede en `docs/plantilla_ADR.md`, evitando dos fuentes de verdad.
 
 La implementación deberá respetar además el flujo existente de creación de
 skills: `adr-generator` se generará mediante `skills/skill-creator/SKILL.md`, y
@@ -123,10 +140,11 @@ archivos existentes. En cualquier otro estado, `Reemplazado por` será `No
 aplica`. `Reemplaza a` podrá ser `No aplica` o contener uno o más ADR existentes;
 solo un ADR `Aceptado` podrá reemplazar decisiones previas.
 
-## 6. Formato obligatorio de `docs/plantilla_ADR.md`
+## 6. Formato obligatorio de `skills/adr-generator/templates/plantilla_ADR.md`
 
-La implementación reemplazará los placeholders actuales por instrucciones
-inequívocas y mantendrá, como mínimo, estos metadatos:
+La implementación tomará la plantilla actual como material de partida y creará
+el recurso canónico con instrucciones inequívocas en lugar de placeholders.
+Mantendrá, como mínimo, estos metadatos:
 
 - `Fecha`.
 - `Última actualización`.
@@ -180,9 +198,10 @@ Specs y ADR existentes y detendrá el flujo ante contradicciones no resueltas.
 
 ### 7.2. Separación entre procedimiento y formato
 
-`skills/adr-generator/SKILL.md` referenciará `docs/plantilla_ADR.md` como formato
-obligatorio de salida y no copiará su esqueleto ni mantendrá una segunda lista de
-secciones. La skill conservará en cambio:
+`skills/adr-generator/SKILL.md` referenciará
+`skills/adr-generator/templates/plantilla_ADR.md` como formato obligatorio de
+salida y no copiará su esqueleto ni mantendrá una segunda lista de secciones. La
+skill conservará en cambio:
 
 - triggers y exclusiones;
 - pasos para descubrir decisiones relacionadas y asignar el identificador;
@@ -195,7 +214,7 @@ secciones. La skill conservará en cambio:
 
 La plantilla no incorporará el flujo interno de la skill. De este modo, la
 plantilla determina **qué aspecto tiene** un ADR y la skill determina **cuándo y
-cómo** se produce y valida.
+cómo** se produce y valida, sin que `docs/` conserve otra plantilla operativa.
 
 ### 7.3. Validaciones mínimas
 
@@ -233,10 +252,12 @@ genéricas y que el impacto declarado sea verdaderamente transversal.
 
 | Artefacto | Cambio previsto |
 | :--- | :--- |
-| `docs/plantilla_ADR.md` | Convertirla en el formato canónico con metadatos, secciones, ayudas de redacción y correcciones especificadas. |
-| `skills/adr-generator/SKILL.md` | Crear el procedimiento, referenciar la plantilla y conservar condiciones, reglas y comprobaciones sin duplicar el formato. |
+| `skills/adr-generator/templates/plantilla_ADR.md` | Crear la plantilla canónica con metadatos, secciones, ayudas de redacción y correcciones especificadas. |
+| `skills/adr-generator/SKILL.md` | Crear el procedimiento, referenciar la plantilla canónica interna y conservar condiciones, reglas y comprobaciones sin duplicar el formato. |
 | Recursos o scripts de `adr-generator` | Implementar las validaciones deterministas necesarias sin depender de código de aplicación. |
 | Pruebas de `adr-generator` | Cubrir casos válidos y cada categoría de rechazo definida en esta Spec. |
+| `docs/plantilla_ADR.md` | Sustituir la plantilla antigua por una referencia breve al recurso canónico o eliminarla si no quedan referencias vigentes. |
+| `AGENTS.md` | Actualizar la referencia a la plantilla ADR para no prescribir `docs/plantilla_ADR.md` como fuente canónica. |
 | `skills/INDEX.md` | Regenerarlo mediante `skill-creator` para publicar la skill ya validada; no editarlo manualmente. |
 | `CHANGELOG.md` | Registrar el nuevo flujo y la revisión notable de la plantilla con una única marca UTC final. |
 
@@ -252,9 +273,9 @@ alcance se limita a documentación y tooling de la skill.
 
 ## 10. Criterios de aceptación
 
-1. `docs/plantilla_ADR.md` es el único formato de salida y exige la ruta
-   `docs/adr/ADR-NNNN-titulo-kebab-case.md` con identificador coherente e
-   inmutable.
+1. `skills/adr-generator/templates/plantilla_ADR.md` es el único formato de
+   salida y exige la ruta `docs/adr/ADR-NNNN-titulo-kebab-case.md` con
+   identificador coherente e inmutable.
 2. Todos los timestamps tienen precisión de minuto, usan reloj de 24 horas, UTC
    explícito y el formato `YYYY-MM-DD HH:mm UTC`.
 3. Solo existen los cinco estados definidos y únicamente se permiten las
@@ -267,14 +288,17 @@ alcance se limita a documentación y tooling de la skill.
 6. Las erratas `implicaicones`, `implicaoens` y `edbería` no aparecen en la
    plantilla final y se usan `implicaciones` y `debería`.
 7. `skills/adr-generator/SKILL.md` conserva el procedimiento y apunta a la
-   plantilla sin duplicar su estructura como otro formato mantenible.
-8. La skill rechaza placeholders incompletos, menos de dos alternativas
+   plantilla canónica interna sin duplicar su estructura como otro formato
+   mantenible.
+8. `docs/plantilla_ADR.md` deja de contener una segunda plantilla operativa y
+   `AGENTS.md` no prescribe `docs/plantilla_ADR.md` como fuente canónica.
+9. La skill rechaza placeholders incompletos, menos de dos alternativas
    razonables, alternativas sin análisis, o consecuencias positivas o negativas
    ausentes o genéricas.
-9. Las pruebas cubren identificación, timestamps, estados, transiciones,
+10. Las pruebas cubren identificación, timestamps, estados, transiciones,
    reemplazos, estructura, ámbito transversal, placeholders, alternativas,
    consecuencias y revisión futura, incluyendo casos positivos y negativos.
-10. `adr-generator` se crea mediante `skill-creator` y solo aparece en el índice
+11. `adr-generator` se crea mediante `skill-creator` y solo aparece en el índice
     regenerado después de superar las validaciones.
 
 ## 11. Plan de implementación propuesto
@@ -283,12 +307,16 @@ alcance se limita a documentación y tooling de la skill.
    `/build docs/specs/SPEC-adr-generator.md`.
 2. Usar `skills/skill-creator/SKILL.md` para crear el andamiaje de
    `adr-generator` y regenerar el índice conforme al flujo existente.
-3. Revisar `docs/plantilla_ADR.md` para convertirla en el formato canónico
-   definido en esta Spec.
-4. Implementar en la skill el procedimiento y las validaciones, manteniendo la
+3. Crear `skills/adr-generator/templates/plantilla_ADR.md` como formato
+   canónico definido en esta Spec.
+4. Sustituir `docs/plantilla_ADR.md` por una referencia breve al recurso
+   canónico, o eliminarlo si no quedan referencias vigentes.
+5. Actualizar `AGENTS.md` para que la gobernanza ADR apunte a la plantilla
+   canónica sin mantener dos fuentes de verdad.
+6. Implementar en la skill el procedimiento y las validaciones, manteniendo la
    separación entre formato y flujo.
-5. Añadir y ejecutar primero las pruebas enfocadas de `adr-generator`, después
+7. Añadir y ejecutar primero las pruebas enfocadas de `adr-generator`, después
    la suite de skills afectada y las herramientas de formato o análisis ya
    configuradas.
-6. Revisar el diff completo, registrar el cambio notable en `CHANGELOG.md` y
+8. Revisar el diff completo, registrar el cambio notable en `CHANGELOG.md` y
    fijar una única marca UTC al finalizar la entrega.

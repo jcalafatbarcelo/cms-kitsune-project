@@ -4,4 +4,5 @@
 
 | Skill | Ruta | Descripción | Cuándo usarla |
 | :--- | :--- | :--- | :--- |
+| `adr-generator` | `skills/adr-generator/SKILL.md` | Proponer, redactar, revisar y actualizar ADR del proyecto con plantilla canónica, numeración, estados, reemplazos y validaciones estructurales. | el usuario pida proponer, generar, redactar, revisar o actualizar un Architecture Decision Record y la decisión supere el umbral arquitectónico definido por AGENTS.md; no usar para refactors locales, correcciones rutinarias, decisiones ya prescritas o documentación no arquitectónica. |
 | `skill-creator` | `skills/skill-creator/SKILL.md` | Generar el andamiaje aislado de una nueva skill orientada al proyecto, validarlo y regenerar el índice derivado de skills mediante un flujo compatible con distintos agentes. | el usuario pida crear una skill, automatizar un flujo recurrente o estandarizar una tarea y proporcione nombre kebab-case, descripción restrictiva y condiciones de uso; no usar para modificar código de aplicación ni para sobrescribir una skill existente. |

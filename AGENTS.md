@@ -109,12 +109,13 @@ Mantén el formato [Keep a Changelog 1.1.0
 Crea un ADR únicamente cuando la decisión sea arquitectónica y duradera, afecte
 a varios componentes o imponga una restricción transversal, presente
 alternativas razonables y tenga consecuencias que justifiquen conservar el
-razonamiento. Usa `docs/plantilla_ADR.md`.
+razonamiento. Usa la plantilla canónica de
+`skills/adr-generator/templates/plantilla_ADR.md`.
 
 No crees ADR para refactors locales, nombres, correcciones rutinarias, detalles
-reversibles ni decisiones ya prescritas. La skill `adr-generator` está
-planificada para después del cierre de este `AGENTS.md`; no la asumas disponible
-mientras no aparezca en `skills/INDEX.md`.
+reversibles ni decisiones ya prescritas. Usa la skill `adr-generator` solo si
+aparece en `skills/INDEX.md`; si no está disponible, aplica directamente el
+criterio anterior y deja constancia de la limitación.
 
 ## V. SISTEMA DE SKILLS
 

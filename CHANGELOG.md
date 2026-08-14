@@ -8,6 +8,8 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 
 ### Añadido
 
+- Skill `adr-generator` para guiar la creación, revisión y validación
+  estructural de ADR con plantilla canónica interna.
 - Skill `skill-creator` para generar, validar y registrar de forma determinista nuevas skills de proyecto.
 - Índice derivado `skills/INDEX.md` para descubrir skills sin cargar instrucciones
   no relacionadas con la tarea.
@@ -16,6 +18,8 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 
 ### Modificado
 
+- Movida la plantilla ADR canónica a `skills/adr-generator/templates/` y
+  conservado `docs/plantilla_ADR.md` solo como referencia documental.
 - Aclarado que la agnosticidad de `skill-creator` se refiere al agente ejecutor y no obliga a que las skills generadas sean genéricas; estas deben orientarse al contexto del proyecto.
 - Documentada la estructura estándar de cada skill, diferenciando los archivos base de los directorios opcionales de scripts, referencias y recursos.
 - Simplificado `AGENTS.md` para delegar en `skill-creator` la estructura y las condiciones de creación, evitando mantener reglas duplicadas.
@@ -24,4 +28,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Adaptada `skill-creator` para regenerar el índice desde los `SKILL.md`
   existentes sin modificar `AGENTS.md`.
 
-Fecha de última modificación: 2026-08-14 16:12 UTC
+Fecha de última modificación: 2026-08-14 18:04 UTC
