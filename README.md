@@ -68,7 +68,7 @@ definida en Specs concretas y aprobadas.
 - [`AGENTS.md`](AGENTS.md): reglas operativas, fuentes de verdad y flujo de
   trabajo para agentes.
 
-## Flujo de trabajo SDD
+## Flujo de trabajo SDD y TDD
 
 El desarrollo parte de una especificación antes de cualquier implementación:
 
@@ -81,10 +81,20 @@ El desarrollo parte de una especificación antes de cualquier implementación:
    ```text
    /build docs/specs/SPEC-[nombre].md
    ```
+4. Dividir el alcance aprobado en incrementos verticales pequeños y, cuando
+   aporte una ventaja neta, construir cada uno mediante
+   `Red → Green → Refactor`.
+5. Cerrar cada incremento con pruebas proporcionales al riesgo, refactor con la
+   suite en verde y el quality gate definido en `AGENTS.md`.
 
 Una petición genérica de implementación o un `/build` sin una Spec concreta y
 aprobada no autoriza cambios de aplicación. Las reglas completas se encuentran
 en [`AGENTS.md`](AGENTS.md).
+
+Las capacidades idiomáticas de Laravel y Vue tienen preferencia sobre patrones
+adicionales cuando ofrecen una solución clara y mantenible. Los patrones se
+incorporan para resolver una necesidad o variación demostrada, no como capas
+preventivas que compliquen innecesariamente el código.
 
 ## Estado del proyecto
 

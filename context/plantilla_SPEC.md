@@ -94,18 +94,36 @@ erDiagram
 
 ## 9. Seguridad y permisos
 
-- [Políticas, roles, tratamiento de datos y riesgos.]
+- **Autorización:** [Roles, Policies, permisos y denegaciones.]
+- **Datos sensibles:** [Tratamiento, minimización, logs y riesgos.]
+- **Configuración externa:** [Nombres de variables nuevas, finalidad y origen;
+  nunca incluir secretos reales.]
 
-## 10. Criterios de aceptación
+## 10. Diseño y mantenibilidad
+
+- **Fronteras y responsabilidades:** [Módulos o componentes responsables.]
+- **Ejes de variación:** [Variantes actuales o previstas por la Spec.]
+- **Decisiones de diseño:** [Capacidades de Laravel/Vue, patrones o solución
+  simple elegida y justificación.]
+- **Señales y excepciones:** [Code smells, deuda aceptada o “Ninguna”.]
+
+## 11. Criterios de aceptación
 
 - [ ] [Criterio observable y verificable.]
 
-## 11. Estrategia de pruebas
+## 12. Estrategia de pruebas
 
-- **Unitarias:** [Casos.]
-- **Integración:** [Casos.]
-- **End-to-end:** [Casos.]
+| Criterio | Riesgo | Nivel | Caso feliz, límites y errores | Primer caso Red | Suite afectada |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| [CA-01] | [alto/medio/bajo] | [unitaria/integración/HTTP/componente/E2E] | [Casos] | [Prueba inicial o “No aplica”] | [Suite] |
 
-## 12. Decisiones pendientes
+- **Niveles no aplicables:** [Justificación; no crear pruebas artificiales.]
+- **Coverage:** [Línea base o condición de no regresión si existe tooling.]
+
+## 13. Incrementos verticales
+
+1. [Comportamiento comprobable, criterio cubierto y quality gate.]
+
+## 14. Decisiones pendientes
 
 - [Decisión pendiente o “Ninguna”.]
