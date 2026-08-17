@@ -4,8 +4,9 @@
 
 Eres un asistente de ingeniería de software integrado en el repositorio. Tu
 objetivo es construir un CMS Modular Multiidioma con Laravel y Vue 3 mediante
-**Spec Driven Development (SDD)**. La calidad, la arquitectura, la
-sostenibilidad del código y la documentación funcional son prioritarias.
+**Spec Driven Development (SDD)**, apoyado por **Test Driven Development (TDD)**
+cuando aporte una ventaja neta. La calidad, la arquitectura, la sostenibilidad
+del código y la documentación funcional son prioritarias.
 
 ## II. MODOS DE OPERACIÓN
 
@@ -131,13 +132,79 @@ Restricciones técnicas permanentes:
 - Vue 3 con Composition API;
 - ningún parseo de Blade mediante expresiones regulares.
 
+### Diseño sostenible y uso de patrones
+
+Prioriza la solución correcta más simple que mantenga alta cohesión, bajo
+acoplamiento, responsabilidades claras, comportamiento comprobable y una
+evolución razonablemente segura. Aprovecha primero las capacidades idiomáticas
+de Laravel y Vue cuando resuelvan el problema con claridad. Introduce patrones o
+abstracciones adicionales solo cuando respondan a una necesidad actual o a una
+variación prevista expresamente por la Spec y aporten una mejora neta frente a
+las herramientas del framework.
+
+`switch`, condicionales, valores literales, métodos extensos o tipos primitivos
+no están prohibidos por sí mismos. Trátalos como señales de revisión cuando
+crezcan con cada variante, oculten conocimiento de dominio, mezclen
+responsabilidades, generen duplicación o aumenten el acoplamiento. Considera,
+según el problema demostrado, alternativas como Strategy, Factory, eventos y
+listeners de Laravel, Observer, Value Objects, Policies, Middleware o handlers.
+No introduzcas interfaces, capas, repositorios, factories ni patrones «por si
+acaso» cuando compliquen el código sin reducir un riesgo concreto.
+
+Las excepciones conscientes a estas directrices no se adoptan silenciosamente.
+Si conservar una solución supone deuda técnica relevante, reduce una cobertura
+aplicable, acopla módulos o sacrifica mantenibilidad por plazo o complejidad,
+detén esa parte y presenta al usuario la señal detectada, alternativas, costes,
+consecuencias y recomendación antes de continuar. No constituye una excepción
+el uso justificado de una construcción simple cuando una abstracción no aporta
+una mejora neta. Las decisiones locales evidentes y sin deuda relevante pueden
+resolverse autónomamente y explicarse en el resumen.
+
 ## III. PRUEBAS Y CALIDAD EN `/build`
 
 Toda implementación funcional debe:
 
-1. añadir o actualizar pruebas automatizadas para el comportamiento modificado;
-2. ejecutar primero las pruebas enfocadas y después la suite afectada disponible;
-3. cumplir además las comprobaciones comunes indicadas a continuación.
+1. relacionar cada criterio de aceptación con al menos una prueba automatizada;
+2. cubrir, según el riesgo, el camino feliz, límites, errores previsibles,
+   autorización, persistencia, efectos secundarios y regresiones relevantes;
+3. usar el nivel más bajo que aporte confianza suficiente: pruebas unitarias
+   para lógica aislable; de integración para Eloquent, base de datos, módulos,
+   eventos, filesystem, colas y adaptadores; HTTP o de componente para contratos
+   Laravel y Vue; y end-to-end para itinerarios críticos;
+4. justificar en la Spec o en la entrega los niveles no aplicables, sin crear
+   pruebas artificiales para cumplir una categoría;
+5. ejecutar primero las pruebas enfocadas y después la suite afectada disponible;
+6. cumplir además las comprobaciones comunes indicadas a continuación.
+
+Los porcentajes de coverage son una salvaguarda secundaria, no sustituyen la
+trazabilidad entre criterios, riesgos y pruebas. Cuando exista tooling, no
+reduzcas la cobertura del módulo modificado y presta especial atención a las
+ramas de la lógica crítica. No impongas un umbral global sin una línea base
+acordada y medible.
+
+### Flujo incremental SDD y TDD
+
+SDD define qué comportamiento se construye y sus límites; TDD puede guiar cómo
+se implementa. Antes de `/build`, divide la Spec aprobada en incrementos
+verticales pequeños que produzcan comportamiento comprobable. Evita fases
+puramente horizontales —por ejemplo, crear todos los modelos y después todos los
+controladores— cuando no entreguen por sí mismas un resultado verificable.
+
+Para cada incremento donde TDD sea eficiente, aplica `Red → Green → Refactor`:
+
+1. selecciona un criterio y escribe la prueba más pequeña que lo demuestre;
+2. ejecuta la prueba y confirma que falla por ausencia del comportamiento, no
+   por un error de sintaxis, configuración o infraestructura;
+3. implementa el mínimo comportamiento correcto para llevarla a verde;
+4. refactoriza nombres, responsabilidades, duplicación y diseño con la suite en
+   verde;
+5. ejecuta las pruebas enfocadas y la suite afectada antes de continuar.
+
+TDD no es obligatorio cuando no aporte una ventaja neta, como en exploración,
+configuración declarativa o integración difícil de aislar. La excepción debe
+justificarse y no elimina la obligación de añadir pruebas proporcionales al
+riesgo. Los estados intermedios en rojo no se entregan ni se consolidan en
+commits destinados a revisión.
 
 El mantenimiento no funcional debe ejecutar validaciones proporcionales al
 artefacto modificado, como validadores de Markdown, enlaces, esquemas,
@@ -156,6 +223,25 @@ En todo `/build`:
    concreta, sin afirmar que pasó;
 5. considera fallida la entrega cuando una comprobación aplicable falle por el
    cambio, salvo aceptación expresa de la deuda por el usuario.
+
+Antes de dar por terminada una implementación funcional, verifica además los
+criterios de aceptación, las excepciones o deuda aceptadas y la documentación de
+configuración necesaria para reproducir el cambio sin versionar secretos.
+
+### Secretos y artefactos locales
+
+Nunca incluyas en Git credenciales, tokens, API keys, claves privadas, archivos
+`.env` reales, volcados, backups o logs con información sensible. Las plantillas
+versionables deben contener solo nombres de variables y valores ficticios
+seguros. Documenta su finalidad, obligatoriedad, formato y origen, pero conserva
+los valores reales en gestores de secretos o mecanismos externos a Git.
+
+Mantén los ignores del repositorio acordes con los artefactos generados por el
+stack. Antes de cada commit revisa los archivos nuevos y el diff; usa los
+detectores de secretos configurados cuando existan. Si se expone una credencial,
+no basta con borrar el archivo: detén la entrega, revócala o rótala y comunica el
+incidente sin reproducir su valor. El procedimiento ampliado se documenta en
+`docs/architecture/configuration-and-secrets.md`.
 
 ## IV. DOCUMENTACIÓN, CHANGELOG Y ADR
 
