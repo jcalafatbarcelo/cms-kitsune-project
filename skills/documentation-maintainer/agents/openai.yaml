@@ -1,0 +1,4 @@
+interface:
+  display_name: "Documentation Maintainer"
+  short_description: "Mantén la documentación canónica del CMS"
+  default_prompt: "Usa $documentation-maintainer para crear o actualizar documentación del producto de forma validada."

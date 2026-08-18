@@ -124,6 +124,17 @@ erDiagram
 
 1. [Comportamiento comprobable, criterio cubierto y quality gate.]
 
-## 14. Decisiones pendientes
+## 14. Impacto documental
+
+- **Audiencias afectadas:** [Usuario/editor, administrador, desarrollador de
+  extensiones, contributor del core o "Ninguna".]
+- **Documentación que crear o actualizar:** [Rutas previstas o "No aplica".]
+- **Contratos generados afectados:** [OpenAPI, schemas, comandos, configuración
+  o "Ninguno".]
+- **Migración o actualización:** [Guía necesaria o "No aplica".]
+- **Material visual:** [Capturas, diagramas o "No aplica".]
+- **Justificación si no aplica:** [Motivo verificable.]
+
+## 15. Decisiones pendientes
 
 - [Decisión pendiente o “Ninguna”.]
