@@ -244,6 +244,10 @@ En todo `/build`:
 Antes de dar por terminada una implementación funcional, verifica además los
 criterios de aceptación, las excepciones o deuda aceptadas y la documentación de
 configuración necesaria para reproducir el cambio sin versionar secretos.
+Verifica también el impacto documental declarado en la Spec. La documentación
+necesaria para instalar, configurar, utilizar, extender o actualizar el
+comportamiento se entrega en el mismo cambio, salvo que la Spec aprobada delimite
+expresamente otro incremento.
 
 ### Secretos y artefactos locales
 
@@ -262,12 +266,19 @@ incidente sin reproducir su valor. El procedimiento ampliado se documenta en
 
 ## IV. DOCUMENTACIÓN, CHANGELOG Y ADR
 
-### Documentación wiki-friendly
+### Documentación del producto
 
-Toda la documentación técnica reside en `docs/` y explica cómo funciona el
-producto, no un historial ampliado. Organízala jerárquicamente en
-`docs/architecture/`, `docs/modules/`, `docs/api/`, `docs/specs/`, `docs/adr/` o
-la sección funcional correspondiente.
+La documentación canónica reside en `docs/`, explica cómo funciona el producto y
+se versiona junto con el comportamiento que describe; no presenta funcionalidad
+prevista como disponible ni funciona como un historial ampliado. Las vistas
+generadas, wikis y respuestas asistidas por IA son derivadas y no reemplazan
+Specs, ADR, contratos, código, pruebas ni documentación revisada.
+
+Usa la skill `documentation-maintainer`, cuando figure en `skills/INDEX.md`, para
+crear, actualizar, reorganizar o validar documentación del producto. No la uses
+para Specs, ADR ni `CHANGELOG.md`, que conservan sus flujos específicos. La
+estrategia, audiencias y criterios de publicación se definen en
+`docs/architecture/documentation-strategy.md`.
 
 ### `CHANGELOG.md`
 

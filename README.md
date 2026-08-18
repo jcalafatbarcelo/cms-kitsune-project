@@ -58,6 +58,9 @@ definida en Specs concretas y aprobadas.
 
 - [`context/SDD_Inicial.md`](context/SDD_Inicial.md): visión inicial,
   arquitectura base, reglas de negocio y alcance MoSCoW.
+- [`docs/architecture/documentation-strategy.md`](docs/architecture/documentation-strategy.md):
+  estrategia de Documentation as Code, audiencias, versionado, publicación
+  futura y criterios para evaluar wikis o asistentes basados en IA.
 - [`docs/specs/`](docs/specs/): Specs que concretan el comportamiento y los
   criterios de aceptación.
 - [`docs/adr/`](docs/adr/): ubicación prevista para ADR cuando exista una
@@ -103,6 +106,11 @@ Specs y tooling de skills. Todavía no hay una aplicación Laravel configurada,
 por lo que no se documentan comandos de instalación, ejecución ni pruebas. Se
 añadirán cuando existan los artefactos ejecutables y el procedimiento pueda
 verificarse en el propio repositorio.
+
+La documentación canónica se mantendrá en el repositorio. La selección de un
+portal público y la posible incorporación de una wiki asistida por IA se
+evaluarán cuando existan funcionalidades, contratos y documentación suficientes
+para realizar una prueba representativa.
 
 ## Licencia
 

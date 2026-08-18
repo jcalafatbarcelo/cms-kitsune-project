@@ -8,6 +8,8 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 
 ### Añadido
 
+- Estrategia de Documentation as Code y skill `documentation-maintainer` para
+  crear, organizar y validar la documentación canónica del producto.
 - Flujo combinado SDD y TDD, criterios de diseño sostenible y política de
   gestión de secretos previa al inicio del desarrollo de aplicación.
 - Skill `adr-generator` para guiar la creación, revisión y validación
@@ -20,6 +22,8 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 
 ### Modificado
 
+- Incorporado el impacto documental a la plantilla de Specs y a la verificación
+  final de las implementaciones funcionales.
 - Reforzada la estrategia de pruebas con trazabilidad por criterio, cobertura
   proporcional al riesgo y justificación de niveles no aplicables.
 - Movida la plantilla ADR canónica a `skills/adr-generator/templates/` y
@@ -32,4 +36,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Adaptada `skill-creator` para regenerar el índice desde los `SKILL.md`
   existentes sin modificar `AGENTS.md`.
 
-Fecha de última modificación: 2026-08-17 23:19 UTC
+Fecha de última modificación: 2026-08-18 22:32 UTC
