@@ -142,6 +142,23 @@ abstracciones adicionales solo cuando respondan a una necesidad actual o a una
 variación prevista expresamente por la Spec y aporten una mejora neta frente a
 las herramientas del framework.
 
+No introduzcas antipatrones conocidos como solución ordinaria. Una solución
+idiomática de Laravel o Vue que presente características asociadas a un
+antipatrón solo podrá conservarse cuando aporte una ventaja neta clara y
+demostrable frente a las alternativas, reduzca complejidad accidental o riesgo
+de integración y mantenga el impacto localizado, comprobable y razonablemente
+reversible. La mera conveniencia, la rapidez de implementación o el hecho de que
+el framework permita una construcción no justifican la excepción.
+
+Antes de adoptar esa excepción, identifica el antipatrón o riesgo concreto,
+compara las alternativas viables y evalúa sus efectos sobre acoplamiento,
+cohesión, testabilidad, rendimiento, seguridad y mantenibilidad. Si genera deuda
+técnica relevante o una restricción arquitectónica duradera, detén esa parte y
+solicita aprobación expresa conforme a las reglas de excepciones y ADR. Si el
+uso es local, idiomático y no introduce deuda relevante, puede resolverse
+autónomamente, dejando constancia de la justificación en el resumen de la
+entrega.
+
 `switch`, condicionales, valores literales, métodos extensos o tipos primitivos
 no están prohibidos por sí mismos. Trátalos como señales de revisión cuando
 crezcan con cada variante, oculten conocimiento de dominio, mezclen
