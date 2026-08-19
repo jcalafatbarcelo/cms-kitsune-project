@@ -8,6 +8,8 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 
 ### Añadido
 
+- Roadmap de calidad, seguridad y observabilidad con criterios y fases para
+  evaluar CI, Husky, cabeceras HTTP, Sentry y Zod.
 - Skill `spec-maintainer` con planificación previa, perfiles `feature` y
   `maintenance`, plantilla canónica, revisión semántica y validación estructural
   de Specs.
@@ -42,4 +44,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Adaptada `skill-creator` para regenerar el índice desde los `SKILL.md`
   existentes sin modificar `AGENTS.md`.
 
-Fecha de última modificación: 2026-08-19 00:20 UTC
+Fecha de última modificación: 2026-08-19 00:39 UTC
