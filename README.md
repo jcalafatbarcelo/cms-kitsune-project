@@ -61,6 +61,9 @@ definida en Specs concretas y aprobadas.
 - [`docs/architecture/documentation-strategy.md`](docs/architecture/documentation-strategy.md):
   estrategia de Documentation as Code, audiencias, versionado, publicación
   futura y criterios para evaluar wikis o asistentes basados en IA.
+- [`docs/architecture/quality-roadmap.md`](docs/architecture/quality-roadmap.md):
+  iniciativas candidatas y momentos de evaluación para quality gates, cabeceras
+  HTTP, observabilidad y validación runtime.
 - [`docs/specs/`](docs/specs/): Specs que concretan el comportamiento y los
   criterios de aceptación.
 - [`docs/adr/`](docs/adr/): ubicación prevista para ADR cuando exista una
