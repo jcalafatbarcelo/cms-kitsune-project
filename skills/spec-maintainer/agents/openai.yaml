@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec maintainer"
+  short_description: "Planifica y valida Specs proporcionales al riesgo"
+  default_prompt: "Usa $spec-maintainer para proponer, redactar o revisar una Spec con el perfil adecuado."

@@ -8,6 +8,9 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 
 ### Añadido
 
+- Skill `spec-maintainer` con planificación previa, perfiles `feature` y
+  `maintenance`, plantilla canónica, revisión semántica y validación estructural
+  de Specs.
 - Estrategia de Documentation as Code y skill `documentation-maintainer` para
   crear, organizar y validar la documentación canónica del producto.
 - Flujo combinado SDD y TDD, criterios de diseño sostenible y política de
@@ -22,6 +25,9 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 
 ### Modificado
 
+- Diferenciado el alcance de una Spec abierta de los ajustes internos permitidos
+  durante su implementación y definido un flujo proporcional para bugs y
+  regresiones sin rebajar las garantías funcionales.
 - Incorporado el impacto documental a la plantilla de Specs y a la verificación
   final de las implementaciones funcionales.
 - Reforzada la estrategia de pruebas con trazabilidad por criterio, cobertura
@@ -36,4 +42,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Adaptada `skill-creator` para regenerar el índice desde los `SKILL.md`
   existentes sin modificar `AGENTS.md`.
 
-Fecha de última modificación: 2026-08-18 22:32 UTC
+Fecha de última modificación: 2026-08-19 00:20 UTC
