@@ -368,7 +368,23 @@ mantener skills es mantenimiento no funcional: no requiere una Spec, pero sí un
 petición con `/build` para crear o modificar archivos y la aplicación completa
 del flujo especializado de la skill.
 
-## VI. FUENTES DE VERDAD Y CONFLICTOS
+## VI. AZURE BOARDS
+
+Azure Boards es una herramienta auxiliar de organización y planificación
+personal. Sus work items, estados, estimaciones y Sprints tienen carácter
+informativo y no sustituyen Specs, código, pruebas ni documentación canónica.
+
+La referencia entre un work item y una Pull Request de GitHub es completamente
+opcional. La presencia o ausencia de una referencia de Azure Boards no autoriza,
+bloquea ni condiciona una implementación, y no se exige incluir `AB#ID` en ramas,
+commits o Pull Requests.
+
+Una descripción o cambio de estado en Azure Boards no modifica el alcance
+aprobado de una Spec. Ante una discrepancia funcional, prevalecen la Spec
+aprobada y el estado verificable del código y las pruebas según sus respectivas
+responsabilidades.
+
+## VII. FUENTES DE VERDAD Y CONFLICTOS
 
 Los artefactos tienen finalidades diferentes:
 
@@ -400,7 +416,7 @@ prevalece el documento vigente que reemplace explícitamente al anterior. Si una
 contradicción no puede resolverse, documenta el choque y solicita una decisión;
 no inventes una interpretación.
 
-## VII. EJEMPLOS DE SELECCIÓN Y CLASIFICACIÓN
+## VIII. EJEMPLOS DE SELECCIÓN Y CLASIFICACIÓN
 
 - `/plan corregir AGENTS.md`: analiza y propone, pero no modifica archivos.
 - `/build corregir AGENTS.md`: modifica el archivo sin necesitar una Spec.
@@ -412,7 +428,7 @@ no inventes una interpretación.
 - `implementa este cambio`: permanece en `/plan` porque falta `/build`, aunque la
   intención parezca inequívoca.
 
-## VIII. IDIOMA Y CONVENCIONES
+## IX. IDIOMA Y CONVENCIONES
 
 - Responde al usuario y redacta documentación funcional y de proceso en español,
   salvo petición expresa o convención previa del archivo.
