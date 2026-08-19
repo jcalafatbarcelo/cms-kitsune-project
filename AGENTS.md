@@ -46,6 +46,13 @@ Estos cambios requieren conjuntamente:
 Si falta la referencia o la aprobación, solicita lo que falte y no implementes el
 alcance funcional.
 
+Las Specs usan un núcleo común con perfiles proporcionales al alcance. El perfil
+`feature` corresponde a capacidades nuevas o cambios en reglas, contratos, datos
+o flujos. El perfil `maintenance` permite documentar de forma abreviada bugs y
+regresiones acotados que restauran un comportamiento ya definido sin cambiar su
+contrato. Ambos perfiles requieren aprobación antes de modificar comportamiento
+funcional; una Spec de mantenimiento reduce ceremonia, no garantías esenciales.
+
 #### Mantenimiento no funcional
 
 Es mantenimiento no funcional:
@@ -105,6 +112,14 @@ Cuando se cumplen los requisitos aplicables al alcance, la orden `/build`
 autoriza a completarlo de forma autónoma: inspeccionar, editar, probar, aplicar
 formato y hacer ajustes internos no requieren validación archivo por archivo.
 Los hitos se comunican como progreso, no como peticiones de permiso.
+
+Durante esa implementación, corrige dentro de la misma Spec los defectos y
+ajustes internos necesarios para satisfacer sus criterios sin cambiar alcance,
+comportamiento esperado, datos, API pública ni reglas de negocio. Actualiza y
+obtén nueva aprobación de la misma Spec si cambia uno de esos elementos; crea
+otra Spec cuando el cambio sea un incremento independiente o un bug ajeno
+descubierto incidentalmente. Una Spec abierta no autoriza a acumular cualquier
+cambio solicitado hasta su cierre.
 
 Si una tarea inicialmente clasificada como no funcional descubre que necesita
 modificar comportamiento ejecutable u observable, detente antes de realizar ese
@@ -202,9 +217,11 @@ acordada y medible.
 ### Flujo incremental SDD y TDD
 
 SDD define qué comportamiento se construye y sus límites; TDD puede guiar cómo
-se implementa. Antes de `/build`, divide la Spec aprobada en incrementos
-verticales pequeños que produzcan comportamiento comprobable. Evita fases
-puramente horizontales —por ejemplo, crear todos los modelos y después todos los
+se implementa. Durante la planificación previa a la Spec, divide la iniciativa
+en incrementos verticales pequeños y selecciona el que se va a especificar. La
+Spec concreta ese incremento y, si todavía resulta demasiado amplio, lo divide
+antes de `/build` en entregas verticales comprobables. Evita fases puramente
+horizontales —por ejemplo, crear todos los modelos y después todos los
 controladores— cuando no entreguen por sí mismas un resultado verificable.
 
 Para cada incremento donde TDD sea eficiente, aplica `Red → Green → Refactor`:
@@ -264,7 +281,30 @@ no basta con borrar el archivo: detén la entrega, revócala o rótala y comunic
 incidente sin reproducir su valor. El procedimiento ampliado se documenta en
 `docs/architecture/configuration-and-secrets.md`.
 
-## IV. DOCUMENTACIÓN, CHANGELOG Y ADR
+## IV. SPECS, DOCUMENTACIÓN, CHANGELOG Y ADR
+
+### Specs
+
+Usa `spec-maintainer`, cuando figure en `skills/INDEX.md`, para proponer,
+redactar, revisar, actualizar o validar Specs. La planificación de la iniciativa
+precede a la Spec y decide el problema, las fases, el incremento seleccionado,
+el alcance actual y el diferido. La Spec convierte ese resultado en un contrato
+implementable; no sustituye esa planificación ni debe abarcar por defecto toda
+la iniciativa.
+
+Cada Spec debe conservar alcance, fuera de alcance, *clash check*, requisitos
+aplicables, garantías de calidad y seguridad, criterios de aceptación,
+trazabilidad de pruebas e impacto documental. Puede diferir complejidad
+evolutiva con motivo, riesgo y condición de revisión, pero no la corrección,
+autorización, integridad, validación, seguridad o pruebas necesarias para el
+comportamiento entregado.
+
+Los perfiles `feature` y `maintenance` pertenecen al mismo sistema y ciclo de
+aprobación. Usa `maintenance` únicamente para restaurar un comportamiento
+previamente definido mediante una reparación acotada, reproducible y sin cambios
+en reglas de negocio, datos o contratos públicos; en caso contrario usa
+`feature`. La validación estructural de la skill no equivale a aprobación ni
+garantiza por sí sola la corrección semántica.
 
 ### Documentación del producto
 
