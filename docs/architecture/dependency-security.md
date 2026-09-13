@@ -174,16 +174,13 @@ ejecución semanal permite regenerar la captura después de ese procesamiento;
 para releases futuras deberá evaluarse si además se necesita un SBOM ligado al
 artefacto de distribución y firmado o atestado.
 
-## Protección pendiente de `main`
+## Protección de `main`
 
-Dependency Review solo bloqueará realmente una integración cuando su check sea
-obligatorio mediante un ruleset. Después de publicar el workflow y comprobar su
-primera ejecución en un Pull Request, crear en **Settings > Rules > Rulesets** un
-branch ruleset con estos valores:
+El ruleset `Protect main` está activo sobre la rama por defecto y hace
+obligatorios los checks de seguridad antes de fusionar. Configuración aplicada:
 
 | Opción | Valor |
 | :--- | :--- |
-| Nombre | `Protect main` |
 | Enforcement status | `Active` |
 | Rama objetivo | Default branch (`main`) |
 | Bypass | Ninguno |
@@ -193,29 +190,28 @@ branch ruleset con estos valores:
 | Restrict deletions | Activado |
 | Block force pushes | Activado |
 
-Configurar como checks obligatorios, seleccionando GitHub Actions como fuente
-cuando la interfaz lo permita:
+Checks obligatorios:
 
 - `Composer security audit`;
 - `npm security audit`;
 - `Dependency review`.
 
-No incluir `Software bill of materials`: se ejecuta después de integrar cambios
-en `main`, no durante el Pull Request. Tampoco exigir todavía aprobación externa,
-historial lineal o commits firmados; son políticas independientes que no se han
-adoptado. El ruleset debe activarse únicamente después de que `Dependency review`
-haya informado al menos un check, para que GitHub permita seleccionarlo.
+No se incluye `Software bill of materials`, porque se ejecuta después de
+integrar cambios en `main` y no durante el Pull Request. Tampoco se exige
+aprobación externa, historial lineal ni commits firmados; son políticas
+independientes que no se han adoptado.
+
+La protección se verificó con un Pull Request de prueba que desincronizaba
+`composer.lock`: el check `Composer security audit` falló y GitHub impidió la
+fusión aunque los demás checks informaran correctamente.
 
 ## Controles pendientes
 
-Queda pendiente activar el ruleset remoto y comprobar que bloquea una fusión con
-checks incompletos o fallidos. Hasta entonces, los checks informan pero no son
-obligatorios. La atestación de un SBOM de release también queda fuera del alcance
-actual.
+La atestación de un SBOM de release queda fuera del alcance actual.
 
 ### Validación futura de workflows
 
-`actionlint` se ha reevaluado al incorporar el workflow de SBOM. Con dos
+`actionlint` se ha reevaluado al incorporar el workflow de SBOM. Con tres
 workflows acotados, el coste de añadir y mantener otra herramienta todavía no
 aporta una ventaja neta frente a la validación estructural y la ejecución real
 en GitHub; se evaluará de nuevo al construir el quality gate general o si sigue
