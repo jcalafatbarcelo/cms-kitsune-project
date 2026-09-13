@@ -7,10 +7,12 @@ conocidas en las dependencias bloqueadas de Composer y npm. Está dirigido a
 contributors del core y responsables de mantenimiento.
 
 El control combina Dependabot con los workflows
-`.github/workflows/dependency-security.yml` y `.github/workflows/sbom.yml`.
-Audita las versiones bloqueadas y conserva inventarios SPDX de las dependencias
-que GitHub reconoce. No analiza el código fuente ni cubre todavía paquetes del
-sistema operativo, imágenes de contenedor o servicios externos.
+`.github/workflows/dependency-security.yml`,
+`.github/workflows/dependency-review.yml` y `.github/workflows/sbom.yml`. Audita
+las versiones bloqueadas, impide introducir dependencias con vulnerabilidades
+conocidas y conserva inventarios SPDX de las dependencias que GitHub reconoce.
+No analiza el código fuente ni cubre todavía paquetes del sistema operativo,
+imágenes de contenedor o servicios externos.
 
 ## Fuentes de verdad
 
@@ -53,6 +55,25 @@ npm audit --package-lock-only --audit-level=low --ignore-scripts
 Los comandos necesitan acceso a los registros y servicios de advisories de
 Composer y npm. Un error de red, autenticación o disponibilidad produce un fallo
 y no debe tratarse como una auditoría superada.
+
+## Dependency Review automatizada
+
+El workflow `Dependency review` se ejecuta en todos los Pull Requests, sin
+filtros de rutas, y compara las dependencias del commit base y del commit
+propuesto mediante la API del Dependency Graph. Falla si el cambio introduce una
+vulnerabilidad conocida de severidad baja o superior en dependencias de runtime,
+desarrollo o scope desconocido.
+
+La revisión muestra las versiones corregidas conocidas e información de
+licencias, pero no aplica todavía una allowlist o denylist de licencias porque el
+proyecto no ha aprobado esa política. Tampoco publica comentarios en el Pull
+Request: el detalle queda en el job summary y en sus logs, evitando conceder
+`pull-requests: write`.
+
+El workflow solo dispone de `contents: read`. Las Actions oficiales están
+fijadas por SHA y el checkout no conserva credenciales. Un resultado verde
+demuestra que el cambio no introduce vulnerabilidades conocidas bajo esta
+política; no sustituye la revisión de compatibilidad descrita a continuación.
 
 ## Revisión de Pull Requests de dependencias
 
@@ -153,12 +174,44 @@ ejecución semanal permite regenerar la captura después de ese procesamiento;
 para releases futuras deberá evaluarse si además se necesita un SBOM ligado al
 artefacto de distribución y firmado o atestado.
 
+## Protección pendiente de `main`
+
+Dependency Review solo bloqueará realmente una integración cuando su check sea
+obligatorio mediante un ruleset. Después de publicar el workflow y comprobar su
+primera ejecución en un Pull Request, crear en **Settings > Rules > Rulesets** un
+branch ruleset con estos valores:
+
+| Opción | Valor |
+| :--- | :--- |
+| Nombre | `Protect main` |
+| Enforcement status | `Active` |
+| Rama objetivo | Default branch (`main`) |
+| Bypass | Ninguno |
+| Require a pull request before merging | Activado, `0` aprobaciones |
+| Require conversation resolution before merging | Activado |
+| Require status checks to pass | Activado y estricto; rama actualizada |
+| Restrict deletions | Activado |
+| Block force pushes | Activado |
+
+Configurar como checks obligatorios, seleccionando GitHub Actions como fuente
+cuando la interfaz lo permita:
+
+- `Composer security audit`;
+- `npm security audit`;
+- `Dependency review`.
+
+No incluir `Software bill of materials`: se ejecuta después de integrar cambios
+en `main`, no durante el Pull Request. Tampoco exigir todavía aprobación externa,
+historial lineal o commits firmados; son políticas independientes que no se han
+adoptado. El ruleset debe activarse únicamente después de que `Dependency review`
+haya informado al menos un check, para que GitHub permita seleccionarlo.
+
 ## Controles pendientes
 
-Queda pendiente convertir los checks en obligatorios, incorporar dependency
-review y definir la protección de Pull Requests. Estos incrementos se abordarán
-por separado y no deben presentarse como activos. La atestación de un SBOM de
-release también queda fuera del alcance actual.
+Queda pendiente activar el ruleset remoto y comprobar que bloquea una fusión con
+checks incompletos o fallidos. Hasta entonces, los checks informan pero no son
+obligatorios. La atestación de un SBOM de release también queda fuera del alcance
+actual.
 
 ### Validación futura de workflows
 

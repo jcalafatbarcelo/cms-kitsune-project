@@ -123,10 +123,13 @@ conserva durante 90 días como artifact de GitHub Actions. Este inventario refle
 el estado procesado por GitHub y no constituye una atestación de release ligada
 a un build concreto.
 
-El resto del quality gate y la protección obligatoria de Pull Requests
-permanecen pendientes.
+Dependency Review compara además los cambios directos y transitivos de cada Pull
+Request y falla desde severidad baja en scopes de runtime, desarrollo y
+desconocidos. La protección obligatoria de `main` permanece pendiente hasta
+publicar el workflow, validar su primer check y activar el ruleset documentado.
+El resto del quality gate también continúa pendiente.
 
-`actionlint` se ha reevaluado al añadir el segundo workflow y continúa diferido:
+`actionlint` se ha reevaluado al ampliar los workflows y continúa diferido:
 la validación estructural y las ejecuciones reales siguen siendo proporcionales
 al tamaño actual de la automatización. Una eventual adopción deberá usar una
 versión fijada y un comando reproducible en CI, reutilizable en local sin exigir
