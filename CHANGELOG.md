@@ -28,6 +28,8 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
   duplicados y límites de ruta.
 - Integración del servidor MCP de Laravel Boost para OpenCode y Codex, restringida
   a herramientas de solo lectura de contexto y documentación.
+- Flujo de continuidad de sesión con guía y plantilla en `docs/context/` y notas
+  locales excluidas de Git en `docs/context/sessions/`.
 
 ### Modificado
 
@@ -68,4 +70,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-09-13 00:02 UTC
+Fecha de última modificación: 2026-09-13 00:12 UTC

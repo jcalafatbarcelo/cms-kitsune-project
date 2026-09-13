@@ -46,6 +46,9 @@ Homestead.yaml
 /backups/
 /dumps/
 
+# Notas locales de continuidad de sesion (no canonicas, no versionadas)
+/docs/context/sessions/
+
 # Resultados de pruebas, caches y logs
 /.phpunit.cache/
 .phpunit.result.cache
