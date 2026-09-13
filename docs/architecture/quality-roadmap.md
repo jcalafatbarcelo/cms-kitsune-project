@@ -40,7 +40,7 @@ es arquitectónica, transversal y duradera.
 
 | Iniciativa | Objetivo | Prioridad orientativa | Hito de evaluación | Estado |
 | :--- | :--- | :--- | :--- | :--- |
-| Quality gates en CI | Hacer obligatorios formato, análisis estático, tests y controles de seguridad reproducibles | Alta | Bootstrap de la aplicación | En curso: [auditoría de dependencias disponible](dependency-security.md) |
+| Quality gates en CI | Hacer obligatorios formato, análisis estático, tests y controles de seguridad reproducibles | Alta | Bootstrap de la aplicación | En curso: [auditoría y SBOM disponibles](dependency-security.md) |
 | Hooks locales con Husky | Adelantar feedback sobre archivos preparados para commit o push | Media | Cuando existan scripts frontend estables | Candidata |
 | Cabeceras HTTP y Content Security Policy (CSP) para Laravel | Reducir exposición a ejecución, framing, filtrado de información y transporte inseguro | Alta | Primer endpoint HTTP; endurecimiento antes de staging | Candidata |
 | Observabilidad con Sentry | Detectar y diagnosticar errores de Laravel y Vue por entorno y release | Media/Alta | Integración básica tras el bootstrap; completar antes de staging | Candidata |
@@ -117,13 +117,20 @@ valida y audita diariamente los lockfiles de Composer y npm, además de ejecutar
 en Pull Requests y pushes a `main`. Este incremento cubre advisories conocidos y
 paquetes Composer abandonados sin instalar ni actualizar dependencias.
 
-El resto del quality gate, la generación automatizada del SBOM y la protección
-obligatoria de Pull Requests permanecen pendientes.
+El Dependency Graph genera además un SBOM SPDX 2.3 automatizado cuando cambian
+los lockfiles de `main`, semanalmente y bajo demanda. Cada captura validada se
+conserva durante 90 días como artifact de GitHub Actions. Este inventario refleja
+el estado procesado por GitHub y no constituye una atestación de release ligada
+a un build concreto.
 
-`actionlint` se evaluará al construir el quality gate general o al aumentar el
-número de workflows. Una eventual adopción deberá usar una versión fijada y un
-comando reproducible en CI, reutilizable en local sin exigir instalaciones
-globales. La política completa y su estado se mantienen en
+El resto del quality gate y la protección obligatoria de Pull Requests
+permanecen pendientes.
+
+`actionlint` se ha reevaluado al añadir el segundo workflow y continúa diferido:
+la validación estructural y las ejecuciones reales siguen siendo proporcionales
+al tamaño actual de la automatización. Una eventual adopción deberá usar una
+versión fijada y un comando reproducible en CI, reutilizable en local sin exigir
+instalaciones globales. La política completa y su estado se mantienen en
 [Seguridad de dependencias](dependency-security.md#validación-futura-de-workflows).
 
 ### Husky

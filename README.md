@@ -7,9 +7,10 @@ el ecosistema Laravel. El proyecto persigue un producto sostenible, desacoplado
 y extensible, construido mediante **Spec Driven Development (SDD)**.
 
 > [!WARNING]
-> **Este repositorio se encuentra en fase de diseño inicial.** Las capacidades
-> descritas en este documento representan el objetivo del producto y no deben
-> interpretarse como funcionalidad ya implementada o disponible.
+> **Este repositorio se encuentra en desarrollo inicial.** Ya dispone de un
+> bootstrap ejecutable de Laravel y controles básicos de calidad, pero los
+> módulos funcionales del CMS descritos en este documento siguen previstos y no
+> deben interpretarse como disponibles salvo indicación expresa.
 
 ## Objetivos principales
 
@@ -40,16 +41,21 @@ la propia página, el idioma y todos los ascendientes de la página.
 Estas decisiones describen el diseño previsto; su implementación deberá quedar
 definida en Specs concretas y aprobadas.
 
-## Stack previsto
+## Stack
 
-- **Backend:** Laravel sobre PHP 8.x.
-- **Persistencia:** Eloquent ORM con MySQL o MariaDB.
-- **Backoffice:** Laravel Blade como base y Vue 3 con Composition API para el
-  PageBuilder y otras zonas interactivas.
-- **Frontend público:** renderizado del lado del servidor mediante Laravel
-  Blade, con islas de interactividad Vue cuando sean necesarias.
-- **Assets:** Vue compartido entre módulos y cargado bajo demanda, con Vite para
-  su compilación; sin SPA ni Inertia por defecto.
+- **Disponible:** Laravel 13 sobre PHP 8.3 o posterior, Eloquent ORM, Blade,
+  Vite 8, Tailwind CSS 4 y Pest 5.
+- **Persistencia de desarrollo:** SQLite en la configuración inicial de
+  Laravel.
+- **Persistencia prevista para el CMS:** MySQL o MariaDB, manteniendo Eloquent
+  como capa de persistencia.
+- **Arquitectura modular prevista:** `nWidart/laravel-modules`; todavía no está
+  incorporado al proyecto.
+- **Frontend previsto:** Blade como base del backoffice y del sitio público, con
+  Vue 3 y Composition API para el PageBuilder y otras islas interactivas. Vue
+  todavía no está incorporado al proyecto.
+- **Assets previstos:** Vue compartido entre módulos y cargado bajo demanda,
+  con Vite para su compilación; sin SPA ni Inertia por defecto.
 
 Los límites de integración se definen en el
 [ADR-0001](docs/adr/ADR-0001-blade-vue-bajo-demanda.md). La persistencia del
@@ -113,13 +119,39 @@ adicionales cuando ofrecen una solución clara y mantenible. Los patrones se
 incorporan para resolver una necesidad o variación demostrada, no como capas
 preventivas que compliquen innecesariamente el código.
 
+## Puesta en marcha
+
+El bootstrap actual requiere PHP 8.3 o posterior, Composer, Node.js y npm. Desde
+la raíz del repositorio:
+
+```shell
+composer run setup
+composer run dev
+```
+
+El primer comando instala las dependencias, prepara `.env`, genera la clave de
+aplicación, ejecuta las migraciones y compila los assets. El segundo inicia el
+servidor de Laravel, el listener de colas y Vite para desarrollo.
+
+Las comprobaciones disponibles se ejecutan con:
+
+```shell
+composer test
+npm run build
+composer validate --strict --no-check-publish --no-plugins --no-scripts
+composer audit --locked --abandoned=fail --no-plugins --no-scripts
+npm audit --package-lock-only --audit-level=low --ignore-scripts
+```
+
+Las auditorías de dependencias también se ejecutan automáticamente mediante
+GitHub Actions en Pull Requests, pushes a `main`, diariamente y bajo demanda.
+
 ## Estado del proyecto
 
-El repositorio contiene actualmente documentación de visión, gobernanza SDD,
-Specs y tooling de skills. Todavía no hay una aplicación Laravel configurada,
-por lo que no se documentan comandos de instalación, ejecución ni pruebas. Se
-añadirán cuando existan los artefactos ejecutables y el procedimiento pueda
-verificarse en el propio repositorio.
+El repositorio contiene el bootstrap ejecutable de Laravel, configuración de
+Pest con pruebas iniciales, compilación frontend con Vite y auditorías
+automatizadas de dependencias. Los módulos de dominio del CMS todavía no están
+implementados; se incorporarán mediante Specs concretas y aprobadas.
 
 La documentación canónica se mantendrá en el repositorio. La selección de un
 portal público y la posible incorporación de una wiki asistida por IA se
@@ -128,4 +160,4 @@ para realizar una prueba representativa.
 
 ## Licencia
 
-**Pendiente.** El proyecto todavía no dispone de un archivo `LICENSE`.
+Este proyecto se distribuye bajo la [licencia MIT](LICENSE).

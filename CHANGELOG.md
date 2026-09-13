@@ -33,6 +33,8 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Auditoría diaria de dependencias Composer y npm en GitHub Actions, con PHP 8.5,
   Node 24 LTS, política estricta de advisories y mantenimiento mediante
   Dependabot.
+- Generación automatizada del SBOM SPDX 2.3 desde el Dependency Graph, con
+  validación de Composer y npm y conservación durante 90 días en GitHub Actions.
 
 ### Modificado
 
@@ -63,6 +65,9 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Simplificado `AGENTS.md` para delegar en `skill-creator` la estructura y las condiciones de creación, evitando mantener reglas duplicadas.
 - Definida la gobernanza SDD sobre fuentes de verdad, aprobaciones de `/build`,
   calidad, ADR, changelog e idioma.
+- Establecida para agentes y mantenedores la revisión obligatoria de
+  compatibilidad, tests, build y procedencia de Actions antes de integrar
+  actualizaciones de dependencias.
 - Adaptada `skill-creator` para regenerar el índice desde los `SKILL.md`
   existentes sin modificar `AGENTS.md`.
 
@@ -73,4 +78,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-09-13 09:22 UTC
+Fecha de última modificación: 2026-09-13 10:52 UTC

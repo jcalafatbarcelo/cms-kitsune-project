@@ -1,0 +1,91 @@
+name: Software bill of materials
+
+on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - ".github/workflows/sbom.yml"
+      - "composer.lock"
+      - "package-lock.json"
+  schedule:
+    - cron: "47 5 * * 2"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: "sbom-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  export-sbom:
+    name: Export SPDX SBOM
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Generate and download SBOM
+        shell: bash
+        env:
+          GH_TOKEN: "${{ github.token }}"
+        run: |
+          set -euo pipefail
+
+          api_headers=(
+            --header "Accept: application/vnd.github+json"
+            --header "Authorization: Bearer ${GH_TOKEN}"
+            --header "X-GitHub-Api-Version: 2026-03-10"
+          )
+          generate_url="${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/dependency-graph/sbom/generate-report"
+          expected_fetch_prefix="${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/dependency-graph/sbom/fetch-report/"
+
+          generate_response="$(curl --fail-with-body --silent --show-error "${api_headers[@]}" "${generate_url}")"
+          sbom_url="$(jq --exit-status --raw-output '.sbom_url' <<< "${generate_response}")"
+
+          if [[ "${sbom_url}" != "${expected_fetch_prefix}"* ]]; then
+            echo "GitHub returned an unexpected SBOM download URL." >&2
+            exit 1
+          fi
+
+          for attempt in {1..30}; do
+            status="$(curl --silent --show-error --output sbom-status.json --write-out '%{http_code}' "${api_headers[@]}" "${sbom_url}")"
+
+            case "${status}" in
+              202)
+                sleep 10
+                ;;
+              302)
+                curl --fail-with-body --location --silent --show-error "${api_headers[@]}" --output sbom-api-response.json "${sbom_url}"
+                break
+                ;;
+              *)
+                echo "SBOM generation failed with HTTP status ${status}." >&2
+                exit 1
+                ;;
+            esac
+
+            if [[ "${attempt}" -eq 30 ]]; then
+              echo "Timed out waiting for GitHub to generate the SBOM." >&2
+              exit 1
+            fi
+          done
+
+          jq --exit-status '
+            (.sbom // .)
+            | select(.spdxVersion == "SPDX-2.3")
+            | select((.packages | type) == "array" and (.packages | length > 0))
+            | select(any(.packages[].externalRefs[]?;
+                .referenceType == "purl" and (.referenceLocator | startswith("pkg:composer/"))))
+            | select(any(.packages[].externalRefs[]?;
+                .referenceType == "purl" and (.referenceLocator | startswith("pkg:npm/"))))
+          ' sbom-api-response.json > kitsune-cms-sbom.spdx.json
+
+      - name: Upload SPDX SBOM
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: "kitsune-cms-sbom-${{ github.run_id }}"
+          path: kitsune-cms-sbom.spdx.json
+          if-no-files-found: error
+          retention-days: 90

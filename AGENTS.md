@@ -258,6 +258,19 @@ En todo `/build`:
 5. considera fallida la entrega cuando una comprobación aplicable falle por el
    cambio, salvo aceptación expresa de la deuda por el usuario.
 
+### Revisión de actualizaciones de dependencias
+
+Al detectar o revisar una actualización de Composer, npm o GitHub Actions,
+incluidos los Pull Requests de Dependabot, aplica la checklist canónica de
+`docs/architecture/dependency-security.md#revisión-de-pull-requests-de-dependencias`.
+No presentes una actualización como compatible o segura únicamente porque los
+audits, Dependabot o su indicador de compatibilidad estén en verde. Revisa los
+cambios directos y transitivos, las notas de versión y el impacto aplicable;
+ejecuta instalación reproducible, pruebas, build y audits según el ecosistema.
+Para Actions comprueba además que el SHA corresponda al tag esperado, los
+permisos y la ejecución real del workflow. Informa de toda comprobación omitida
+y no recomiendes fusionar mientras falle una comprobación aplicable.
+
 Antes de dar por terminada una implementación funcional, verifica además los
 criterios de aceptación, las excepciones o deuda aceptadas y la documentación de
 configuración necesaria para reproducir el cambio sin versionar secretos.
