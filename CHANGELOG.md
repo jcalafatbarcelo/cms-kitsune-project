@@ -35,6 +35,8 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
   Dependabot.
 - Generación automatizada del SBOM SPDX 2.3 desde el Dependency Graph, con
   validación de Composer y npm y conservación durante 90 días en GitHub Actions.
+- Dependency Review para impedir que los Pull Requests introduzcan dependencias
+  con vulnerabilidades conocidas de cualquier severidad y scope.
 
 ### Modificado
 
@@ -78,4 +80,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-09-13 10:52 UTC
+Fecha de última modificación: 2026-09-13 11:26 UTC
