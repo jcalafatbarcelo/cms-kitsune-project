@@ -40,7 +40,7 @@ es arquitectónica, transversal y duradera.
 
 | Iniciativa | Objetivo | Prioridad orientativa | Hito de evaluación | Estado |
 | :--- | :--- | :--- | :--- | :--- |
-| Quality gates en CI | Hacer obligatorios formato, análisis estático, tests y controles de seguridad reproducibles | Alta | Bootstrap de la aplicación | En curso: [auditoría, SBOM y protección de main disponibles](dependency-security.md) |
+| Quality gates en CI | Hacer obligatorios formato, análisis estático, tests y controles de seguridad reproducibles | Alta | Bootstrap de la aplicación | En curso: [CI](continuous-integration.md) con formato, tests, build y seguridad de dependencias; análisis estático pendiente |
 | Hooks locales con Husky | Adelantar feedback sobre archivos preparados para commit o push | Media | Cuando existan scripts frontend estables | Candidata |
 | Cabeceras HTTP y Content Security Policy (CSP) para Laravel | Reducir exposición a ejecución, framing, filtrado de información y transporte inseguro | Alta | Primer endpoint HTTP; endurecimiento antes de staging | Candidata |
 | Observabilidad con Sentry | Detectar y diagnosticar errores de Laravel y Vue por entorno y release | Media/Alta | Integración básica tras el bootstrap; completar antes de staging | Candidata |
@@ -126,15 +126,15 @@ a un build concreto.
 Dependency Review compara además los cambios directos y transitivos de cada Pull
 Request y falla desde severidad baja en scopes de runtime, desarrollo y
 desconocidos. El ruleset `Protect main` exige este check junto con las auditorías
-de Composer y npm, y bloquea la fusión mientras alguno no pase. El resto del
-quality gate continúa pendiente.
+de Composer y npm, y bloquea la fusión mientras alguno no pase.
 
-`actionlint` se ha reevaluado al ampliar los workflows y continúa diferido:
-la validación estructural y las ejecuciones reales siguen siendo proporcionales
-al tamaño actual de la automatización. Una eventual adopción deberá usar una
-versión fijada y un comando reproducible en CI, reutilizable en local sin exigir
-instalaciones globales. La política completa y su estado se mantienen en
-[Seguridad de dependencias](dependency-security.md#validación-futura-de-workflows).
+### Quality gate de CI
+
+El workflow [CI](continuous-integration.md) añade el formato con Pint, la suite
+de Pest, la compilación de assets con Vite y la validación de los workflows con
+`actionlint`. `actionlint` se adopta con la versión `1.7.12` fijada y verificada
+por SHA-256, sin instalación global ni Action de terceros. El análisis estático y
+el umbral de cobertura de pruebas siguen pendientes.
 
 ### Husky
 
