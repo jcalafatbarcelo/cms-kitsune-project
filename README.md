@@ -1,5 +1,7 @@
 # CMS modular multiidioma
 
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/jcalafatbarcelo/cms-kitsune-project?utm_source=oss&utm_medium=github&utm_campaign=jcalafatbarcelo%2Fcms-kitsune-project&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
+
 CMS modular multiidioma desarrollado como Proyecto de Fin de Máster (TFM) sobre
 el ecosistema Laravel. El proyecto persigue un producto sostenible, desacoplado
 y extensible, construido mediante **Spec Driven Development (SDD)**.

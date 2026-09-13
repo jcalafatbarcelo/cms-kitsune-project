@@ -7,9 +7,9 @@ control de calidad, la seguridad y la observabilidad del CMS. Está dirigido a
 contributors del core y responsables de despliegue.
 
 > [!IMPORTANT]
-> Todas las iniciativas descritas están **previstas o pendientes de evaluación**.
-> El repositorio todavía no contiene una aplicación Laravel ejecutable y ninguna
-> de estas herramientas está instalada, configurada ni disponible.
+> El repositorio contiene el bootstrap ejecutable de Laravel. Las iniciativas
+> mantienen en la tabla su estado individual; no deben considerarse disponibles
+> las que sigan marcadas como candidatas.
 
 Este roadmap no sustituye una Spec, un ADR ni el backlog de una implementación.
 Cuando una iniciativa vaya a modificar el build, el runtime, un contrato o un
@@ -40,7 +40,7 @@ es arquitectónica, transversal y duradera.
 
 | Iniciativa | Objetivo | Prioridad orientativa | Hito de evaluación | Estado |
 | :--- | :--- | :--- | :--- | :--- |
-| Quality gates en CI | Hacer obligatorios formato, análisis estático, tests y controles de seguridad reproducibles | Alta | Bootstrap de la aplicación | Candidata |
+| Quality gates en CI | Hacer obligatorios formato, análisis estático, tests y controles de seguridad reproducibles | Alta | Bootstrap de la aplicación | En curso: [auditoría de dependencias disponible](dependency-security.md) |
 | Hooks locales con Husky | Adelantar feedback sobre archivos preparados para commit o push | Media | Cuando existan scripts frontend estables | Candidata |
 | Cabeceras HTTP y Content Security Policy (CSP) para Laravel | Reducir exposición a ejecución, framing, filtrado de información y transporte inseguro | Alta | Primer endpoint HTTP; endurecimiento antes de staging | Candidata |
 | Observabilidad con Sentry | Detectar y diagnosticar errores de Laravel y Vue por entorno y release | Media/Alta | Integración básica tras el bootstrap; completar antes de staging | Candidata |
@@ -53,7 +53,7 @@ del producto definido en el SDD inicial.
 
 ### 1. Bootstrap y baseline reproducible
 
-Cuando se cree la aplicación Laravel y Vue:
+Tras crear el bootstrap de la aplicación Laravel:
 
 1. definir comandos canónicos de formato, lint, análisis estático y tests;
 2. ejecutar esos comandos en CI sobre un entorno limpio;
@@ -109,6 +109,22 @@ Antes de exponer el CMS a usuarios reales:
 - revisar dependencias, secretos, logs y artefactos de build antes del release.
 
 ## Evaluación por iniciativa
+
+### Auditoría de dependencias
+
+El control descrito en [Seguridad de dependencias](dependency-security.md)
+valida y audita diariamente los lockfiles de Composer y npm, además de ejecutarse
+en Pull Requests y pushes a `main`. Este incremento cubre advisories conocidos y
+paquetes Composer abandonados sin instalar ni actualizar dependencias.
+
+El resto del quality gate, la generación automatizada del SBOM y la protección
+obligatoria de Pull Requests permanecen pendientes.
+
+`actionlint` se evaluará al construir el quality gate general o al aumentar el
+número de workflows. Una eventual adopción deberá usar una versión fijada y un
+comando reproducible en CI, reutilizable en local sin exigir instalaciones
+globales. La política completa y su estado se mantienen en
+[Seguridad de dependencias](dependency-security.md#validación-futura-de-workflows).
 
 ### Husky
 
@@ -203,6 +219,6 @@ motivo y la condición que permitiría reevaluarla.
 - Seleccionar proveedores, planes comerciales o regiones concretas.
 - Instalar paquetes o modificar configuración ejecutable.
 - Definir contratos API o schemas del PageBuilder todavía inexistentes.
-- Establecer comandos de CI, hooks o despliegue antes de disponer del proyecto
-  ejecutable.
-- Afirmar que alguna de estas medidas está activa en el CMS.
+- Establecer los restantes comandos de CI, hooks o despliegue sin evaluarlos por
+  separado.
+- Presentar como activas las medidas que continúan marcadas como candidatas.

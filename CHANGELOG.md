@@ -30,6 +30,9 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
   a herramientas de solo lectura de contexto y documentación.
 - Flujo de continuidad de sesión con guía y plantilla en `docs/context/` y notas
   locales excluidas de Git en `docs/context/sessions/`.
+- Auditoría diaria de dependencias Composer y npm en GitHub Actions, con PHP 8.5,
+  Node 24 LTS, política estricta de advisories y mantenimiento mediante
+  Dependabot.
 
 ### Modificado
 
@@ -70,4 +73,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-09-13 00:12 UTC
+Fecha de última modificación: 2026-09-13 09:22 UTC

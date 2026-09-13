@@ -1,0 +1,66 @@
+name: Dependency security
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+  schedule:
+    - cron: "23 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: "dependency-security-${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  composer-security:
+    name: Composer security audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: "8.5"
+          tools: composer:v2
+          coverage: none
+        env:
+          fail-fast: "true"
+          update: "true"
+
+      - name: Validate Composer files
+        run: composer validate --strict --no-check-publish --no-plugins --no-scripts
+
+      - name: Audit Composer dependencies
+        run: composer audit --locked --abandoned=fail --no-plugins --no-scripts
+
+  npm-security:
+    name: npm security audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: "24"
+          check-latest: true
+          package-manager-cache: false
+
+      - name: Audit npm dependencies
+        run: npm audit --package-lock-only --audit-level=low --ignore-scripts
