@@ -24,7 +24,7 @@ Tras evaluar la Arquitectura Hexagonal, se ha optado por un enfoque de **Monolit
   - **Assets Frontend:** Vue como dependencia compartida entre módulos, con carga bajo demanda y compilación mediante Vite; sin SPA ni Inertia por defecto.
 
 La decisión y sus límites se recogen en el
-[ADR-0001: Integración de Blade y Vue bajo demanda](../docs/adr/ADR-0001-blade-vue-bajo-demanda.md).
+[ADR-0001: Integración de Blade y Vue bajo demanda](../adr/ADR-0001-blade-vue-bajo-demanda.md).
 Es arquitectura prevista, todavía no implementada.
 
 ## **3. Reglas de Negocio y Modelado de Datos (Knowhow)**
