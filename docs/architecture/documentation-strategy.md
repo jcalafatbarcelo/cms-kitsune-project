@@ -79,7 +79,7 @@ docs/
 
 `docs/specs/`, `docs/adr/` y `docs/changelog/` conservan sus flujos específicos.
 La documentación ordinaria del producto se mantiene mediante la skill
-`documentation-maintainer` cuando figure en `skills/INDEX.md`.
+`documentation-maintainer` cuando figure en `.agents/skills/INDEX.md`.
 
 ## Versionado y publicación futura
 

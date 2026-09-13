@@ -1,0 +1,69 @@
+# Dependencias
+vendor/
+node_modules/
+
+# Configuracion local y credenciales
+.env
+.env.*
+!.env.example
+!.env.*.example
+auth.json
+/storage/*.key
+
+# Artefactos de Laravel y Vite
+/public/build/
+/public/fonts-manifest.dev.json
+/public/hot
+/public/storage
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
+!/bootstrap/cache/.gitkeep
+/storage/pail
+/storage/framework/cache/**
+/storage/framework/sessions/**
+/storage/framework/testing/**
+/storage/framework/views/**
+/storage/logs/**
+!/storage/**/
+!/storage/**/.gitignore
+!/storage/**/.gitkeep
+
+# Herramientas de desarrollo de Laravel
+.phpactor.json
+_ide_helper.php
+Homestead.json
+Homestead.yaml
+
+# Configuracion local de Codex; se versiona solo la configuracion de proyecto
+/.codex/*
+!/.codex/config.toml
+
+# Datos y backups locales
+/database/*.sqlite
+/database/*.sqlite-*
+/database/*.sqlite3
+/database/*.sqlite3-*
+/backups/
+/dumps/
+
+# Resultados de pruebas, caches y logs
+/.phpunit.cache/
+.phpunit.result.cache
+/coverage/
+*.log
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+# Archivos locales del editor y del sistema operativo
+/.cursor/
+/.idea/
+/.nova/
+/.vscode/
+/.zed/
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo

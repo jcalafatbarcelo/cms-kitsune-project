@@ -1,0 +1,7 @@
+[mcp_servers.laravel-boost]
+command = "php"
+args = ["artisan", "boost:mcp"]
+enabled = true
+startup_timeout_sec = 30
+default_tools_approval_mode = "writes"
+enabled_tools = ["application-info", "search-docs", "database-schema", "get-absolute-url"]

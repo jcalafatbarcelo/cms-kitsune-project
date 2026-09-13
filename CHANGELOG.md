@@ -8,6 +8,8 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 
 ### Añadido
 
+- ADR-0001 aceptado para la arquitectura prevista: Blade como base y Vue
+  compartido bajo demanda, con separación de assets públicos y del editor.
 - Roadmap de calidad, seguridad y observabilidad con criterios y fases para
   evaluar CI, Husky, cabeceras HTTP, Sentry y Zod.
 - Skill `spec-maintainer` con planificación previa, perfiles `feature` y
@@ -24,9 +26,24 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
   no relacionadas con la tarea.
 - Pruebas automatizadas del registro atómico de skills, validación de frontmatter,
   duplicados y límites de ruta.
+- Integración del servidor MCP de Laravel Boost para OpenCode y Codex, restringida
+  a herramientas de solo lectura de contexto y documentación.
 
 ### Modificado
 
+- Movidas las skills canónicas a `.agents/skills/` y regenerado su índice derivado;
+  actualizadas las referencias operativas de `AGENTS.md` y la documentación.
+- Renombrado el proyecto en `composer.json` (`kitsune/cms`) y `package.json`
+  (`kitsune-cms`), sustituyendo la identidad del esqueleto de Laravel.
+- Consolidado `context/` en `docs/context/` y actualizadas las referencias
+  operativas de `AGENTS.md`, `README.md`, el ADR-0001 y las skills.
+- Eliminada la plantilla SPEC obsoleta `context/plantilla_SPEC.md`, sin
+  referencias y superada por la plantilla canónica de `spec-maintainer`.
+- Desactivadas en Boost las guidelines, las skills y la integración con Laravel
+  Cloud, y retirado el hook automático `boost:update` de Composer para controlar
+  las actualizaciones.
+- Alineados el SDD, el README y el roadmap con la integración Blade/Vue y con
+  JSON como alternativa inicial, no definitiva, de persistencia del PageBuilder.
 - Diferenciado el alcance de una Spec abierta de los ajustes internos permitidos
   durante su implementación y definido un flujo proporcional para bugs y
   regresiones sin rebajar las garantías funcionales.
@@ -34,7 +51,7 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
   final de las implementaciones funcionales.
 - Reforzada la estrategia de pruebas con trazabilidad por criterio, cobertura
   proporcional al riesgo y justificación de niveles no aplicables.
-- Movida la plantilla ADR canónica a `skills/adr-generator/templates/` y
+- Movida la plantilla ADR canónica a `.agents/skills/adr-generator/templates/` y
   conservado `docs/plantilla_ADR.md` solo como referencia documental.
 - Aclarado que la agnosticidad de `skill-creator` se refiere al agente ejecutor y no obliga a que las skills generadas sean genéricas; estas deben orientarse al contexto del proyecto.
 - Documentada la estructura estándar de cada skill, diferenciando los archivos base de los directorios opcionales de scripts, referencias y recursos.
@@ -44,4 +61,11 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Adaptada `skill-creator` para regenerar el índice desde los `SKILL.md`
   existentes sin modificar `AGENTS.md`.
 
-Fecha de última modificación: 2026-08-19 00:39 UTC
+### Eliminado
+
+- Skills genéricas instaladas por Boost que no aportaban una ventaja neta frente
+  a `AGENTS.md`, la documentación consultable por MCP y las skills propias.
+- Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
+  por el proyecto.
+
+Fecha de última modificación: 2026-09-13 00:02 UTC

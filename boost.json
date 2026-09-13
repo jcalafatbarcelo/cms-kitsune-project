@@ -1,0 +1,12 @@
+{
+    "agents": [
+        "opencode",
+        "codex"
+    ],
+    "cloud": false,
+    "guidelines": false,
+    "mcp": true,
+    "nightwatch": false,
+    "sail": false,
+    "skills": []
+}

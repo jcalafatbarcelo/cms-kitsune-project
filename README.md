@@ -15,8 +15,9 @@ y extensible, construido mediante **Spec Driven Development (SDD)**.
   evolución independiente.
 - Gestionar contenido multiidioma sin comprometer la identidad estable de las
   entidades ni sus relaciones estructurales.
-- Ofrecer un PageBuilder reactivo y declarativo, con esquemas JSON en el
-  backoffice y renderizado público seguro.
+- Ofrecer un PageBuilder reactivo y declarativo en el backoffice y renderizado
+  público seguro; JSON es la alternativa inicial de persistencia, pendiente de
+  evaluación en su Spec.
 - Tratar los assets como entidades reutilizables, con metadatos traducibles y
   perfiles de uso diferenciados.
 - Mantener los árboles de navegación independientes de la jerarquía de URL
@@ -41,22 +42,30 @@ definida en Specs concretas y aprobadas.
 
 - **Backend:** Laravel sobre PHP 8.x.
 - **Persistencia:** Eloquent ORM con MySQL o MariaDB.
-- **Backoffice:** Vue 3 con Composition API.
+- **Backoffice:** Laravel Blade como base y Vue 3 con Composition API para el
+  PageBuilder y otras zonas interactivas.
 - **Frontend público:** renderizado del lado del servidor mediante Laravel
-  Blade.
+  Blade, con islas de interactividad Vue cuando sean necesarias.
+- **Assets:** Vue compartido entre módulos y cargado bajo demanda, con Vite para
+  su compilación; sin SPA ni Inertia por defecto.
+
+Los límites de integración se definen en el
+[ADR-0001](docs/adr/ADR-0001-blade-vue-bajo-demanda.md). La persistencia del
+PageBuilder se decidirá en su Spec, sin confundir el esquema de los bloques con
+el formato de almacenamiento de su contenido.
 
 ## Alcance del MVP (MoSCoW)
 
 | Prioridad | Alcance previsto |
 | :--- | :--- |
-| **Must** | Core como monolito modular; gestión de idiomas activos e inactivos; patrón Entity-Translation; PageBuilder con Vue 3, esquemas JSON y renderizado Blade; assets reutilizables con metadatos traducibles; navegación independiente de las URL canónicas. |
+| **Must** | Core como monolito modular; gestión de idiomas activos e inactivos; patrón Entity-Translation; PageBuilder con Vue 3, configuración declarativa y renderizado Blade, con persistencia pendiente de decisión; assets reutilizables con metadatos traducibles; navegación independiente de las URL canónicas. |
 | **Should** | Visibilidad condicional en menús, publicación en cascada y selector de idioma inteligente. |
-| **Could** | Integración con LLM para traducir contenido JSON desde el editor. |
+| **Could** | Integración con LLM para traducir contenido estructurado desde el editor. |
 | **Won't (MVP)** | Instalador visual de plugins o módulos desde el backoffice. |
 
 ## Documentación y fuentes de referencia
 
-- [`context/SDD_Inicial.md`](context/SDD_Inicial.md): visión inicial,
+- [`docs/context/SDD_Inicial.md`](docs/context/SDD_Inicial.md): visión inicial,
   arquitectura base, reglas de negocio y alcance MoSCoW.
 - [`docs/architecture/documentation-strategy.md`](docs/architecture/documentation-strategy.md):
   estrategia de Documentation as Code, audiencias, versionado, publicación
@@ -66,10 +75,10 @@ definida en Specs concretas y aprobadas.
   HTTP, observabilidad y validación runtime.
 - [`docs/specs/`](docs/specs/): Specs que concretan el comportamiento y los
   criterios de aceptación.
-- [`docs/adr/`](docs/adr/): ubicación prevista para ADR cuando exista una
-  decisión arquitectónica que justifique su creación; todavía no contiene ADR.
+- [`docs/adr/`](docs/adr/): decisiones arquitectónicas; incluye el
+  [ADR-0001 sobre Blade y Vue](docs/adr/ADR-0001-blade-vue-bajo-demanda.md).
 - [`CHANGELOG.md`](CHANGELOG.md): registro histórico de cambios notables.
-- [`skills/INDEX.md`](skills/INDEX.md): catálogo derivado de skills disponibles
+- [`.agents/skills/INDEX.md`](.agents/skills/INDEX.md): catálogo canónico derivado de skills disponibles
   en el repositorio.
 - [`AGENTS.md`](AGENTS.md): reglas operativas, fuentes de verdad y flujo de
   trabajo para agentes.

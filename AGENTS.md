@@ -82,7 +82,7 @@ código, pruebas, Specs, documentación, skills y artefactos de configuración o
 del flujo de trabajo.
 
 1. Lee el código y las pruebas afectados, las Specs y ADR vigentes y
-   `context/SDD_Inicial.md`.
+   `docs/context/SDD_Inicial.md`.
 2. Realiza un *clash check* y comunica conflictos con decisiones o reglas de
    negocio existentes.
 3. Inspecciona archivos y presenta análisis, planes y propuestas sin
@@ -285,7 +285,7 @@ incidente sin reproducir su valor. El procedimiento ampliado se documenta en
 
 ### Specs
 
-Usa `spec-maintainer`, cuando figure en `skills/INDEX.md`, para proponer,
+Usa `spec-maintainer`, cuando figure en `.agents/skills/INDEX.md`, para proponer,
 redactar, revisar, actualizar o validar Specs. La planificación de la iniciativa
 precede a la Spec y decide el problema, las fases, el incremento seleccionado,
 el alcance actual y el diferido. La Spec convierte ese resultado en un contrato
@@ -314,7 +314,7 @@ prevista como disponible ni funciona como un historial ampliado. Las vistas
 generadas, wikis y respuestas asistidas por IA son derivadas y no reemplazan
 Specs, ADR, contratos, código, pruebas ni documentación revisada.
 
-Usa la skill `documentation-maintainer`, cuando figure en `skills/INDEX.md`, para
+Usa la skill `documentation-maintainer`, cuando figure en `.agents/skills/INDEX.md`, para
 crear, actualizar, reorganizar o validar documentación del producto. No la uses
 para Specs, ADR ni `CHANGELOG.md`, que conservan sus flujos específicos. La
 estrategia, audiencias y criterios de publicación se definen en
@@ -339,34 +339,58 @@ Crea un ADR únicamente cuando la decisión sea arquitectónica y duradera, afec
 a varios componentes o imponga una restricción transversal, presente
 alternativas razonables y tenga consecuencias que justifiquen conservar el
 razonamiento. Usa la plantilla canónica de
-`skills/adr-generator/templates/plantilla_ADR.md`.
+`.agents/skills/adr-generator/templates/plantilla_ADR.md`.
 
 No crees ADR para refactors locales, nombres, correcciones rutinarias, detalles
 reversibles ni decisiones ya prescritas. Usa la skill `adr-generator` solo si
-aparece en `skills/INDEX.md`; si no está disponible, aplica directamente el
+aparece en `.agents/skills/INDEX.md`; si no está disponible, aplica directamente el
 criterio anterior y deja constancia de la limitación.
 
 ## V. SISTEMA DE SKILLS
 
-El descubrimiento de skills se limita estrictamente a `skills/`. No busques
-skills en `docs/`, dependencias, directorios del sistema ni otras ubicaciones,
-salvo instrucción explícita.
+La ubicación canónica de las skills del proyecto es `.agents/skills/`, en la raíz
+del repositorio. El autodescubrimiento de metadatos por el cliente está permitido,
+pero `.agents/skills/INDEX.md` sigue siendo el catálogo canónico de skills del
+proyecto. Las skills globales o instaladas por el cliente no equivalen a una
+aprobación del proyecto ni amplían el alcance autorizado.
 
-1. Consulta una sola vez `skills/INDEX.md` para decidir si una skill corresponde
+1. Consulta una sola vez `.agents/skills/INDEX.md` para decidir si una skill corresponde
    a la tarea.
-2. Abre únicamente el `SKILL.md` de las skills seleccionadas.
-3. Si el índice es válido, no inspecciones las demás carpetas de `skills/`.
+2. Abre únicamente el `SKILL.md` de las skills pertinentes e indexadas.
+3. Si el índice es válido, no inspecciones las demás carpetas de `.agents/skills/`.
 4. Si falta el índice o una ruta seleccionada, limita la recuperación a
-   `skills/*/SKILL.md`, informa de la desincronización y no busques fuera de
-   `skills/`.
+   `.agents/skills/*/SKILL.md`, informa de la desincronización y no busques fuera de
+   `.agents/skills/`. No busques skills en `docs/`, dependencias ni directorios del
+   sistema salvo instrucción explícita.
 
-Cada `skills/<nombre>/SKILL.md` es la fuente de verdad de su flujo y frontmatter.
-`skills/INDEX.md` es una vista derivada y no se edita manualmente. Toda nueva
-skill se crea mediante `skills/skill-creator/SKILL.md`, que valida la skill y
+Cada `.agents/skills/<nombre>/SKILL.md` es la fuente de verdad de su flujo y frontmatter.
+`.agents/skills/INDEX.md` es una vista derivada y no se edita manualmente. Toda nueva
+skill se crea mediante `.agents/skills/skill-creator/SKILL.md`, que valida la skill y
 regenera el índice. No anuncies ni uses skills ausentes del índice. Crear o
 mantener skills es mantenimiento no funcional: no requiere una Spec, pero sí una
 petición con `/build` para crear o modificar archivos y la aplicación completa
 del flujo especializado de la skill.
+
+Esta ubicación sustituye exclusivamente las rutas antiguas `skills/` prescritas
+en `docs/specs/SPEC-gobernanza-agentes.md` y `docs/specs/SPEC-adr-generator.md`.
+El resto de sus disposiciones no cambia; las Specs históricas no se reescriben.
+No mantengas copias duplicadas ni symlinks en la ubicación anterior.
+
+### MCP y documentación externa
+
+El uso de MCP no autoriza escritura en `/plan` ni permite eludir las reglas de
+secretos, permisos o alcance. Evalúa los efectos de cada herramienta, no solo su
+nombre, y no envíes secretos a servicios externos. La documentación canónica, el
+código y las pruebas del repositorio prevalecen frente a documentación externa
+según sus respectivas responsabilidades, sin sustituir Specs ni ADR. Antes de
+aplicar recomendaciones externas, comprueba las versiones instaladas y la versión
+de la documentación consultada; ante discrepancias, verifica el estado local.
+
+El servidor MCP del proyecto se configura en `opencode.json` y `.codex/config.toml`,
+donde se restringe por permisos el catálogo de herramientas expuesto. Boost no
+regenera automáticamente guidelines ni skills: no reintroduzcas el hook
+`boost:update` ni habilites esas opciones en `boost.json` sin revisar antes su
+salida, para no sobrescribir estas reglas ni el catálogo de `.agents/skills/`.
 
 ## VI. AZURE BOARDS
 
@@ -403,8 +427,12 @@ Los artefactos tienen finalidades diferentes:
    ADR ni estas instrucciones.
 6. `CHANGELOG.md` es histórico, nunca prescriptivo. Verifica cualquier
    discrepancia mediante código y pruebas.
-7. `context/SDD_Inicial.md` aporta visión y restricciones de alto nivel que una
-   decisión posterior y explícita puede concretar o reemplazar.
+7. `docs/context/SDD_Inicial.md` aporta visión y restricciones de alto nivel que
+   una decisión posterior y explícita puede concretar o reemplazar.
+
+La ruta `docs/context/` sustituye a la antigua `context/` citada en
+`docs/specs/SPEC-gobernanza-agentes.md` y `docs/specs/SPEC-adr-generator.md`.
+Las Specs históricas no se reescriben.
 
 Ninguna modificación puede realizarse en `/plan`, incluida la creación o
 actualización de una Spec, documentación, skill o cualquier otro artefacto. Su

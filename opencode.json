@@ -1,0 +1,22 @@
+{
+    "$schema": "https://opencode.ai/config.json",
+    "mcp": {
+        "laravel-boost": {
+            "type": "local",
+            "enabled": true,
+            "command": [
+                "php",
+                "artisan",
+                "boost:mcp"
+            ],
+            "cwd": "."
+        }
+    },
+    "permission": {
+        "laravel-boost_*": "deny",
+        "laravel-boost_application-info": "allow",
+        "laravel-boost_search-docs": "allow",
+        "laravel-boost_database-schema": "allow",
+        "laravel-boost_get-absolute-url": "allow"
+    }
+}

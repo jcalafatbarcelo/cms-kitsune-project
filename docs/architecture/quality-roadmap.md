@@ -79,7 +79,8 @@ Al aparecer el primer flujo Vue que intercambie datos con Laravel:
 
 ### 3. PageBuilder y módulos principales
 
-Al definir los schemas JSON del PageBuilder:
+Al definir los esquemas declarativos y la persistencia del PageBuilder (JSON es
+una alternativa inicial pendiente de evaluación, no un formato obligatorio):
 
 - seleccionar una fuente de verdad para los contratos y su estrategia de
   compatibilidad;
