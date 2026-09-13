@@ -72,6 +72,8 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
   actualizaciones de dependencias.
 - Adaptada `skill-creator` para regenerar el índice desde los `SKILL.md`
   existentes sin modificar `AGENTS.md`.
+- Activado el ruleset `Protect main`, que exige Pull Request, resolución de
+  conversaciones y los checks de auditoría y Dependency Review antes de fusionar.
 
 ### Eliminado
 
@@ -80,4 +82,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-09-13 11:26 UTC
+Fecha de última modificación: 2026-09-13 14:41 UTC

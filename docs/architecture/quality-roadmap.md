@@ -40,7 +40,7 @@ es arquitectónica, transversal y duradera.
 
 | Iniciativa | Objetivo | Prioridad orientativa | Hito de evaluación | Estado |
 | :--- | :--- | :--- | :--- | :--- |
-| Quality gates en CI | Hacer obligatorios formato, análisis estático, tests y controles de seguridad reproducibles | Alta | Bootstrap de la aplicación | En curso: [auditoría y SBOM disponibles](dependency-security.md) |
+| Quality gates en CI | Hacer obligatorios formato, análisis estático, tests y controles de seguridad reproducibles | Alta | Bootstrap de la aplicación | En curso: [auditoría, SBOM y protección de main disponibles](dependency-security.md) |
 | Hooks locales con Husky | Adelantar feedback sobre archivos preparados para commit o push | Media | Cuando existan scripts frontend estables | Candidata |
 | Cabeceras HTTP y Content Security Policy (CSP) para Laravel | Reducir exposición a ejecución, framing, filtrado de información y transporte inseguro | Alta | Primer endpoint HTTP; endurecimiento antes de staging | Candidata |
 | Observabilidad con Sentry | Detectar y diagnosticar errores de Laravel y Vue por entorno y release | Media/Alta | Integración básica tras el bootstrap; completar antes de staging | Candidata |
@@ -125,9 +125,9 @@ a un build concreto.
 
 Dependency Review compara además los cambios directos y transitivos de cada Pull
 Request y falla desde severidad baja en scopes de runtime, desarrollo y
-desconocidos. La protección obligatoria de `main` permanece pendiente hasta
-publicar el workflow, validar su primer check y activar el ruleset documentado.
-El resto del quality gate también continúa pendiente.
+desconocidos. El ruleset `Protect main` exige este check junto con las auditorías
+de Composer y npm, y bloquea la fusión mientras alguno no pase. El resto del
+quality gate continúa pendiente.
 
 `actionlint` se ha reevaluado al ampliar los workflows y continúa diferido:
 la validación estructural y las ejecuciones reales siguen siendo proporcionales
