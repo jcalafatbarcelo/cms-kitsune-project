@@ -81,6 +81,10 @@ el formato de almacenamiento de su contenido.
 - [`docs/architecture/quality-roadmap.md`](docs/architecture/quality-roadmap.md):
   iniciativas candidatas y momentos de evaluación para quality gates, cabeceras
   HTTP, observabilidad y validación runtime.
+- [`docs/architecture/continuous-integration.md`](docs/architecture/continuous-integration.md):
+  quality gate de CI, comandos locales y validación de workflows.
+- [`docs/architecture/dependency-security.md`](docs/architecture/dependency-security.md):
+  auditorías de dependencias, SBOM, Dependency Review y protección de `main`.
 - [`docs/specs/`](docs/specs/): Specs que concretan el comportamiento y los
   criterios de aceptación.
 - [`docs/adr/`](docs/adr/): decisiones arquitectónicas; incluye el

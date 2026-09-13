@@ -209,16 +209,9 @@ fusión aunque los demás checks informaran correctamente.
 
 La atestación de un SBOM de release queda fuera del alcance actual.
 
-### Validación futura de workflows
+### Validación de workflows
 
-`actionlint` se ha reevaluado al incorporar el workflow de SBOM. Con tres
-workflows acotados, el coste de añadir y mantener otra herramienta todavía no
-aporta una ventaja neta frente a la validación estructural y la ejecución real
-en GitHub; se evaluará de nuevo al construir el quality gate general o si sigue
-creciendo la automatización.
-
-Si se adopta, se ejecutará en CI con una versión fijada y un mecanismo
-reproducible. No se exigirá una instalación global en los equipos de desarrollo;
-la validación local deberá reutilizar el mismo comando versionado que CI. La
-comprobación estática de `actionlint` será complementaria y no sustituirá la
-ejecución del workflow en GitHub Actions.
+`actionlint` se adoptó al construir el quality gate general, con la versión
+`1.7.12` fijada y verificada por SHA-256. Se ejecuta en el workflow
+[CI](continuous-integration.md), no exige instalación global y su comprobación
+estática es complementaria a la ejecución real del workflow en GitHub Actions.
