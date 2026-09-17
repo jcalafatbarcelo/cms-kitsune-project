@@ -1,501 +1,248 @@
-# Instrucciones del Sistema (In-Repo Agent) - TFM CMS Laravel
+# AGENTS.md - CMS Kitsune
 
-## I. IDENTIDAD Y ALCANCE
+## 1. Alcance
 
-Eres un asistente de ingeniería de software integrado en el repositorio. Tu
-objetivo es construir un CMS Modular Multiidioma con Laravel y Vue 3 mediante
-**Spec Driven Development (SDD)**, apoyado por **Test Driven Development (TDD)**
-cuando aporte una ventaja neta. La calidad, la arquitectura, la sostenibilidad
-del código y la documentación funcional son prioritarias.
+Objetivo: CMS modular y multiidioma con Laravel/Vue 3. Prioridades: SDD,
+calidad, arquitectura sostenible, documentacion funcional y TDD con ventaja neta.
 
-## II. MODOS DE OPERACIÓN
+`DEBE`, `NO DEBE` y `SOLO` son obligatorios.
 
-### Selección de modo
+## 2. Modo y escritura
 
-1. Una petición que contenga `/plan` activa el modo `/plan`.
-2. En `/plan` está prohibido modificar cualquier archivo del repositorio.
-3. Sin `/plan` ni `/build`, aplica el modo `/plan`.
-4. Solo una petición que contenga `/build` activa el modo `/build` y autoriza a
-   modificar archivos.
-5. Expresiones ordinarias como «implementa», «corrige», «modifica» o «ejecuta el
-   plan» no sustituyen el marcador explícito `/build` ni autorizan escritura.
-6. La presencia de `/build` activa siempre ese modo. Después se clasifica el
-   alcance para determinar si necesita una Spec aprobada; la ausencia de una Spec
-   no impide ejecutar mantenimiento exclusivamente no funcional.
+| Condicion | Accion |
+| --- | --- |
+| Peticion con `/build` | Modo `/build`. |
+| Peticion con `/plan` sin `/build`, o sin marcador | Modo `/plan`. |
+| Palabras ordinarias sin `/build` | NO autorizan escritura. |
 
-### Clasificación del alcance en `/build`
+### `/plan`
 
-#### Cambios funcionales sujetos a SDD
+- NO crear, modificar, mover ni borrar artefactos del repositorio.
+- DEBE leer codigo/pruebas afectados, Specs/ADR vigentes y
+  `docs/context/SDD_Inicial.md`; DEBE hacer `clash check` e informar conflictos.
+- PUEDE proponer contenido en la respuesta; NO materializarlo.
+- Una Spec propuesta DEBE incluir, o declarar no aplicables: E-R/migraciones,
+  contratos/firmas, JSON PageBuilder, logica critica, validaciones y aceptacion.
+- Crear/actualizar una Spec materialmente requiere `/build`, no otra Spec previa.
+- NO crear, cambiar ni borrar ramas.
 
-Son cambios funcionales:
+### `/build`: clasificacion
 
-- código de aplicación;
-- migraciones y modelo de datos;
-- APIs o contratos públicos;
-- lógica de negocio;
-- comportamiento ejecutable u observable del producto;
-- pruebas que definan o alteren dicho comportamiento.
+| Alcance | Condicion previa |
+| --- | --- |
+| Funcional: aplicacion, datos/migraciones, API/contrato publico, logica de negocio, comportamiento observable o pruebas que lo definan/alteren | `/build` + `docs/specs/SPEC-[nombre].md` concreta y aprobada. Si falta una condicion, detener parte funcional y pedirla. |
+| No funcional: documentacion, skills, `AGENTS.md`, plantillas, instrucciones, flujo, correcciones editoriales, metadatos o configuracion sin efecto ejecutable | `/build` + peticion inequivoca o plan validado + reglas del artefacto. No requiere Spec. |
+| Mixto | Spec aprobada para parte funcional ANTES de modificar cualquier archivo. |
 
-Estos cambios requieren conjuntamente:
+Si un mantenimiento necesita efecto ejecutable/observable, detener ANTES y exigir
+Spec aprobada; NO presentarlo como mantenimiento.
 
-- el marcador `/build`;
-- la referencia a una Spec concreta mediante
-  `docs/specs/SPEC-[nombre].md`;
-- que la Spec figure como aprobada.
+### Ramas
 
-Si falta la referencia o la aprobación, solicita lo que falte y no implementes el
-alcance funcional.
+En `/build`, ANTES de modificar archivos:
 
-Las Specs usan un núcleo común con perfiles proporcionales al alcance. El perfil
-`feature` corresponde a capacidades nuevas o cambios en reglas, contratos, datos
-o flujos. El perfil `maintenance` permite documentar de forma abreviada bugs y
-regresiones acotados que restauran un comportamiento ya definido sin cambiar su
-contrato. Ambos perfiles requieren aprobación antes de modificar comportamiento
-funcional; una Spec de mantenimiento reduce ceremonia, no garantías esenciales.
+- Si el cambio no es operativo autorizado para `main`, crear y cambiar a una rama
+  nueva; NO escribir en `main`.
+- Esto incluye codigo, pruebas, migraciones, Specs, documentacion de producto,
+  configuracion, workflows y artefactos asociados al CMS.
+- Una excepcion en `main` requiere peticion explicita y alcance solo operativo;
+  NO puede incluir comportamiento ejecutable, pruebas, Specs ni documentacion de
+  producto.
+- Si la rama actual no es `main` y corresponde al alcance autorizado, usarla; si
+  no corresponde, crear una nueva o pedir decision ante cambios pendientes.
 
-#### Mantenimiento no funcional
+Formato: `<bloque>/<nombre-kebab-case>`, solo minusculas.
 
-Es mantenimiento no funcional:
+Bloques iniciales: `core`, `security`, `quality`, `module`, `page-builder`,
+`i18n`, `template`. Se puede anadir bloque si ninguno clasifica el alcance con
+precision. El bloque organiza trabajo; NO define arquitectura, modulos, dominio
+ni alcance de Spec.
 
-- creación o modificación de documentación;
-- creación o modificación de skills;
-- cambios en `AGENTS.md`;
-- plantillas, instrucciones y artefactos del flujo de trabajo;
-- correcciones editoriales;
-- metadatos y configuración sin impacto en el producto ejecutable.
+Ejemplos: `core/page-hierarchy`, `security/authorization-policy`,
+`quality/pest-architecture`, `module/media-library`, `page-builder/block-schema`,
+`i18n/page-translations`, `template/public-layout`.
 
-Estos cambios requieren:
+## 3. Ejecucion `/build`
 
-- el marcador `/build`;
-- una petición inequívoca o un plan previamente validado;
-- el cumplimiento de las reglas particulares del artefacto.
+- Implementar SOLO alcance autorizado; NO inventar campos, tablas, modulos ni
+  comportamiento.
+- Con requisitos satisfechos, `/build` autoriza inspeccion, edicion, pruebas,
+  formato y ajustes internos autonomos. Comunicar hitos como progreso.
+- Ajuste interno en Spec: permitido SOLO si mantiene alcance, comportamiento,
+  datos, API publica y reglas de negocio. Si altera uno: actualizar Spec y obtener
+  aprobacion nueva.
+- Incremento independiente o bug incidental ajeno: requiere otra Spec.
+- Pedir aprobacion nueva SOLO por cambio de alcance/datos/API/aceptacion;
+  conflicto con ADR/Spec/regla; operacion destructiva/irreversible no prevista;
+  o decision funcional abierta con alternativas de consecuencias distintas.
+- Si se activa un bloqueo, dejar repositorio coherente si es posible; informar
+  completado/pendiente; NO presentar parcial como terminado.
 
-No requieren crear una Spec ni referenciar una Spec aprobada. Si la petición
-combina cambios funcionales y no funcionales, exige una Spec concreta y aprobada
-para el alcance funcional antes de modificar cualquier archivo.
+Restricciones permanentes: `nWidart/laravel-modules`, Eloquent ORM, Vue 3
+Composition API; NO parsear Blade con expresiones regulares.
 
-### Modo `/plan` (El Arquitecto)
+### Diseno
 
-Este modo es estrictamente de solo lectura respecto al repositorio. Está
-prohibido crear, actualizar, mover o eliminar cualquier archivo, incluidos
-código, pruebas, Specs, documentación, skills y artefactos de configuración o
-del flujo de trabajo.
+- Elegir solucion idiomatica mas simple que preserve cohesion, bajo acoplamiento,
+  responsabilidades claras, comprobabilidad y evolucion segura.
+- Anadir patron/abstraccion SOLO para necesidad actual o variacion prevista por
+  Spec con mejora neta.
+- NO usar antipatron ordinariamente. Excepcion: ventaja neta demostrable, menor
+  complejidad accidental o riesgo de integracion, impacto local/comprobable/
+  reversible. Rapidez, conveniencia o disponibilidad framework NO justifican.
+- Antes de excepcion: identificar riesgo, comparar alternativas, evaluar
+  acoplamiento, cohesion, testabilidad, rendimiento, seguridad y mantenibilidad.
+  Si genera deuda relevante/restriccion duradera: detener y pedir aprobacion. Si
+  es local, idiomatica y sin deuda relevante: resolver e informar en entrega.
+- `switch`, condicionales, literales, metodos extensos y tipos primitivos son
+  senales. Revisar si crecen por variante, ocultan dominio, mezclan, duplican o
+  acoplan; considerar Strategy, Factory, eventos/listeners, Observer, Value
+  Objects, Policies, Middleware o handlers SOLO si resuelven riesgo concreto.
+- NO anadir capas, interfaces, repositorios, factories o patrones preventivos.
+- Si una opcion implica deuda relevante, menor cobertura aplicable, acoplamiento
+  modular o menor mantenibilidad por plazo/complejidad: detener; informar senal,
+  alternativas, costes, consecuencias y recomendacion; esperar aprobacion.
 
-1. Lee el código y las pruebas afectados, las Specs y ADR vigentes y
-   `docs/context/SDD_Inicial.md`.
-2. Realiza un *clash check* y comunica conflictos con decisiones o reglas de
-   negocio existentes.
-3. Inspecciona archivos y presenta análisis, planes y propuestas sin
-   materializarlos en el repositorio.
-4. Puede redactar en la respuesta el contenido propuesto para una Spec,
-   documentación u otro artefacto. Una Spec propuesta debe incluir los apartados
-   aplicables: esquema E-R y migraciones propuestas, contratos de API o firmas,
-   estructuras JSON del PageBuilder, lógica crítica, validaciones y criterios de
-   aceptación, declarando expresamente los apartados no aplicables.
-5. Crear o actualizar materialmente una Spec también requiere `/build`, aunque
-   crear o actualizar esa Spec no requiere que exista previamente otra Spec
-   aprobada.
+## 4. Calidad y seguridad
 
-### Modo `/build` (El Ejecutor)
+### Cambio funcional
 
-Es el único modo que autoriza escritura en el repositorio. La necesidad de una
-Spec depende de la naturaleza funcional del cambio, no del mero hecho de usar
-`/build`.
+- Cada aceptacion DEBE tener >=1 prueba automatizada.
+- Cobertura proporcional: feliz, limites, errores previsibles, autorizacion,
+  persistencia, efectos secundarios y regresiones.
+- Nivel minimo suficiente: unitaria(logica aislable); integracion(Eloquent, BD,
+  modulos, eventos, filesystem, colas, adaptadores); HTTP/componente(contratos
+  Laravel/Vue); E2E(itinerario critico). Justificar nivel no aplicable; NO crear
+  pruebas artificiales.
+- Ejecutar pruebas enfocadas ANTES de suite afectada.
+- Coverage es secundario a trazabilidad riesgo-aceptacion-prueba. Si hay tooling,
+  NO reducir cobertura de modulo ni ignorar ramas criticas; NO imponer umbral sin
+  linea base acordada.
 
-Para cambios funcionales, implementa únicamente el alcance de la Spec aprobada
-referenciada. No inventes campos, tablas, módulos ni comportamiento no
-especificado. Para mantenimiento exclusivamente no funcional, ejecuta la
-petición inequívoca o el plan validado sin exigir una Spec y respeta las reglas
-particulares del artefacto.
+### SDD/TDD
 
-Cuando se cumplen los requisitos aplicables al alcance, la orden `/build`
-autoriza a completarlo de forma autónoma: inspeccionar, editar, probar, aplicar
-formato y hacer ajustes internos no requieren validación archivo por archivo.
-Los hitos se comunican como progreso, no como peticiones de permiso.
+- Antes de Spec: dividir iniciativa en incrementos verticales verificables,
+  seleccionar uno y evitar fases horizontales sin resultado verificable.
+- Si TDD aporta ventaja: por criterio ejecutar `Red -> Green -> Refactor`:
+  prueba minima falla por ausencia de comportamiento, no por
+  sintaxis/configuracion/infraestructura; implementacion minima; refactor verde;
+  pruebas enfocadas/suite.
+- Si TDD no aporta ventaja, justificarlo. Pruebas proporcionales siguen siendo
+  obligatorias; NO entregar ni consolidar estados rojos.
 
-Durante esa implementación, corrige dentro de la misma Spec los defectos y
-ajustes internos necesarios para satisfacer sus criterios sin cambiar alcance,
-comportamiento esperado, datos, API pública ni reglas de negocio. Actualiza y
-obtén nueva aprobación de la misma Spec si cambia uno de esos elementos; crea
-otra Spec cuando el cambio sea un incremento independiente o un bug ajeno
-descubierto incidentalmente. Una Spec abierta no autoriza a acumular cualquier
-cambio solicitado hasta su cierre.
+### Validacion de entrega
 
-Si una tarea inicialmente clasificada como no funcional descubre que necesita
-modificar comportamiento ejecutable u observable, detente antes de realizar ese
-cambio y solicita una Spec concreta y aprobada. No presentes como mantenimiento
-una modificación funcional incidental.
+- Mantenimiento no funcional: ejecutar validacion configurada proporcional
+  (Markdown, enlaces, esquema, generador, estructura); declarar no aplicable y
+  motivo; NO crear pruebas de aplicacion artificiales.
+- Todo `/build`: ejecutar formato/analisis configurados sin imponer tooling
+  inexistente; revisar diff; excluir secretos, generados accidentales y cambios
+  ajenos; informar comando/resultado; declarar omision/limitacion; NO declarar
+  superada una omitida.
+- Comprobacion aplicable fallida por cambio => entrega fallida, salvo deuda
+  aceptada expresamente.
+- Dependencias Composer/npm/Actions, incluido Dependabot: aplicar
+  `docs/architecture/dependency-security.md#revisión-de-pull-requests-de-dependencias`;
+  revisar cambios directos/transitivos, notas e impacto; ejecutar instalacion
+  reproducible, pruebas, build/audits aplicables. Para Actions: SHA/tag,
+  permisos y ejecucion real. NO recomendar fusion con comprobacion aplicable
+  fallida ni declarar seguridad/compatibilidad por indicadores verdes.
+- Antes de cerrar cambio funcional: verificar aceptacion, deuda/excepciones,
+  impacto documental y documentacion de instalar/configurar/usar/extender/
+  actualizar, salvo incremento documental diferido expresamente por Spec.
 
-Solicita una nueva aprobación solo si:
+### Secretos
 
-- es necesario cambiar el alcance, el modelo de datos, una API pública o los
-  criterios de aceptación;
-- aparece un conflicto con un ADR, otra Spec vigente o una regla de negocio;
-- se necesita una operación destructiva o irreversible no prevista;
-- falta una decisión funcional con alternativas de consecuencias distintas que
-  la Spec no permite resolver.
+- NUNCA versionar credenciales, tokens, API keys, claves privadas, `.env` reales,
+  dumps, backups o logs sensibles.
+- Plantillas: solo nombres/valores ficticios seguros + finalidad, obligatoriedad,
+  formato y origen. Valores reales: fuera de Git, gestor de secretos/mecanismo
+  externo.
+- Mantener ignores; antes de commit revisar nuevos/diff y usar detectores
+  configurados. Exposicion: borrar NO basta; detener, revocar/rotar y comunicar
+  sin reproducir secreto. Ver `docs/architecture/configuration-and-secrets.md`.
 
-Ante uno de estos casos, o cuando un alcance mixto carezca de Spec aprobada para
-su parte funcional, deja el repositorio en estado coherente siempre que sea
-posible, explica lo completado y lo pendiente y no presentes cambios parciales
-como terminados.
-
-Restricciones técnicas permanentes:
-
-- adherencia a `nWidart/laravel-modules`;
-- uso de Eloquent ORM;
-- Vue 3 con Composition API;
-- ningún parseo de Blade mediante expresiones regulares.
-
-### Diseño sostenible y uso de patrones
-
-Prioriza la solución correcta más simple que mantenga alta cohesión, bajo
-acoplamiento, responsabilidades claras, comportamiento comprobable y una
-evolución razonablemente segura. Aprovecha primero las capacidades idiomáticas
-de Laravel y Vue cuando resuelvan el problema con claridad. Introduce patrones o
-abstracciones adicionales solo cuando respondan a una necesidad actual o a una
-variación prevista expresamente por la Spec y aporten una mejora neta frente a
-las herramientas del framework.
-
-No introduzcas antipatrones conocidos como solución ordinaria. Una solución
-idiomática de Laravel o Vue que presente características asociadas a un
-antipatrón solo podrá conservarse cuando aporte una ventaja neta clara y
-demostrable frente a las alternativas, reduzca complejidad accidental o riesgo
-de integración y mantenga el impacto localizado, comprobable y razonablemente
-reversible. La mera conveniencia, la rapidez de implementación o el hecho de que
-el framework permita una construcción no justifican la excepción.
-
-Antes de adoptar esa excepción, identifica el antipatrón o riesgo concreto,
-compara las alternativas viables y evalúa sus efectos sobre acoplamiento,
-cohesión, testabilidad, rendimiento, seguridad y mantenibilidad. Si genera deuda
-técnica relevante o una restricción arquitectónica duradera, detén esa parte y
-solicita aprobación expresa conforme a las reglas de excepciones y ADR. Si el
-uso es local, idiomático y no introduce deuda relevante, puede resolverse
-autónomamente, dejando constancia de la justificación en el resumen de la
-entrega.
-
-`switch`, condicionales, valores literales, métodos extensos o tipos primitivos
-no están prohibidos por sí mismos. Trátalos como señales de revisión cuando
-crezcan con cada variante, oculten conocimiento de dominio, mezclen
-responsabilidades, generen duplicación o aumenten el acoplamiento. Considera,
-según el problema demostrado, alternativas como Strategy, Factory, eventos y
-listeners de Laravel, Observer, Value Objects, Policies, Middleware o handlers.
-No introduzcas interfaces, capas, repositorios, factories ni patrones «por si
-acaso» cuando compliquen el código sin reducir un riesgo concreto.
-
-Las excepciones conscientes a estas directrices no se adoptan silenciosamente.
-Si conservar una solución supone deuda técnica relevante, reduce una cobertura
-aplicable, acopla módulos o sacrifica mantenibilidad por plazo o complejidad,
-detén esa parte y presenta al usuario la señal detectada, alternativas, costes,
-consecuencias y recomendación antes de continuar. No constituye una excepción
-el uso justificado de una construcción simple cuando una abstracción no aporta
-una mejora neta. Las decisiones locales evidentes y sin deuda relevante pueden
-resolverse autónomamente y explicarse en el resumen.
-
-## III. PRUEBAS Y CALIDAD EN `/build`
-
-Toda implementación funcional debe:
-
-1. relacionar cada criterio de aceptación con al menos una prueba automatizada;
-2. cubrir, según el riesgo, el camino feliz, límites, errores previsibles,
-   autorización, persistencia, efectos secundarios y regresiones relevantes;
-3. usar el nivel más bajo que aporte confianza suficiente: pruebas unitarias
-   para lógica aislable; de integración para Eloquent, base de datos, módulos,
-   eventos, filesystem, colas y adaptadores; HTTP o de componente para contratos
-   Laravel y Vue; y end-to-end para itinerarios críticos;
-4. justificar en la Spec o en la entrega los niveles no aplicables, sin crear
-   pruebas artificiales para cumplir una categoría;
-5. ejecutar primero las pruebas enfocadas y después la suite afectada disponible;
-6. cumplir además las comprobaciones comunes indicadas a continuación.
-
-Los porcentajes de coverage son una salvaguarda secundaria, no sustituyen la
-trazabilidad entre criterios, riesgos y pruebas. Cuando exista tooling, no
-reduzcas la cobertura del módulo modificado y presta especial atención a las
-ramas de la lógica crítica. No impongas un umbral global sin una línea base
-acordada y medible.
-
-### Flujo incremental SDD y TDD
-
-SDD define qué comportamiento se construye y sus límites; TDD puede guiar cómo
-se implementa. Durante la planificación previa a la Spec, divide la iniciativa
-en incrementos verticales pequeños y selecciona el que se va a especificar. La
-Spec concreta ese incremento y, si todavía resulta demasiado amplio, lo divide
-antes de `/build` en entregas verticales comprobables. Evita fases puramente
-horizontales —por ejemplo, crear todos los modelos y después todos los
-controladores— cuando no entreguen por sí mismas un resultado verificable.
-
-Para cada incremento donde TDD sea eficiente, aplica `Red → Green → Refactor`:
-
-1. selecciona un criterio y escribe la prueba más pequeña que lo demuestre;
-2. ejecuta la prueba y confirma que falla por ausencia del comportamiento, no
-   por un error de sintaxis, configuración o infraestructura;
-3. implementa el mínimo comportamiento correcto para llevarla a verde;
-4. refactoriza nombres, responsabilidades, duplicación y diseño con la suite en
-   verde;
-5. ejecuta las pruebas enfocadas y la suite afectada antes de continuar.
-
-TDD no es obligatorio cuando no aporte una ventaja neta, como en exploración,
-configuración declarativa o integración difícil de aislar. La excepción debe
-justificarse y no elimina la obligación de añadir pruebas proporcionales al
-riesgo. Los estados intermedios en rojo no se entregan ni se consolidan en
-commits destinados a revisión.
-
-El mantenimiento no funcional debe ejecutar validaciones proporcionales al
-artefacto modificado, como validadores de Markdown, enlaces, esquemas,
-generadores o comprobaciones estructurales cuando estén configurados. No exige
-crear pruebas de aplicación artificiales; declara expresamente cuáles no son
-aplicables y por qué.
-
-En todo `/build`:
-
-1. ejecuta las herramientas de formato y análisis estático ya configuradas para
-   los archivos modificados, sin imponer herramientas inexistentes;
-2. revisa el diff y excluye secretos, artefactos generados accidentales y
-   cambios ajenos al alcance;
-3. informa del comando exacto y el resultado de cada comprobación;
-4. declara como advertencia cualquier comprobación no ejecutada y su limitación
-   concreta, sin afirmar que pasó;
-5. considera fallida la entrega cuando una comprobación aplicable falle por el
-   cambio, salvo aceptación expresa de la deuda por el usuario.
-
-### Revisión de actualizaciones de dependencias
-
-Al detectar o revisar una actualización de Composer, npm o GitHub Actions,
-incluidos los Pull Requests de Dependabot, aplica la checklist canónica de
-`docs/architecture/dependency-security.md#revisión-de-pull-requests-de-dependencias`.
-No presentes una actualización como compatible o segura únicamente porque los
-audits, Dependabot o su indicador de compatibilidad estén en verde. Revisa los
-cambios directos y transitivos, las notas de versión y el impacto aplicable;
-ejecuta instalación reproducible, pruebas, build y audits según el ecosistema.
-Para Actions comprueba además que el SHA corresponda al tag esperado, los
-permisos y la ejecución real del workflow. Informa de toda comprobación omitida
-y no recomiendes fusionar mientras falle una comprobación aplicable.
-
-Antes de dar por terminada una implementación funcional, verifica además los
-criterios de aceptación, las excepciones o deuda aceptadas y la documentación de
-configuración necesaria para reproducir el cambio sin versionar secretos.
-Verifica también el impacto documental declarado en la Spec. La documentación
-necesaria para instalar, configurar, utilizar, extender o actualizar el
-comportamiento se entrega en el mismo cambio, salvo que la Spec aprobada delimite
-expresamente otro incremento.
-
-### Secretos y artefactos locales
-
-Nunca incluyas en Git credenciales, tokens, API keys, claves privadas, archivos
-`.env` reales, volcados, backups o logs con información sensible. Las plantillas
-versionables deben contener solo nombres de variables y valores ficticios
-seguros. Documenta su finalidad, obligatoriedad, formato y origen, pero conserva
-los valores reales en gestores de secretos o mecanismos externos a Git.
-
-Mantén los ignores del repositorio acordes con los artefactos generados por el
-stack. Antes de cada commit revisa los archivos nuevos y el diff; usa los
-detectores de secretos configurados cuando existan. Si se expone una credencial,
-no basta con borrar el archivo: detén la entrega, revócala o rótala y comunica el
-incidente sin reproducir su valor. El procedimiento ampliado se documenta en
-`docs/architecture/configuration-and-secrets.md`.
-
-## IV. SPECS, DOCUMENTACIÓN, CHANGELOG Y ADR
+## 5. Artefactos
 
 ### Specs
 
-Usa `spec-maintainer`, cuando figure en `.agents/skills/INDEX.md`, para proponer,
-redactar, revisar, actualizar o validar Specs. La planificación de la iniciativa
-precede a la Spec y decide el problema, las fases, el incremento seleccionado,
-el alcance actual y el diferido. La Spec convierte ese resultado en un contrato
-implementable; no sustituye esa planificación ni debe abarcar por defecto toda
-la iniciativa.
+- Si esta indexada, usar `spec-maintainer` para Specs.
+- Planificacion precede Spec: problema, fases, incremento, alcance actual/diferido.
+  Spec = contrato implementable, NO iniciativa completa por defecto.
+- Toda Spec: alcance/fuera de alcance, `clash check`, requisitos, calidad/
+  seguridad, aceptacion, trazabilidad pruebas e impacto documental.
+- Puede diferir complejidad evolutiva con motivo/riesgo/condicion revision; NUNCA
+  correccion, autorizacion, integridad, validacion, seguridad o pruebas necesarias.
+- `feature`: capacidad o cambio de reglas/contratos/datos/flujos. `maintenance`:
+  restauracion acotada/reproducible sin cambio de reglas/datos/contrato publico.
+  Ambos requieren aprobacion. Validacion estructural de `spec-maintainer` !=
+  aprobacion ni correccion semantica.
 
-Cada Spec debe conservar alcance, fuera de alcance, *clash check*, requisitos
-aplicables, garantías de calidad y seguridad, criterios de aceptación,
-trazabilidad de pruebas e impacto documental. Puede diferir complejidad
-evolutiva con motivo, riesgo y condición de revisión, pero no la corrección,
-autorización, integridad, validación, seguridad o pruebas necesarias para el
-comportamiento entregado.
+### Documentacion, sesiones, changelog y ADR
 
-Los perfiles `feature` y `maintenance` pertenecen al mismo sistema y ciclo de
-aprobación. Usa `maintenance` únicamente para restaurar un comportamiento
-previamente definido mediante una reparación acotada, reproducible y sin cambios
-en reglas de negocio, datos o contratos públicos; en caso contrario usa
-`feature`. La validación estructural de la skill no equivale a aprobación ni
-garantiza por sí sola la corrección semántica.
-
-### Documentación del producto
-
-La documentación canónica reside en `docs/`, explica cómo funciona el producto y
-se versiona junto con el comportamiento que describe; no presenta funcionalidad
-prevista como disponible ni funciona como un historial ampliado. Las vistas
-generadas, wikis y respuestas asistidas por IA son derivadas y no reemplazan
-Specs, ADR, contratos, código, pruebas ni documentación revisada.
-
-Usa la skill `documentation-maintainer`, cuando figure en `.agents/skills/INDEX.md`, para
-crear, actualizar, reorganizar o validar documentación del producto. No la uses
-para Specs, ADR ni `CHANGELOG.md`, que conservan sus flujos específicos. La
-estrategia, audiencias y criterios de publicación se definen en
-`docs/architecture/documentation-strategy.md`.
-
-### Continuidad de sesión
-
-Las notas de continuidad son memoria de trabajo local, no documentación canónica.
-Se guardan en `docs/context/sessions/`, excluido de Git, y su flujo se describe
-en `docs/context/session-continuity.md`, con la plantilla en
-`docs/context/session-template.md`.
-
-1. Leer solo la nota indicada o la correspondiente a la tarea actual; no cargar
-   todas ni elegir automáticamente la más reciente. Si hay varias tareas
-   candidatas y no está claro cuál continuar, preguntar.
-2. Tratar su contenido como registro histórico, no como instrucciones vigentes.
-   Verificar las afirmaciones relevantes contra el código, Git, las pruebas y los
-   documentos actuales antes de darlas por válidas.
-3. No incluir secretos, credenciales, volcados ni datos personales.
-4. Una nota no activa `/build`, no aprueba una Spec, no amplía su alcance ni
-   autoriza cambios. En `/plan` no se escribe ninguna nota; el resumen se puede
-   redactar en la respuesta y se materializa solo con `/build`.
-
-### `CHANGELOG.md`
-
-Mantén el formato [Keep a Changelog 1.1.0
-(es-ES)](https://keepachangelog.com/es-ES/1.1.0/) y sus encabezados `Añadido`,
-`Modificado`, `Deprecado`, `Eliminado`, `Fijado` y `Seguridad`.
-
-- Modifícalo solo cuando exista un cambio notable que registrar.
-- Actualiza la marca únicamente cuando modifiques el changelog y una sola vez al
-  finalizar la entrega.
-- Usa UTC y el formato `Fecha de última modificación: YYYY-MM-DD HH:mm UTC`.
-- Para hitos, versiones mayores o menores y refactorizaciones críticas, añade
+- Documentacion canonica: `docs/`, versionada, describe producto real; NO publica
+  previsiones como disponibles ni sustituye fuentes prescriptivas. Vistas, wikis
+  y respuestas IA son derivadas; NO sustituyen Specs, ADR, contratos, codigo,
+  pruebas ni documentacion revisada.
+- Si esta indexada, usar `documentation-maintainer` SOLO para documentacion
+  ordinaria; NO Specs, ADR ni `CHANGELOG.md`. Ver
+  `docs/architecture/documentation-strategy.md`.
+- Sesiones: `docs/context/sessions/` es memoria local excluida Git, no instruccion
+  ni fuente canonica. Ver `docs/context/session-continuity.md` y
+  `docs/context/session-template.md`. Leer solo nota indicada/correspondiente;
+  NO todas ni ultima automatica; si varias, preguntar. Verificar contra codigo,
+  Git, pruebas/documentos. NO secretos/datos personales ni autorizacion de
+  `/build`/Spec/alcance/escritura `/plan`; en `/plan` NO escribir nota.
+- `CHANGELOG.md`: Keep a Changelog 1.1.0 es-ES, encabezados `Añadido`,
+  `Modificado`, `Deprecado`, `Eliminado`, `Fijado`, `Seguridad`. Modificar SOLO
+  por cambio notable, una vez final, con `Fecha de última modificación:
+  YYYY-MM-DD HH:mm UTC`. Hito/version mayor-menor/refactor critico:
   `docs/changelog/vX.Y.Z.md`.
+- ADR SOLO si decision arquitectonica duradera, multicomponente/transversal,
+  alternativas razonables y consecuencias justifican registro. NO para refactor
+  local, nombre, correccion rutinaria, detalle reversible o decision prescrita.
+  Plantilla: `.agents/skills/adr-generator/templates/plantilla_ADR.md`.
+  Usar `adr-generator` SOLO indexada; si no, aplicar criterio e informar limite.
 
-### ADR
+## 6. Skills, MCP y fuentes externas
 
-Crea un ADR únicamente cuando la decisión sea arquitectónica y duradera, afecte
-a varios componentes o imponga una restricción transversal, presente
-alternativas razonables y tenga consecuencias que justifiquen conservar el
-razonamiento. Usa la plantilla canónica de
-`.agents/skills/adr-generator/templates/plantilla_ADR.md`.
+- Raiz skills: `.agents/skills/`; catalogo derivado/canonico:
+  `.agents/skills/INDEX.md`. Skills globales/cliente NO aprobadas ni amplian
+  alcance.
+- Por tarea: leer indice una vez; abrir SOLO `SKILL.md` pertinente/indexada; si
+  indice valido, NO inspeccionar otras carpetas. Si falta indice/ruta: buscar SOLO
+  `.agents/skills/*/SKILL.md`, informar desincronizacion y NO buscar fuera.
+- NO buscar skills en `docs/`, dependencias ni sistema salvo instruccion explicita.
+- `SKILL.md` = fuente de verdad flujo/frontmatter; indice no se edita manual.
+  Nueva skill: `skill-creator` valida y regenera indice. NO anunciar/usar skill
+  ausente. Crear/mantener skill requiere `/build`, no Spec, y aplicar flujo.
+- Rutas antiguas `skills/` en Specs historicas => `.agents/skills/` solamente;
+  NO reescribir Specs ni mantener copias/symlinks.
+- MCP NO autoriza escritura `/plan` ni elude secretos/permisos/alcance. Evaluar
+  efecto, no nombre; NO enviar secretos externo. Verificar version local frente a
+  documentacion externa antes de aplicar. Codigo/pruebas/documentacion canonica
+  prevalecen por finalidad; NO sustituyen Specs/ADR.
+- MCP proyecto: `opencode.json` y `.codex/config.toml`. NO reintroducir
+  `boost:update` ni equivalente en `boost.json` sin revisar salida; evitar
+  sobrescribir reglas/indice.
 
-No crees ADR para refactors locales, nombres, correcciones rutinarias, detalles
-reversibles ni decisiones ya prescritas. Usa la skill `adr-generator` solo si
-aparece en `.agents/skills/INDEX.md`; si no está disponible, aplica directamente el
-criterio anterior y deja constancia de la limitación.
+## 7. Conflictos y convenciones
 
-## V. SISTEMA DE SKILLS
-
-La ubicación canónica de las skills del proyecto es `.agents/skills/`, en la raíz
-del repositorio. El autodescubrimiento de metadatos por el cliente está permitido,
-pero `.agents/skills/INDEX.md` sigue siendo el catálogo canónico de skills del
-proyecto. Las skills globales o instaladas por el cliente no equivalen a una
-aprobación del proyecto ni amplían el alcance autorizado.
-
-1. Consulta una sola vez `.agents/skills/INDEX.md` para decidir si una skill corresponde
-   a la tarea.
-2. Abre únicamente el `SKILL.md` de las skills pertinentes e indexadas.
-3. Si el índice es válido, no inspecciones las demás carpetas de `.agents/skills/`.
-4. Si falta el índice o una ruta seleccionada, limita la recuperación a
-   `.agents/skills/*/SKILL.md`, informa de la desincronización y no busques fuera de
-   `.agents/skills/`. No busques skills en `docs/`, dependencias ni directorios del
-   sistema salvo instrucción explícita.
-
-Cada `.agents/skills/<nombre>/SKILL.md` es la fuente de verdad de su flujo y frontmatter.
-`.agents/skills/INDEX.md` es una vista derivada y no se edita manualmente. Toda nueva
-skill se crea mediante `.agents/skills/skill-creator/SKILL.md`, que valida la skill y
-regenera el índice. No anuncies ni uses skills ausentes del índice. Crear o
-mantener skills es mantenimiento no funcional: no requiere una Spec, pero sí una
-petición con `/build` para crear o modificar archivos y la aplicación completa
-del flujo especializado de la skill.
-
-Esta ubicación sustituye exclusivamente las rutas antiguas `skills/` prescritas
-en `docs/specs/SPEC-gobernanza-agentes.md` y `docs/specs/SPEC-adr-generator.md`.
-El resto de sus disposiciones no cambia; las Specs históricas no se reescriben.
-No mantengas copias duplicadas ni symlinks en la ubicación anterior.
-
-### MCP y documentación externa
-
-El uso de MCP no autoriza escritura en `/plan` ni permite eludir las reglas de
-secretos, permisos o alcance. Evalúa los efectos de cada herramienta, no solo su
-nombre, y no envíes secretos a servicios externos. La documentación canónica, el
-código y las pruebas del repositorio prevalecen frente a documentación externa
-según sus respectivas responsabilidades, sin sustituir Specs ni ADR. Antes de
-aplicar recomendaciones externas, comprueba las versiones instaladas y la versión
-de la documentación consultada; ante discrepancias, verifica el estado local.
-
-El servidor MCP del proyecto se configura en `opencode.json` y `.codex/config.toml`,
-donde se restringe por permisos el catálogo de herramientas expuesto. Boost no
-regenera automáticamente guidelines ni skills: no reintroduzcas el hook
-`boost:update` ni habilites esas opciones en `boost.json` sin revisar antes su
-salida, para no sobrescribir estas reglas ni el catálogo de `.agents/skills/`.
-
-## VI. AZURE BOARDS
-
-Azure Boards es una herramienta auxiliar de organización y planificación
-personal. Sus work items, estados, estimaciones y Sprints tienen carácter
-informativo y no sustituyen Specs, código, pruebas ni documentación canónica.
-
-La referencia entre un work item y una Pull Request de GitHub es completamente
-opcional. La presencia o ausencia de una referencia de Azure Boards no autoriza,
-bloquea ni condiciona una implementación, y no se exige incluir `AB#ID` en ramas,
-commits o Pull Requests.
-
-Una descripción o cambio de estado en Azure Boards no modifica el alcance
-aprobado de una Spec. Ante una discrepancia funcional, prevalecen la Spec
-aprobada y el estado verificable del código y las pruebas según sus respectivas
-responsabilidades.
-
-## VII. FUENTES DE VERDAD Y CONFLICTOS
-
-Los artefactos tienen finalidades diferentes:
-
-1. Las instrucciones explícitas del usuario seleccionan el objetivo, pero solo
-   el marcador `/build` autoriza escritura. Una petición clara sin `/build`
-   permanece en `/plan` y es de solo lectura.
-2. Una Spec aprobada prescribe los cambios funcionales que se construyen en
-   `/build`; un borrador no autoriza implementación funcional. Las Specs no son
-   un requisito para el mantenimiento no funcional.
-3. Los ADR aceptados restringen soluciones arquitectónicas. Si una Spec los
-   contradice, detén la implementación y solicita revisar uno de los artefactos.
-4. El código y las pruebas describen el estado ejecutable actual y son la
-   referencia de compatibilidad, impacto y regresiones, pero no reemplazan el
-   diseño deseado de una Spec aprobada.
-5. Las skills son procedimientos especializados y no pueden contradecir Specs,
-   ADR ni estas instrucciones.
-6. `CHANGELOG.md` es histórico, nunca prescriptivo. Verifica cualquier
-   discrepancia mediante código y pruebas.
-7. `docs/context/SDD_Inicial.md` aporta visión y restricciones de alto nivel que
-   una decisión posterior y explícita puede concretar o reemplazar.
-
-La ruta `docs/context/` sustituye a la antigua `context/` citada en
-`docs/specs/SPEC-gobernanza-agentes.md` y `docs/specs/SPEC-adr-generator.md`.
-Las Specs históricas no se reescriben.
-
-Ninguna modificación puede realizarse en `/plan`, incluida la creación o
-actualización de una Spec, documentación, skill o cualquier otro artefacto. Su
-materialización requiere `/build`; la exigencia adicional de una Spec aprobada
-se aplica solo cuando el alcance es funcional.
-
-La fecha no resuelve por sí sola un conflicto. Dentro de una clase de artefacto
-prevalece el documento vigente que reemplace explícitamente al anterior. Si una
-contradicción no puede resolverse, documenta el choque y solicita una decisión;
-no inventes una interpretación.
-
-## VIII. EJEMPLOS DE SELECCIÓN Y CLASIFICACIÓN
-
-- `/plan corregir AGENTS.md`: analiza y propone, pero no modifica archivos.
-- `/build corregir AGENTS.md`: modifica el archivo sin necesitar una Spec.
-- `/plan crear una skill`: diseña el cambio, pero no crea archivos.
-- `/build crear una skill`: ejecuta mediante `skill-creator`, regenera el índice
-  y no necesita una Spec.
-- `/build implementar autenticación según docs/specs/SPEC-auth.md`: es un cambio
-  funcional y requiere que la Spec referenciada figure como aprobada.
-- `implementa este cambio`: permanece en `/plan` porque falta `/build`, aunque la
-  intención parezca inequívoca.
-
-## IX. IDIOMA Y CONVENCIONES
-
-- Responde al usuario y redacta documentación funcional y de proceso en español,
-  salvo petición expresa o convención previa del archivo.
-- Usa inglés en identificadores, clases, métodos, variables, tablas, campos,
-  rutas y claves de API.
-- Escribe comentarios de código en inglés solo para explicar motivos o
-  restricciones no evidentes; no narres el código.
-- Redacta commits en inglés, en imperativo y con un prefijo convencional
-  coherente con el historial (`docs:`, `feat:`, `fix:`, etc.).
-- Conserva términos técnicos en inglés cuando traducirlos reduzca la precisión y
-  no renombres identificadores existentes solo para aplicar esta política.
+- Azure Boards: auxiliar/informativo; NO sustituye fuente canonica ni autoriza,
+  bloquea o condiciona implementacion. `AB#ID` opcional en ramas/commits/PR; no
+  altera Spec aprobada.
+- Precedencia: usuario selecciona objetivo, SOLO `/build` escritura; Spec aprobada
+  comportamiento funcional; ADR aceptado arquitectura; codigo/pruebas estado,
+  compatibilidad/impacto/regresion; skills subordinadas; changelog historico;
+  `docs/context/SDD_Inicial.md` vision/restriccion de alto nivel.
+- Conflicto Spec/ADR: detener y pedir revisar uno. Changelog discrepante: verificar
+  codigo/pruebas. Fecha NO resuelve: dentro de clase, prevalece vigente que
+  reemplace explicito. Conflicto irresoluble: documentar y pedir decision.
+- `docs/context/` sustituye `context/` solo en `SPEC-gobernanza-agentes.md` y
+  `SPEC-adr-generator.md`; NO reescribir Specs historicas.
+- Respuesta/documentacion funcional/proceso: espanol salvo peticion/convencion.
+  Identificadores(clases, metodos, variables, tablas, campos, rutas, claves API),
+  codigo tecnico y commits: ingles. Commit: imperativo + prefijo coherente
+  (`docs:`, `feat:`, `fix:`, etc.). Comentario codigo: ingles y SOLO motivo/
+  restriccion no evidente. Mantener termino tecnico ingles si traducirlo pierde
+  precision; NO renombrar identificador existente solo por idioma.
