@@ -49,8 +49,9 @@ definida en Specs concretas y aprobadas.
   Laravel.
 - **Persistencia prevista para el CMS:** MySQL o MariaDB, manteniendo Eloquent
   como capa de persistencia.
-- **Arquitectura modular prevista:** `nWidart/laravel-modules`; todavía no está
-  incorporado al proyecto.
+- **Infraestructura modular disponible:** `nWidart/laravel-modules` 13 para
+  descubrir y cargar módulos futuros. Los módulos de dominio todavía no están
+  implementados.
 - **Frontend previsto:** Blade como base del backoffice y del sitio público, con
   Vue 3 y Composition API para el PageBuilder y otras islas interactivas. Vue
   todavía no está incorporado al proyecto.

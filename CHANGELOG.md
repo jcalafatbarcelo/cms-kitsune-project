@@ -8,6 +8,8 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 
 ### Añadido
 
+- Fundación de monolito modular con `nwidart/laravel-modules` 13, incluyendo
+  descubrimiento Laravel y autoload preparado para módulos futuros.
 - ADR-0001 aceptado para la arquitectura prevista: Blade como base y Vue
   compartido bajo demanda, con separación de assets públicos y del editor.
 - Roadmap de calidad, seguridad y observabilidad con criterios y fases para
@@ -85,4 +87,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-09-13 21:11 UTC
+Fecha de última modificación: 2026-09-18 00:08 UTC
