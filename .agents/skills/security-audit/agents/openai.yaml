@@ -1,0 +1,4 @@
+interface:
+  display_name: "Security audit"
+  short_description: "Revisar fronteras de confianza del CMS antes de un PR"
+  default_prompt: "Usa $security-audit para revisar main...HEAD en modo revisión de cambio; declara cobertura, hallazgos y límites."
