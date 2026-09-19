@@ -62,6 +62,14 @@ class ValidateAuditArtifactsTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unknown coverage_ids"):
             MODULE.validate_artifacts(ledger_path, findings_path)
 
+    def test_rejects_boolean_trace_line(self) -> None:
+        finding = self.confirmed_finding()
+        finding["trace"][0]["line"] = True
+        ledger_path, findings_path = self.write_artifacts(self.valid_ledger(), [finding])
+
+        with self.assertRaisesRegex(ValueError, "line must be a positive integer"):
+            MODULE.validate_artifacts(ledger_path, findings_path)
+
     def test_rejects_candidate_without_finding(self) -> None:
         ledger_path, findings_path = self.write_artifacts(self.valid_ledger(), [])
 

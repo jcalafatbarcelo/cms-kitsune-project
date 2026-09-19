@@ -43,7 +43,8 @@ def validate_trace(record: dict[str, Any], label: str) -> None:
             raise ValueError(f"{label}: trace[{index}] must be an object")
         require_text(entry, "file", f"{label}: trace[{index}]")
         require_text(entry, "description", f"{label}: trace[{index}]")
-        if not isinstance(entry.get("line"), int) or entry["line"] < 1:
+        line = entry.get("line")
+        if type(line) is not int or line < 1:
             raise ValueError(f"{label}: trace[{index}].line must be a positive integer")
 
 
