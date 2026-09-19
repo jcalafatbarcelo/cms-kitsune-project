@@ -68,7 +68,7 @@ def validate_ledger(ledger: list[dict[str, Any]]) -> set[str]:
 
 def validate_findings(findings: list[dict[str, Any]], coverage_ids: set[str]) -> set[str]:
     fingerprints: set[str] = set()
-    active_finding_ids: set[str] = set()
+    linked_finding_ids: set[str] = set()
     for index, finding in enumerate(findings):
         label = f"findings[{index}]"
         verdict = require_text(finding, "verdict", label)
@@ -86,8 +86,7 @@ def validate_findings(findings: list[dict[str, Any]], coverage_ids: set[str]) ->
         unknown = set(linked_ids) - coverage_ids
         if unknown:
             raise ValueError(f"{label}: unknown coverage_ids: {', '.join(sorted(unknown))}")
-        if verdict != "rejected":
-            active_finding_ids.update(linked_ids)
+        linked_finding_ids.update(linked_ids)
         if verdict == "confirmed":
             severity = require_text(finding, "severity", label)
             if severity not in SEVERITIES:
@@ -103,18 +102,18 @@ def validate_findings(findings: list[dict[str, Any]], coverage_ids: set[str]) ->
             require_text(finding, "validation_plan", label)
         else:
             require_text(finding, "reason", label)
-    return active_finding_ids
+    return linked_finding_ids
 
 
 def validate_artifacts(ledger_path: Path, findings_path: Path) -> None:
     ledger = read_array(ledger_path, "coverage-ledger")
     findings = read_array(findings_path, "findings")
     coverage_ids = validate_ledger(ledger)
-    active_finding_ids = validate_findings(findings, coverage_ids)
+    linked_finding_ids = validate_findings(findings, coverage_ids)
     for unit in ledger:
-        if unit["status"] == "candidate" and unit["coverage_id"] not in active_finding_ids:
+        if unit["status"] == "candidate" and unit["coverage_id"] not in linked_finding_ids:
             raise ValueError(
-                f"ledger: candidate without active finding '{unit['coverage_id']}'"
+                f"ledger: candidate without linked finding '{unit['coverage_id']}'"
             )
 
 

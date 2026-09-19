@@ -73,8 +73,21 @@ class ValidateAuditArtifactsTests(unittest.TestCase):
     def test_rejects_candidate_without_finding(self) -> None:
         ledger_path, findings_path = self.write_artifacts(self.valid_ledger(), [])
 
-        with self.assertRaisesRegex(ValueError, "candidate without active finding"):
+        with self.assertRaisesRegex(ValueError, "candidate without linked finding"):
             MODULE.validate_artifacts(ledger_path, findings_path)
+
+    def test_accepts_candidate_with_linked_rejected_finding(self) -> None:
+        finding = self.confirmed_finding()
+        finding.update({
+            "verdict": "rejected",
+            "reason": "The policy enforces the owner scope.",
+        })
+        finding.pop("severity")
+        finding.pop("evidence")
+        finding.pop("remediation")
+        ledger_path, findings_path = self.write_artifacts(self.valid_ledger(), [finding])
+
+        MODULE.validate_artifacts(ledger_path, findings_path)
 
     def test_rejects_severity_for_needs_validation(self) -> None:
         finding = self.confirmed_finding()
