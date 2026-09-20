@@ -19,6 +19,8 @@ class UiCatalogRepository
     /** @var array<string, UiCatalogSnapshot> */
     private array $cache = [];
 
+    private ?string $validatedBaseHash = null;
+
     public function __construct(private readonly string $catalogDirectory) {}
 
     public function snapshot(string $locale): UiCatalogSnapshot
@@ -26,7 +28,11 @@ class UiCatalogRepository
         $this->assertLocale($locale);
 
         [$baseLines, $baseHash] = $this->read('en');
-        $this->validateLines($baseLines);
+
+        if ($this->validatedBaseHash !== $baseHash) {
+            $this->validateLines($baseLines);
+            $this->validatedBaseHash = $baseHash;
+        }
 
         if ($locale === 'en') {
             return new UiCatalogSnapshot('en', $baseLines, $baseHash, $baseHash);

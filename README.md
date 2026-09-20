@@ -43,7 +43,7 @@ definida en Specs concretas y aprobadas.
 
 ## Stack
 
-- **Disponible:** Laravel 13 sobre PHP 8.3 o posterior, Eloquent ORM, Blade,
+- **Disponible:** Laravel 13 sobre PHP 8.4 o posterior, Eloquent ORM, Blade,
   Vite 8, Tailwind CSS 4 y Pest 5.
 - **Persistencia de desarrollo:** SQLite `3.45.0` o posterior en la configuración
   inicial de Laravel; no se soporta como motor de producción.
@@ -139,7 +139,7 @@ preventivas que compliquen innecesariamente el código.
 
 ## Puesta en marcha
 
-El bootstrap actual requiere PHP 8.3 o posterior, Composer, Node.js y npm. Desde
+El bootstrap actual requiere PHP 8.4 o posterior, Composer, Node.js y npm. Desde
 la raíz del repositorio:
 
 ```shell

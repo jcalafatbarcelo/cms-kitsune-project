@@ -1,7 +1,7 @@
 # ADR-0003: Baseline moderna de bases de datos
 
 - **Fecha:** 2026-09-20 00:52 UTC
-- **Última actualización:** 2026-09-20 00:52 UTC
+- **Última actualización:** 2026-09-20 13:27 UTC
 - **Estado:** Aceptado
 - **Autores:** Responsable del proyecto y OpenCode (asistencia de redacción)
 - **Reemplaza a:** No aplica
@@ -41,7 +41,7 @@ con la que PHP haya enlazado `pdo_sqlite`.
 
 ## Restricciones
 
-- Técnicas: Laravel 13, PHP 8.3 o posterior, Eloquent ORM y SQL portable entre
+- Técnicas: Laravel 13, PHP 8.4 o posterior, Eloquent ORM y SQL portable entre
   los motores soportados. Las versiones se verifican contra el servidor o la
   biblioteca realmente usados, no contra la versión del cliente PDO.
 - Funcionales: las invariantes persistentes deben ofrecer la misma garantía en
@@ -77,6 +77,9 @@ con la que PHP haya enlazado `pdo_sqlite`.
    de que una serie seleccionada deje de recibir soporte. Cambiar una serie
    requiere actualizar este ADR o reemplazarlo, adaptar CI y documentar la ruta
    de actualización.
+9. Exigir PHP `8.4` o posterior. Esta baseline permite utilizar `Pdo\Mysql` al
+   configurar el certificado SSL de MySQL y MariaDB, sin declarar soporte para un
+   runtime que no proporciona esa API.
 
 ## Criterios de decisión
 
@@ -108,6 +111,8 @@ con la que PHP haya enlazado `pdo_sqlite`.
 - SQLite no reproduce exactamente el comportamiento de producción, por lo que
   no puede ser el único motor del quality gate cuando existan migraciones de
   dominio.
+- Los entornos con PHP 8.3 quedan fuera de soporte; deben actualizar el runtime
+  antes de instalar o actualizar el CMS.
 
 ## Alternativas consideradas
 

@@ -54,7 +54,7 @@ class UiCatalogResolver
             return $key;
         }
 
-        $selected = (new MessageSelector)->choose($line, $number, $locale);
+        $selected = (new MessageSelector)->choose($line, $number, $this->pluralLocale($locale));
 
         return $this->replace($selected, ['count' => $number, ...$replace]);
     }
@@ -77,6 +77,11 @@ class UiCatalogResolver
 
             return null;
         }
+    }
+
+    private function pluralLocale(string $locale): string
+    {
+        return explode('_', $locale, 2)[0];
     }
 
     /** @param array<string, scalar|null> $replace */

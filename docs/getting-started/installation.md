@@ -2,7 +2,7 @@
 
 ## Requisitos
 
-CMS Kitsune requiere PHP 8.3 o posterior, Composer 2, Node.js 24 LTS y npm. La
+CMS Kitsune requiere PHP 8.4 o posterior, Composer 2, Node.js 24 LTS y npm. La
 persistencia soportada es:
 
 | Entorno | Motor soportado |

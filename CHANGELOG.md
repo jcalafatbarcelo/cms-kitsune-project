@@ -99,6 +99,8 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
   segundo registro de `language_settings`.
 - Ampliado el quality gate con una matriz de integración fijada para SQLite,
   MySQL 8.4.11 y MariaDB 11.4.13.
+- Elevado el requisito mínimo del CMS a PHP 8.4 para alinear la configuración
+  TLS de MySQL y MariaDB con la API `Pdo\Mysql` utilizada.
 
 ### Eliminado
 
@@ -107,4 +109,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-09-20 08:28 UTC
+Fecha de última modificación: 2026-09-20 13:27 UTC

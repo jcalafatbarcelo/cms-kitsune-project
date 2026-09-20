@@ -59,6 +59,23 @@ test('valid catalogs resolve requested lines and configured fallback modes', fun
     }
 });
 
+test('plural selection uses the primary language for accepted regional locales', function () {
+    $directory = catalogDirectory();
+
+    try {
+        writeCatalog($directory, 'en', ['core::items.count' => 'One item|:count items']);
+        writeCatalog($directory, 'es_419', ['core::items.count' => 'Un elemento|:count elementos']);
+
+        expect((new UiCatalogResolver(
+            new UiCatalogRepository($directory),
+            'base',
+            new NullLogger,
+        ))->choice('core::items.count', 3, 'es_419'))->toBe('3 elementos');
+    } finally {
+        removeCatalogDirectory($directory);
+    }
+});
+
 test('catalog validation rejects incomplete unknown and incompatible lines', function (array $localized) {
     $directory = catalogDirectory();
 
