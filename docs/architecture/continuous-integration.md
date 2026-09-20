@@ -86,6 +86,35 @@ el workflow se haya publicado y sus ejecuciones sean estables.
 - Caché de dependencias de Composer en CI.
 - Despliegue o verificación de entornos remotos.
 
+## Matriz de bases de datos prevista
+
+La CI actual ejecuta Pest únicamente con SQLite en memoria. Esto es suficiente
+para el bootstrap sin tablas de dominio, pero no demuestra compatibilidad con la
+persistencia de producción.
+
+Cuando se implemente LOC-01 mediante la
+[SPEC de fundación de idiomas estáticos](../specs/SPEC-static-language-foundation.md),
+el quality gate deberá añadir pruebas de integración sobre la baseline del
+[ADR-0003](../adr/ADR-0003-baseline-moderna-de-bases-de-datos.md):
+
+| Motor | Baseline | Uso |
+| :--- | :--- | :--- |
+| SQLite | `>= 3.45.0`, paquete con actualizaciones de seguridad | Desarrollo y pruebas; no producción |
+| MySQL | `8.4.x LTS`, último patch mantenido y fijado | Producción y pruebas de integración |
+| MariaDB | `11.4.x LTS`, último patch mantenido y fijado | Producción y pruebas de integración |
+
+Cada entrada consultará la versión efectiva del motor y fallará si no cumple la
+baseline. La matriz ejecutará las migraciones y las pruebas de integridad
+dependientes del motor, incluido el rechazo real de un segundo registro de
+`language_settings` con `id = 2`. Inspeccionar el SQL generado no sustituye esa
+ejecución. Los servicios fijarán la versión exacta y el digest de imagen cuando
+aplique; actualizar un patch requerirá la revisión reproducible de dependencias,
+no una etiqueta flotante.
+
+Esta sección describe un gate aprobado pero todavía no implementado. Hasta que
+LOC-01 lo incorpore, `PHP quality` continúa siendo una ejecución solo sobre
+SQLite y no constituye evidencia de compatibilidad MySQL/MariaDB.
+
 ## Fuentes de verdad
 
 - `.github/workflows/ci.yml`: definición ejecutable del quality gate.

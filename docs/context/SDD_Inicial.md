@@ -17,7 +17,10 @@ Tras evaluar la Arquitectura Hexagonal, se ha optado por un enfoque de **Monolit
 
 ### **2.2. Stack Tecnológico**
 
-  - **Base de Datos:** MySQL / MariaDB (garantizando compatibilidad con hostings tradicionales LAMP/LEMP).
+  - **Base de Datos:** MySQL / MariaDB sobre series modernas y mantenidas. La
+    compatibilidad con LAMP/LEMP no incluye versiones legacy; la baseline y su
+    verificación se definen en el
+    [ADR-0003](../adr/ADR-0003-baseline-moderna-de-bases-de-datos.md).
   - **Backend:** Laravel (PHP 8.x).
   - **Frontend Backoffice:** Laravel Blade como base de las páginas; Vue 3 con Composition API para zonas interactivas, incluido el editor del PageBuilder.
   - **Renderizado Público:** Laravel Blade (Server-Side Rendering) para el contenido esencial, con componentes Vue puntuales cuando necesiten interactividad.

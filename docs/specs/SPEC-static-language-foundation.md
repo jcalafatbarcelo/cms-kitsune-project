@@ -91,6 +91,8 @@ contenido editorial se aplazan a incrementos posteriores.
 - ADR-0001: sin conflicto; este incremento no introduce Vue, SPA ni assets.
 - ADR-0002: la Spec aplica el formato JSON, las claves estables, el propietario y
   la política de completitud aprobados para los `UI catalogs`.
+- ADR-0003: la persistencia y sus pruebas aplican la baseline moderna de SQLite,
+  MySQL y MariaDB y no amplían compatibilidad a versiones legacy.
 - SPEC-module-foundation: satisface la condición de especificar responsabilidad,
   datos, contratos y pruebas antes de crear el primer módulo.
 - Código y datos: no existen módulos, tablas ni `UI catalogs` previos incompatibles.
@@ -174,6 +176,10 @@ erDiagram
 - No se usarán borrados en cascada.
 - El diseño y las migraciones deben funcionar en SQLite para desarrollo y en
   MySQL/MariaDB como persistencia objetivo.
+- La matriz soportada por este incremento es SQLite `>= 3.45.0` para desarrollo
+  y pruebas, MySQL `8.4.x LTS` y MariaDB `11.4.x LTS` para producción. MySQL y
+  MariaDB deben usar el último patch mantenido de su serie; versiones anteriores,
+  ramas Innovation o rolling y SQLite en producción quedan fuera de soporte.
 
 ### Módulo y contratos
 
@@ -362,10 +368,17 @@ servicios externos.
 
 - Aplicar TDD a cada invariante y variante de resolución porque las matrices de
   estado y fallback aportan casos aislables con resultado determinista.
-- Probar el modelo y las migraciones con SQLite y mantener SQL portable a
-  MySQL/MariaDB sin depender de índices parciales específicos.
-- Probar a nivel de base de datos que no puede existir un segundo registro de
-  `language_settings`, incluido un intento con otro `id`.
+- Probar el modelo y las migraciones mediante ejecución real en SQLite
+  `>= 3.45.0`, MySQL `8.4.x LTS` y MariaDB `11.4.x LTS`, sin depender de índices
+  parciales específicos.
+- La matriz de CI debe consultar y registrar la versión efectiva de cada motor,
+  fallar si queda fuera de la baseline y ejecutar la misma prueba de integración
+  de la migración en los tres motores.
+- En cada entrada de la matriz, probar a nivel de base de datos que no puede
+  existir un segundo registro de `language_settings`: insertar explícitamente
+  `id = 2` debe producir una violación de restricción y no dejar ninguna fila
+  adicional. Verificar solo el SQL generado o ejecutar el caso únicamente en
+  SQLite no satisface esta garantía.
 - Probar `UI catalogs` válidos, incompletos, sobredimensionados, con claves extra,
   placeholders incompatibles, pluralización incompatible, JSON inválido y rutas
   inseguras.
@@ -400,7 +413,9 @@ servicios externos.
 
 - **CA-01:** Una instalación limpia crea el módulo Core, registra `en` activo y
   lo configura como base y predeterminado global de frontend y backoffice; la
-  base de datos rechaza cualquier segundo registro de `language_settings`.
+  matriz de SQLite `>= 3.45.0`, MySQL `8.4.x LTS` y MariaDB `11.4.x LTS` verifica
+  la versión efectiva y demuestra que la base de datos rechaza insertar un
+  segundo `language_settings` con `id = 2` sin alterar el singleton existente.
 - **CA-02:** El sistema resuelve una clave existente del `UI catalog` Core para
   el locale solicitado sin ejecutar contenido del `UI catalog`.
 - **CA-03:** En modo `base`, una clave ausente en un locale instalado usa el valor
@@ -429,7 +444,7 @@ servicios externos.
 
 | Criterio | Riesgo cubierto | Nivel de prueba | Evidencia esperada | Impacto documental |
 | :--- | :--- | :--- | :--- | :--- |
-| CA-01 | Instalación sin idioma utilizable | Integración/BD | Migración y registros iniciales verificados | Guía de instalación de idiomas |
+| CA-01 | Instalación sin idioma utilizable o singleton no impuesto por un motor | Integración/BD multi-motor | Versión efectiva, migración, registros iniciales y rechazo de `id = 2` verificados en SQLite, MySQL y MariaDB | Requisitos de instalación y guía de idiomas |
 | CA-02 | `UI catalog` no integrado o ejecutable | Integración | Clave Core resuelta desde JSON | Guía de `UI catalogs` |
 | CA-03 | Fallback oculta ausencias o degrada mal | Integración | Matriz `base`/`key` verificada | Configuración y diagnóstico |
 | CA-04 | Alta parcial, duplicada o insegura | Integración/BD | Casos válidos e inválidos sin escritura parcial | Administración manual |
@@ -448,7 +463,8 @@ interfaz web. El futuro flujo HTTP deberá añadirlos. La comprobación de modo
 ## 9. Plan de implementación
 
 1. Crear pruebas rojas para la instalación limpia de Core y sus registros base;
-   generar el módulo, migraciones y modelo mínimos hasta cumplir CA-01.
+   generar el módulo, migraciones y modelo mínimos y configurar la matriz de
+   SQLite, MySQL y MariaDB con comprobación de versiones hasta cumplir CA-01.
 2. Crear pruebas rojas de resolución JSON y modos `base`/`key`; implementar el
    `UI catalog` Core y la política de fallback hasta cumplir CA-02 y CA-03.
 3. Crear pruebas rojas del manifiesto, validación y seguridad de rutas;

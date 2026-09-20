@@ -50,6 +50,8 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
   sus `UI catalogs`, fallback y administración manual mediante Artisan.
 - Iniciativa planificada de auditoría administrativa durable antes de incorporar
   las primeras pantallas mutables del backoffice.
+- ADR-0003 aceptado para limitar la persistencia a SQLite moderno en desarrollo
+  y a las series LTS MySQL 8.4 y MariaDB 11.4 en producción.
 
 ### Modificado
 
@@ -87,6 +89,9 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
   existentes sin modificar `AGENTS.md`.
 - Activado el ruleset `Protect main`, que exige Pull Request, resolución de
   conversaciones y los checks de auditoría y Dependency Review antes de fusionar.
+- Reforzada la Spec de fundación de idiomas con una matriz CI multi-motor que
+  verifica versiones y demuestra en SQLite, MySQL y MariaDB el rechazo de un
+  segundo registro de `language_settings`.
 
 ### Eliminado
 
@@ -95,4 +100,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-09-20 00:40 UTC
+Fecha de última modificación: 2026-09-20 00:52 UTC

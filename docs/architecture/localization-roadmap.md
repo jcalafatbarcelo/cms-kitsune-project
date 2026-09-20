@@ -18,6 +18,8 @@ Fuentes prescriptivas relacionadas:
 - [SDD inicial](../context/SDD_Inicial.md): visión y reglas de negocio.
 - [ADR-0002](../adr/ADR-0002-ui-catalogs-json-modulares.md): formato y propiedad
   de los `UI catalogs`.
+- [ADR-0003](../adr/ADR-0003-baseline-moderna-de-bases-de-datos.md): motores,
+  versiones mínimas y política de soporte de persistencia.
 - [SPEC de fundación estática](../specs/SPEC-static-language-foundation.md):
   contrato candidato del primer incremento.
 - [Roadmap de calidad](quality-roadmap.md): momento de evaluación de auditoría,
@@ -64,7 +66,9 @@ Estados de LOC-01:
 - [x] Contrato arquitectónico de `UI catalogs` registrado en ADR-0002.
 - [x] Primera Spec creada y validada estructuralmente.
 - [x] Revisión semántica y aprobación explícita de la Spec.
+- [x] Baseline moderna de SQLite, MySQL y MariaDB decidida.
 - [ ] Implementación TDD de LOC-01.
+- [ ] Matriz CI multi-motor con verificación de versiones y restricciones.
 - [ ] Documentación de administración y extensibilidad basada en código real.
 - [ ] Cierre de criterios, suite, quality gate y estado `Completada`.
 

@@ -45,10 +45,11 @@ definida en Specs concretas y aprobadas.
 
 - **Disponible:** Laravel 13 sobre PHP 8.3 o posterior, Eloquent ORM, Blade,
   Vite 8, Tailwind CSS 4 y Pest 5.
-- **Persistencia de desarrollo:** SQLite en la configuración inicial de
-  Laravel.
-- **Persistencia prevista para el CMS:** MySQL o MariaDB, manteniendo Eloquent
-  como capa de persistencia.
+- **Persistencia de desarrollo:** SQLite `3.45.0` o posterior en la configuración
+  inicial de Laravel; no se soporta como motor de producción.
+- **Persistencia prevista para el CMS:** MySQL `8.4.x LTS` o MariaDB `11.4.x LTS`
+  en su último patch mantenido, manteniendo Eloquent como capa de persistencia.
+  Las versiones legacy y las ramas de innovación quedan fuera de soporte.
 - **Infraestructura modular disponible:** `nWidart/laravel-modules` 13 para
   descubrir y cargar módulos futuros. Los módulos de dominio todavía no están
   implementados.
@@ -93,7 +94,8 @@ el formato de almacenamiento de su contenido.
   criterios de aceptación.
 - [`docs/adr/`](docs/adr/): decisiones arquitectónicas; incluye el
   [ADR-0001 sobre Blade y Vue](docs/adr/ADR-0001-blade-vue-bajo-demanda.md) y el
-  [ADR-0002 sobre UI catalogs JSON](docs/adr/ADR-0002-ui-catalogs-json-modulares.md).
+  [ADR-0002 sobre UI catalogs JSON](docs/adr/ADR-0002-ui-catalogs-json-modulares.md)
+  y el [ADR-0003 sobre la baseline de bases de datos](docs/adr/ADR-0003-baseline-moderna-de-bases-de-datos.md).
 - [`CHANGELOG.md`](CHANGELOG.md): registro histórico de cambios notables.
 - [`.agents/skills/INDEX.md`](.agents/skills/INDEX.md): catálogo canónico derivado de skills disponibles
   en el repositorio.
