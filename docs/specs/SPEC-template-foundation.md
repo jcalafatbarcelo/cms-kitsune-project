@@ -120,6 +120,9 @@ textos de interfaz propios.
   cambio de identificador en el manifiesto de un directorio registrado, un cambio
   de directorio de un template registrado o la ausencia de uno registrado hace
   que `sync` falle sin crear un nuevo registro ni modificar el existente.
+- Las transiciones de activación y de predeterminado también exigen que la
+  identidad actual del manifiesto coincida con el identificador persistido; la
+  revalidación no puede actualizar ni sustituir esa identidad.
 
 ### Paquetes, manifiesto y presentaciones
 
@@ -127,6 +130,11 @@ textos de interfaz propios.
   `Templates/<Nombre>`; no se recorren subdirectorios ni rutas configurables. El
   nombre del directorio debe tener entre 1 y 100 caracteres ASCII alfanuméricos,
   empezar por una letra y no incluir espacios, puntos ni separadores.
+- La identidad de directorio usa `directory_key`, obtenido al convertir el nombre
+  ASCII del directorio a minúsculas. Dos directorios cuyo nombre solo difiera en
+  mayúsculas o minúsculas, como `Acme` y `acme`, colisionan y hacen que `sync`
+  falle. Esta regla se aplica antes de persistir, al descubrir paquetes y al
+  comparar los registros existentes en todos los sistemas de archivos.
 - Base reside exactamente en `Templates/Base`.
 - Cada paquete contiene un archivo regular `template.json`, nunca un enlace
   simbólico. Su ruta canónica debe permanecer dentro de su directorio de template.
@@ -164,10 +172,12 @@ textos de interfaz propios.
   de su despliegue versionado junto al CMS; el comando no descarga, copia ni
   ejecuta paquetes aportados por el usuario.
 - Al registrar un paquete, Core persiste su nombre de directorio junto al
-  identificador. En una sincronización posterior, el directorio registrado debe
-  seguir presente y su manifiesto debe conservar el mismo identificador. Un
-  renombrado no está admitido en este incremento; se rechazará en vez de crear un
-  segundo registro que pueda dejar el anterior activo o predeterminado.
+  identificador y su `directory_key`. En una sincronización posterior, el
+  directorio registrado debe seguir presente con la misma grafía y su manifiesto
+  debe conservar el mismo identificador. Un renombrado, incluso solo de
+  mayúsculas o minúsculas, no está admitido en este incremento; se rechazará en
+  vez de crear un segundo registro que pueda dejar el anterior activo o
+  predeterminado.
 
 ### Entidades y migraciones
 
@@ -176,7 +186,8 @@ La migración del módulo Core creará:
 ```text
 cms_templates
 - id: bigint, PK
-- directory: varchar(100), unique, not null
+- directory: varchar(100), not null
+- directory_key: varchar(100), unique, not null
 - identifier: varchar(100), unique, not null
 - name: varchar(100), not null
 - manifest_hash: char(64), not null
@@ -198,7 +209,11 @@ cms_template_settings
   dejar esquema creado, también en motores sin DDL transaccional.
 - Solo después del preflight correcto, la migración crea las tablas e inserta el
   registro Base con el hash SHA-256 de la instantánea validada, `directory = Base`,
-  activo y referenciado como predeterminado global.
+  `directory_key = base`, activo y referenciado como predeterminado global.
+- `directory_key` debe contener solo la normalización ASCII en minúsculas de
+  `directory`. La restricción única sobre esa columna, no la collation por defecto
+  del motor, impone la política de colisiones de mayúsculas/minúsculas de forma
+  uniforme en SQLite, MySQL y MariaDB.
 - La base de datos debe imponer que `cms_template_settings.id` sea siempre `1`
   mediante una restricción `CHECK` portable o una construcción equivalente con
   la misma garantía en SQLite, MySQL y MariaDB.
@@ -224,20 +239,23 @@ cms:template:set-default {identifier}
 - `cms:template:list` muestra identificador, nombre, estado activo y si es el
   predeterminado.
 - `cms:template:sync` valida todos los directorios directos presentes bajo
-  `Templates/`, comprueba que todos los directorios registrados siguen presentes
-  y registra los paquetes válidos nuevos como inactivos. Para los ya registrados,
-  actualiza nombre y hash solo tras validar la instantánea del mismo archivo y
-  confirmar que conserva su identificador. No activa, desactiva ni cambia el
-  predeterminado.
+  `Templates/`, calcula sus `directory_key`, rechaza colisiones por diferencia
+  exclusiva de mayúsculas/minúsculas y comprueba que todos los directorios
+  registrados siguen presentes con la misma grafía. Registra los paquetes válidos
+  nuevos como inactivos. Para los ya registrados, actualiza nombre y hash solo
+  tras validar la instantánea del mismo archivo y confirmar que conserva su
+  identificador. No activa, desactiva ni cambia el predeterminado.
 - Si cualquier paquete descubierto o registrado es inválido, ausente, duplicado,
-  inseguro, cambia su identificador o colisiona con un identificador o directorio
-  de otro paquete, `sync` falla y no modifica datos.
+  inseguro, cambia su identificador o directorio, o colisiona por identificador o
+  `directory_key` con otro paquete, `sync` falla y no modifica datos.
 - `cms:template:activate` revalida el paquete desplegado en su directorio
-  persistido antes de activar un template registrado e inactivo.
+  persistido y compara el identificador del manifiesto con el persistido antes de
+  activar un template registrado e inactivo.
 - `cms:template:disable` solo desactiva un template activo que no sea Base ni el
   predeterminado y mantiene al menos un template activo.
 - `cms:template:set-default` revalida el paquete desplegado en su directorio
-  persistido y solo acepta un template registrado y activo; el cambio es atómico.
+  persistido, compara el identificador del manifiesto con el persistido y solo
+  acepta un template registrado y activo; el cambio es atómico.
 - Los comandos correctos terminan con código `0` y muestran solo el estado
   resultante. Entradas inválidas, manifiestos inválidos, templates desconocidos o
   transiciones prohibidas terminan con código distinto de `0` y mensaje
@@ -268,11 +286,13 @@ cms:template:set-default {identifier}
   estado permitidos y denegados.
 - Probar manifiestos válidos, JSON inválido, schema desconocido, identificadores
   o presentaciones inválidos, claves duplicadas, vistas ausentes, archivos
-  sobredimensionados, rutas inseguras y colisiones entre directorios.
+  sobredimensionados, rutas inseguras y colisiones entre directorios, incluidas
+  las que solo difieren en mayúsculas/minúsculas, en SQLite, MySQL y MariaDB.
 - Probar que `sync` no deja escrituras parciales ante cualquier paquete inválido
   o registrado ausente/renombrado, y que usa el hash de la instantánea validada.
 - Probar que activar o seleccionar como predeterminado revalida el paquete y
-  rechaza el registro cuando falta o deja de ser válido después de `sync`.
+  rechaza el registro cuando falta, deja de ser válido o cambia su identificador
+  después de `sync`.
 - Ejecutar pruebas enfocadas, suite afectada, Pint, build frontend y controles
   de seguridad configurados.
 - Documentar el contrato de `template.json`, la operación por Artisan y el
@@ -310,7 +330,8 @@ cms:template:set-default {identifier}
   sin crear un registro de sustitución.
 - **CA-05:** Solo un template registrado e inactivo puede activarse; solo uno
   activo y actualmente válido puede hacerse predeterminado; ambas operaciones son
-  atómicas y revalidan el paquete desplegado.
+  atómicas, revalidan el paquete desplegado y rechazan un identificador de
+  manifiesto distinto del persistido.
 - **CA-06:** No se puede desactivar Base, el predeterminado ni el último template
   activo.
 - **CA-07:** Los comandos listan el estado y comunican errores mediante códigos
@@ -325,8 +346,8 @@ cms:template:set-default {identifier}
 | CA-01 | Sistema sin template utilizable o singleton no impuesto por un motor | Integración/BD multi-motor | Migración, Base y rechazo de `id = 2` verificados en los tres motores | Instalación y administración de templates |
 | CA-02 | Contrato de presentación ambiguo o ruta Blade elegida por datos | Integración/filesystem | Manifiesto Base y Blade convencional validados sin ruta HTTP | Desarrollo de templates |
 | CA-03 | Paquete desplegado no registrable o activado implícitamente | Integración/console | Sync registra el paquete inactivo y conserva el predeterminado | Operación por Artisan |
-| CA-04 | Traversal, enlaces o escritura parcial desde filesystem | Integración/filesystem | Errores deterministas y estado persistido intacto | Seguridad y diagnóstico |
-| CA-05 | Predeterminado inactivo o carrera de estados | Integración/BD | Transiciones permitidas y atómicas verificadas | Operación por Artisan |
+| CA-04 | Traversal, enlaces, colisión por casing o escritura parcial desde filesystem | Integración/filesystem | Errores deterministas y estado persistido intacto | Seguridad y diagnóstico |
+| CA-05 | Predeterminado inactivo, identidad desplegada distinta o carrera de estados | Integración/BD | Revalidación de identidad y transiciones atómicas verificadas | Operación por Artisan |
 | CA-06 | Base o último template activo indisponible | Integración/BD | Transiciones denegadas verificadas | Operación por Artisan |
 | CA-07 | Automatización ambigua o fuga de contenido de manifiesto | Feature/console | Código y salida de cada comando | Referencia de comandos |
 | CA-08 | Operación dependiente de conocimiento implícito | Validación documental | Procedimiento y límites revisados | Nuevas guías de templates |
