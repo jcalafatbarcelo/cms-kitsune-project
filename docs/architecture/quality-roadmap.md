@@ -162,8 +162,11 @@ administrativo mutable esté planificado. No se creará preventivamente una tabl
 genérica sin conocer actores, operaciones y política de retención.
 
 Los intentos denegados se tratarán como eventos de seguridad, diferenciados de
-las mutaciones. Una mutación durable solo se auditará tras commit; una operación
-fallida no se registrará como cambio aplicado.
+las mutaciones. La mutación y su evento durable deben escribirse en la misma
+transacción, de modo que ambos se confirmen o reviertan juntos. Si el destino de
+auditoría usa otro almacenamiento, la transacción de negocio debe persistir un
+outbox o handoff durable cuya entrega sea idempotente y tenga reintentos. Una
+operación fallida no se registrará como cambio aplicado.
 
 ### Husky
 

@@ -1,7 +1,7 @@
 # ADR-0002: UI catalogs JSON modulares
 
 - **Fecha:** 2026-09-19 23:23 UTC
-- **Última actualización:** 2026-09-19 23:23 UTC
+- **Última actualización:** 2026-09-20 00:40 UTC
 - **Estado:** Aceptado
 - **Autores:** Responsable del proyecto y OpenCode (asistencia de redacción)
 - **Reemplaza a:** No aplica
@@ -65,7 +65,10 @@ templates.
    `<owner>::<group>.<item>`, por ejemplo `core::auth.login.submit`.
 4. Asignar cada clave a un propietario normalizado. Un propietario puede ser
    Core, un módulo o un template. Compartir contrato no exige una abstracción ni
-   un ciclo de vida común antes de que exista esa necesidad.
+   un ciclo de vida común antes de que exista esa necesidad. Los propietarios se
+   registran por identificador normalizado antes de cargar líneas; `core` queda
+   reservado y cualquier segundo identificador de origen que normalice al mismo
+   valor se rechaza en lugar de fusionarse con el primero.
 5. Exigir que todo propietario aporte un `UI catalog` `en` con todas sus claves. Una
    clave presente solo en otro locale se ignora en runtime y la validación la
    trata como error.
@@ -121,9 +124,10 @@ templates.
   proyecto utilizará claves técnicas exactas, comportamiento soportado por el
   traductor pero que debe protegerse con pruebas de integración al actualizar
   Laravel.
-- Los `UI catalogs` de extensiones ausentes producirán inglés o claves visibles según
-  el modo elegido. Los overrides permitirán traducciones locales sin modificar
-  la extensión.
+- La ausencia del `UI catalog` localizado de un propietario instalado producirá
+  inglés o la clave visible según el modo elegido. Si el propietario no dispone
+  de `UI catalog` `en`, no es válido y ambos modos devuelven la clave. Los
+  overrides permitirán traducciones locales sin modificar la extensión.
 - Un instalador futuro deberá registrar ubicaciones externas, validar manifiestos
   y resolver conflictos de propietarios. Esa complejidad se aplaza hasta que
   exista distribución dinámica real.

@@ -174,8 +174,10 @@ su historial con un backfill ficticio. La auditoría durable comenzará cuando s
 instale LOC-03 y será obligatoria antes de exponer mutaciones en el backoffice.
 
 Un intento denegado es un evento de seguridad y puede auditarse sin estado
-anterior/posterior. Una mutación confirmada solo genera su evento durable después
-del commit; una transacción fallida no debe registrarse como cambio realizado.
+anterior/posterior. La mutación y su evento durable compartirán transacción. Si
+la auditoría reside en otro almacenamiento, la transacción de negocio persistirá
+un outbox o handoff durable con entrega idempotente y reintentos. Una transacción
+fallida no debe registrarse como cambio realizado.
 
 ### LOC-05: selección temporal y navegador
 

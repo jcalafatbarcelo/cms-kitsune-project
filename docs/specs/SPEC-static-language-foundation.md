@@ -136,7 +136,7 @@ languages
 - updated_at: timestamp, not null
 
 language_settings
-- id: bigint, PK; solo se admite el registro global
+- id: bigint, PK, fixed 1, check (id = 1); solo se admite el registro global
 - base_language_id: bigint, FK languages.id, restrict, unique, not null
 - frontend_default_language_id: bigint, FK languages.id, restrict, not null
 - backoffice_default_language_id: bigint, FK languages.id, restrict, not null
@@ -165,6 +165,10 @@ erDiagram
   representen de forma equivalente.
 - La migración insertará `en`, activo, y un único `language_settings` que lo
   referencie en los tres roles.
+- La base de datos debe imponer que `language_settings.id` sea siempre `1`
+  mediante una restricción `CHECK` portable o una construcción equivalente con
+  la misma garantía en SQLite, MySQL y MariaDB. La PK y la unicidad de
+  `base_language_id` no sustituyen esta restricción singleton.
 - El rollback elimina primero `language_settings` y después `languages`. No hay
   backfill porque las tablas no existen previamente.
 - No se usarán borrados en cascada.
@@ -180,8 +184,11 @@ erDiagram
 - Un `UI catalog` es un objeto JSON plano de claves y valores string.
 - Las claves tienen propietario y siguen el formato
   `<owner>::<group>.<item>`, por ejemplo `core::auth.login.submit`.
-- El identificador de propietario se normaliza en kebab-case y evita colisiones
-  entre Core, módulos y futuros templates.
+- El identificador de propietario se normaliza en kebab-case y se registra antes
+  de cargar líneas. `core` queda reservado para Core. Si dos identificadores de
+  origen distintos producen el mismo identificador normalizado, el segundo se
+  rechaza antes de registrar su `UI catalog`; nunca se fusionan propietarios por
+  normalización.
 - El `UI catalog` base `en` de un propietario contiene todas sus claves válidas.
 - Una clave presente en otro locale pero ausente del `UI catalog` `en` del mismo
   propietario no se registra ni se resuelve. La validación debe informarla como
@@ -357,6 +364,8 @@ servicios externos.
   estado y fallback aportan casos aislables con resultado determinista.
 - Probar el modelo y las migraciones con SQLite y mantener SQL portable a
   MySQL/MariaDB sin depender de índices parciales específicos.
+- Probar a nivel de base de datos que no puede existir un segundo registro de
+  `language_settings`, incluido un intento con otro `id`.
 - Probar `UI catalogs` válidos, incompletos, sobredimensionados, con claves extra,
   placeholders incompatibles, pluralización incompatible, JSON inválido y rutas
   inseguras.
@@ -390,7 +399,8 @@ servicios externos.
 ## 7. Criterios de aceptación
 
 - **CA-01:** Una instalación limpia crea el módulo Core, registra `en` activo y
-  lo configura como base y predeterminado global de frontend y backoffice.
+  lo configura como base y predeterminado global de frontend y backoffice; la
+  base de datos rechaza cualquier segundo registro de `language_settings`.
 - **CA-02:** El sistema resuelve una clave existente del `UI catalog` Core para
   el locale solicitado sin ejecutar contenido del `UI catalog`.
 - **CA-03:** En modo `base`, una clave ausente en un locale instalado usa el valor
