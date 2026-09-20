@@ -40,11 +40,12 @@ es arquitectónica, transversal y duradera.
 
 | Iniciativa | Objetivo | Prioridad orientativa | Hito de evaluación | Estado |
 | :--- | :--- | :--- | :--- | :--- |
-| Quality gates en CI | Hacer obligatorios formato, análisis estático, tests y controles de seguridad reproducibles | Alta | Bootstrap de la aplicación | En curso: [CI](continuous-integration.md) con formato, tests, build y seguridad de dependencias; análisis estático pendiente |
+| Quality gates en CI | Hacer obligatorios formato, análisis estático, tests y controles de seguridad reproducibles | Alta | Bootstrap de la aplicación | En curso: [CI](continuous-integration.md) con formato, tests, matriz SQLite/MySQL/MariaDB, build y seguridad de dependencias; análisis estático pendiente |
 | Hooks locales con Husky | Adelantar feedback sobre archivos preparados para commit o push | Media | Cuando existan scripts frontend estables | Candidata |
 | Cabeceras HTTP y Content Security Policy (CSP) para Laravel | Reducir exposición a ejecución, framing, filtrado de información y transporte inseguro | Alta | Primer endpoint HTTP; endurecimiento antes de staging | Candidata |
 | Observabilidad con Sentry | Detectar y diagnosticar errores de Laravel y Vue por entorno y release | Media/Alta | Integración básica tras el bootstrap; completar antes de staging | Candidata |
 | Validación runtime con Zod | Validar datos no confiables en las fronteras de Vue y del PageBuilder | Media | Primer contrato frontend o schema de bloque complejo | Candidata |
+| Auditoría administrativa durable | Conservar actor, origen y operación de cambios sensibles sin depender de logs rotatorios ni FK borrables | Alta | Antes del primer backoffice que modifique idiomas, overrides, usuarios, publicación o configuración | Planificada en el [roadmap de localización](localization-roadmap.md#loc-03-auditoría-administrativa) |
 
 Las prioridades son relativas a estas iniciativas y no alteran el alcance MoSCoW
 del producto definido en el SDD inicial.
@@ -134,7 +135,40 @@ El workflow [CI](continuous-integration.md) añade el formato con Pint, la suite
 de Pest, la compilación de assets con Vite y la validación de los workflows con
 `actionlint`. `actionlint` se adopta con la versión `1.7.12` fijada y verificada
 por SHA-256, sin instalación global ni Action de terceros. El análisis estático y
-el umbral de cobertura de pruebas siguen pendientes.
+el umbral de cobertura de pruebas siguen pendientes. Las primeras migraciones de
+dominio añaden una matriz enfocada sobre SQLite, MySQL y MariaDB que comprueba la
+versión efectiva y las mismas restricciones persistentes en los tres motores.
+
+### Auditoría administrativa durable
+
+La gestión prevista de idiomas y overrides necesita atribución e historial antes
+de exponer mutaciones en el backoffice. Los campos de creador y último
+modificador facilitan consultas, pero no sustituyen eventos históricos ni deben
+depender de claves foráneas hacia usuarios que puedan eliminarse.
+
+La evaluación deberá definir:
+
+- operaciones y entidades auditables, evitando registrar cambios triviales;
+- identidad histórica para actores de usuario, consola y sistema;
+- tratamiento de usuarios eliminados sin perder trazabilidad ni conservar datos
+  personales innecesarios;
+- contenido anterior y posterior que sea imprescindible, con filtrado de
+  secretos, credenciales, sesiones y contenido editorial;
+- autorización de consulta, retención, integridad, exportación y borrado cuando
+  sea legalmente aplicable;
+- comportamiento transaccional para no registrar cambios que finalmente fallen;
+- volumen, índices, alertas y degradación segura.
+
+La iniciativa se abordará mediante una Spec propia cuando el primer flujo
+administrativo mutable esté planificado. No se creará preventivamente una tabla
+genérica sin conocer actores, operaciones y política de retención.
+
+Los intentos denegados se tratarán como eventos de seguridad, diferenciados de
+las mutaciones. La mutación y su evento durable deben escribirse en la misma
+transacción, de modo que ambos se confirmen o reviertan juntos. Si el destino de
+auditoría usa otro almacenamiento, la transacción de negocio debe persistir un
+outbox o handoff durable cuya entrega sea idempotente y tenga reintentos. Una
+operación fallida no se registrará como cambio aplicado.
 
 ### Husky
 

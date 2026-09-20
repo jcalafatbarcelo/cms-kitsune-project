@@ -20,6 +20,7 @@ Todos los jobs usan `ubuntu-24.04`, fijan las Actions por commit SHA, declaran
 | Job | Entorno | Comprobaciones |
 | :--- | :--- | :--- |
 | `PHP quality` | PHP 8.5, último patch; Composer 2 | `composer install` reproducible, formato con Pint y suite de Pest. |
+| `Database integration (motor)` | PHP 8.5; SQLite 3.45+, MySQL 8.4.11 y MariaDB 11.4.13 | Versión efectiva, migración limpia y restricciones persistentes de Core. |
 | `Frontend build` | Node 24 LTS, último patch; npm incluido | `npm ci` y compilación de assets con Vite. |
 | `Workflow lint` | `actionlint` 1.7.12 | Validez de los workflows de `.github/workflows/`. |
 
@@ -85,6 +86,41 @@ el workflow se haya publicado y sus ejecuciones sean estables.
 - Umbral de cobertura de pruebas; no se impone sin una línea base acordada.
 - Caché de dependencias de Composer en CI.
 - Despliegue o verificación de entornos remotos.
+
+## Matriz de bases de datos
+
+La suite completa de `PHP quality` usa SQLite en memoria. El job `Database
+integration` ejecuta además la misma prueba enfocada de instalación sobre la
+baseline del
+[ADR-0003](../adr/ADR-0003-baseline-moderna-de-bases-de-datos.md):
+
+| Motor | Baseline | Uso |
+| :--- | :--- | :--- |
+| SQLite | `>= 3.45.0`, paquete con actualizaciones de seguridad | Desarrollo y pruebas; no producción |
+| MySQL | `8.4.11`, imagen fijada por digest | Producción y pruebas de integración |
+| MariaDB | `11.4.13`, imagen fijada por digest | Producción y pruebas de integración |
+
+Cada entrada consultará la versión efectiva del motor y fallará si no cumple la
+baseline. La matriz ejecutará las migraciones y las pruebas de integridad
+dependientes del motor, incluido el rechazo real de un segundo registro de
+`language_settings` con `id = 2`. Inspeccionar el SQL generado no sustituye esa
+ejecución. Los servicios fijarán la versión exacta y el digest de imagen cuando
+aplique; actualizar un patch requerirá la revisión reproducible de dependencias,
+no una etiqueta flotante.
+
+SQLite se ejecuta directamente en el runner. Las otras entradas inician
+contenedores efímeros con base, usuario y contraseñas ficticias de testing. Solo
+la prueba `tests/Feature/Core/LanguageInstallationTest.php` se repite en los tres
+motores; la suite completa no se triplica. La entrada MySQL habilita
+`log_bin_trust_function_creators` solo dentro de su contenedor efímero para poder
+crear y verificar los triggers de integridad con el usuario de testing; no es una
+configuración de producción.
+
+Para reproducir MySQL o MariaDB en local se necesita un contenedor de la misma
+imagen, una base vacía y las variables `DB_CONNECTION`, `DB_HOST`, `DB_PORT`,
+`DB_DATABASE`, `DB_USERNAME` y `DB_PASSWORD`. Las credenciales reales permanecen
+fuera de Git. Los patches y digests se actualizan mediante una revisión manual de
+dependencias con ejecución real de la matriz.
 
 ## Fuentes de verdad
 

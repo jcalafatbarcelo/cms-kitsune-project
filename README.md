@@ -8,9 +8,9 @@ y extensible, construido mediante **Spec Driven Development (SDD)**.
 
 > [!WARNING]
 > **Este repositorio se encuentra en desarrollo inicial.** Ya dispone de un
-> bootstrap ejecutable de Laravel y controles básicos de calidad, pero los
-> módulos funcionales del CMS descritos en este documento siguen previstos y no
-> deben interpretarse como disponibles salvo indicación expresa.
+> bootstrap ejecutable, el módulo Core con fundación estática de idiomas y
+> controles de calidad. Páginas, PageBuilder, medios, menús y administración web
+> siguen previstos y no deben interpretarse como disponibles.
 
 ## Objetivos principales
 
@@ -43,15 +43,16 @@ definida en Specs concretas y aprobadas.
 
 ## Stack
 
-- **Disponible:** Laravel 13 sobre PHP 8.3 o posterior, Eloquent ORM, Blade,
+- **Disponible:** Laravel 13 sobre PHP 8.4 o posterior, Eloquent ORM, Blade,
   Vite 8, Tailwind CSS 4 y Pest 5.
-- **Persistencia de desarrollo:** SQLite en la configuración inicial de
-  Laravel.
-- **Persistencia prevista para el CMS:** MySQL o MariaDB, manteniendo Eloquent
-  como capa de persistencia.
+- **Persistencia de desarrollo:** SQLite `3.45.0` o posterior en la configuración
+  inicial de Laravel; no se soporta como motor de producción.
+- **Persistencia prevista para el CMS:** MySQL `8.4.x LTS` o MariaDB `11.4.x LTS`
+  en su último patch mantenido, manteniendo Eloquent como capa de persistencia.
+  Las versiones legacy y las ramas de innovación quedan fuera de soporte.
 - **Infraestructura modular disponible:** `nWidart/laravel-modules` 13 para
-  descubrir y cargar módulos futuros. Los módulos de dominio todavía no están
-  implementados.
+  descubrir y cargar módulos. Core registra idiomas, predeterminados globales y
+  `UI catalogs`; los demás módulos de dominio todavía no están implementados.
 - **Frontend previsto:** Blade como base del backoffice y del sitio público, con
   Vue 3 y Composition API para el PageBuilder y otras islas interactivas. Vue
   todavía no está incorporado al proyecto.
@@ -82,6 +83,15 @@ el formato de almacenamiento de su contenido.
 - [`docs/architecture/quality-roadmap.md`](docs/architecture/quality-roadmap.md):
   iniciativas candidatas y momentos de evaluación para quality gates, cabeceras
   HTTP, observabilidad y validación runtime.
+- [`docs/architecture/localization-roadmap.md`](docs/architecture/localization-roadmap.md):
+  secuencia prevista para idiomas, `UI catalogs`, overrides, negociación HTTP y
+  contenido localizado, con su estado de avance.
+- [`docs/administration/languages.md`](docs/administration/languages.md):
+  operación de idiomas mediante los comandos Artisan disponibles.
+- [`docs/developers/ui-catalogs.md`](docs/developers/ui-catalogs.md): contrato,
+  validación y resolución de textos estáticos JSON.
+- [`docs/getting-started/installation.md`](docs/getting-started/installation.md):
+  requisitos, instalación y configuración de persistencia y fallback.
 - [`docs/architecture/continuous-integration.md`](docs/architecture/continuous-integration.md):
   quality gate de CI, comandos locales y validación de workflows.
 - [`docs/architecture/dependency-security.md`](docs/architecture/dependency-security.md):
@@ -89,7 +99,9 @@ el formato de almacenamiento de su contenido.
 - [`docs/specs/`](docs/specs/): Specs que concretan el comportamiento y los
   criterios de aceptación.
 - [`docs/adr/`](docs/adr/): decisiones arquitectónicas; incluye el
-  [ADR-0001 sobre Blade y Vue](docs/adr/ADR-0001-blade-vue-bajo-demanda.md).
+  [ADR-0001 sobre Blade y Vue](docs/adr/ADR-0001-blade-vue-bajo-demanda.md) y el
+  [ADR-0002 sobre UI catalogs JSON](docs/adr/ADR-0002-ui-catalogs-json-modulares.md)
+  y el [ADR-0003 sobre la baseline de bases de datos](docs/adr/ADR-0003-baseline-moderna-de-bases-de-datos.md).
 - [`CHANGELOG.md`](CHANGELOG.md): registro histórico de cambios notables.
 - [`.agents/skills/INDEX.md`](.agents/skills/INDEX.md): catálogo canónico derivado de skills disponibles
   en el repositorio.
@@ -109,6 +121,7 @@ El desarrollo parte de una especificación antes de cualquier implementación:
    ```text
    /build docs/specs/SPEC-[nombre].md
    ```
+
 4. Dividir el alcance aprobado en incrementos verticales pequeños y, cuando
    aporte una ventaja neta, construir cada uno mediante
    `Red → Green → Refactor`.
@@ -126,7 +139,7 @@ preventivas que compliquen innecesariamente el código.
 
 ## Puesta en marcha
 
-El bootstrap actual requiere PHP 8.3 o posterior, Composer, Node.js y npm. Desde
+El bootstrap actual requiere PHP 8.4 o posterior, Composer, Node.js y npm. Desde
 la raíz del repositorio:
 
 ```shell
@@ -154,9 +167,10 @@ GitHub Actions en Pull Requests, pushes a `main`, diariamente y bajo demanda.
 ## Estado del proyecto
 
 El repositorio contiene el bootstrap ejecutable de Laravel, configuración de
-Pest con pruebas iniciales, compilación frontend con Vite y auditorías
-automatizadas de dependencias. Los módulos de dominio del CMS todavía no están
-implementados; se incorporarán mediante Specs concretas y aprobadas.
+Pest, compilación frontend con Vite, auditorías automatizadas de dependencias y
+el módulo Core con registro de idiomas, `UI catalogs`, fallback y administración
+manual mediante Artisan. Los módulos de páginas, medios, menús y PageBuilder se
+incorporarán mediante Specs concretas y aprobadas.
 
 La documentación canónica se mantendrá en el repositorio. La selección de un
 portal público y la posible incorporación de una wiki asistida por IA se
