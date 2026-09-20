@@ -45,6 +45,7 @@ es arquitectónica, transversal y duradera.
 | Cabeceras HTTP y Content Security Policy (CSP) para Laravel | Reducir exposición a ejecución, framing, filtrado de información y transporte inseguro | Alta | Primer endpoint HTTP; endurecimiento antes de staging | Candidata |
 | Observabilidad con Sentry | Detectar y diagnosticar errores de Laravel y Vue por entorno y release | Media/Alta | Integración básica tras el bootstrap; completar antes de staging | Candidata |
 | Validación runtime con Zod | Validar datos no confiables en las fronteras de Vue y del PageBuilder | Media | Primer contrato frontend o schema de bloque complejo | Candidata |
+| Auditoría administrativa durable | Conservar actor, origen y operación de cambios sensibles sin depender de logs rotatorios ni FK borrables | Alta | Antes del primer backoffice que modifique idiomas, overrides, usuarios, publicación o configuración | Planificada en el [roadmap de localización](localization-roadmap.md#loc-03-auditoría-administrativa) |
 
 Las prioridades son relativas a estas iniciativas y no alteran el alcance MoSCoW
 del producto definido en el SDD inicial.
@@ -135,6 +136,34 @@ de Pest, la compilación de assets con Vite y la validación de los workflows co
 `actionlint`. `actionlint` se adopta con la versión `1.7.12` fijada y verificada
 por SHA-256, sin instalación global ni Action de terceros. El análisis estático y
 el umbral de cobertura de pruebas siguen pendientes.
+
+### Auditoría administrativa durable
+
+La gestión prevista de idiomas y overrides necesita atribución e historial antes
+de exponer mutaciones en el backoffice. Los campos de creador y último
+modificador facilitan consultas, pero no sustituyen eventos históricos ni deben
+depender de claves foráneas hacia usuarios que puedan eliminarse.
+
+La evaluación deberá definir:
+
+- operaciones y entidades auditables, evitando registrar cambios triviales;
+- identidad histórica para actores de usuario, consola y sistema;
+- tratamiento de usuarios eliminados sin perder trazabilidad ni conservar datos
+  personales innecesarios;
+- contenido anterior y posterior que sea imprescindible, con filtrado de
+  secretos, credenciales, sesiones y contenido editorial;
+- autorización de consulta, retención, integridad, exportación y borrado cuando
+  sea legalmente aplicable;
+- comportamiento transaccional para no registrar cambios que finalmente fallen;
+- volumen, índices, alertas y degradación segura.
+
+La iniciativa se abordará mediante una Spec propia cuando el primer flujo
+administrativo mutable esté planificado. No se creará preventivamente una tabla
+genérica sin conocer actores, operaciones y política de retención.
+
+Los intentos denegados se tratarán como eventos de seguridad, diferenciados de
+las mutaciones. Una mutación durable solo se auditará tras commit; una operación
+fallida no se registrará como cambio aplicado.
 
 ### Husky
 

@@ -42,6 +42,12 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Quality gate de integración continua con formato Pint, suite de Pest,
   compilación de assets con Vite y validación de workflows mediante `actionlint`
   con versión fijada y verificada por checksum.
+- ADR-0002 aceptado para representar los textos estáticos mediante `UI catalogs`
+  JSON modulares, con claves estables, propietario y fallback configurable.
+- Roadmap de localización y primera Spec aprobada para la fundación de
+  idiomas estáticos, overrides, negociación HTTP y evolución futura.
+- Iniciativa planificada de auditoría administrativa durable antes de incorporar
+  las primeras pantallas mutables del backoffice.
 
 ### Modificado
 
@@ -87,4 +93,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-09-18 00:08 UTC
+Fecha de última modificación: 2026-09-20 00:24 UTC

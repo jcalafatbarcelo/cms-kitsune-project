@@ -82,6 +82,9 @@ el formato de almacenamiento de su contenido.
 - [`docs/architecture/quality-roadmap.md`](docs/architecture/quality-roadmap.md):
   iniciativas candidatas y momentos de evaluación para quality gates, cabeceras
   HTTP, observabilidad y validación runtime.
+- [`docs/architecture/localization-roadmap.md`](docs/architecture/localization-roadmap.md):
+  secuencia prevista para idiomas, `UI catalogs`, overrides, negociación HTTP y
+  contenido localizado, con su estado de avance.
 - [`docs/architecture/continuous-integration.md`](docs/architecture/continuous-integration.md):
   quality gate de CI, comandos locales y validación de workflows.
 - [`docs/architecture/dependency-security.md`](docs/architecture/dependency-security.md):
@@ -89,7 +92,8 @@ el formato de almacenamiento de su contenido.
 - [`docs/specs/`](docs/specs/): Specs que concretan el comportamiento y los
   criterios de aceptación.
 - [`docs/adr/`](docs/adr/): decisiones arquitectónicas; incluye el
-  [ADR-0001 sobre Blade y Vue](docs/adr/ADR-0001-blade-vue-bajo-demanda.md).
+  [ADR-0001 sobre Blade y Vue](docs/adr/ADR-0001-blade-vue-bajo-demanda.md) y el
+  [ADR-0002 sobre UI catalogs JSON](docs/adr/ADR-0002-ui-catalogs-json-modulares.md).
 - [`CHANGELOG.md`](CHANGELOG.md): registro histórico de cambios notables.
 - [`.agents/skills/INDEX.md`](.agents/skills/INDEX.md): catálogo canónico derivado de skills disponibles
   en el repositorio.
