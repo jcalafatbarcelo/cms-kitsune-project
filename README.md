@@ -115,6 +115,7 @@ El desarrollo parte de una especificación antes de cualquier implementación:
    ```text
    /build docs/specs/SPEC-[nombre].md
    ```
+
 4. Dividir el alcance aprobado en incrementos verticales pequeños y, cuando
    aporte una ventaja neta, construir cada uno mediante
    `Red → Green → Refactor`.
