@@ -38,8 +38,8 @@ textos de interfaz propios.
 - Crear el registro persistente de CMS Templates y el singleton que referencia el
   template predeterminado.
 - Registrar Base, activo y predeterminado, al migrar una instalación limpia.
-- Descubrir paquetes ya desplegados bajo `Templates/<Nombre>` mediante un comando
-  explícito de sincronización.
+- Descubrir paquetes no Base desplegados manualmente bajo `Templates/<Nombre>`
+  mediante un comando explícito de sincronización.
 - Validar el manifiesto antes de registrar o actualizar un template descubierto.
 - Registrar los templates descubiertos no Base inicialmente inactivos.
 - Listar, sincronizar, activar, desactivar y cambiar el predeterminado mediante
@@ -113,14 +113,20 @@ textos de interfaz propios.
   operación separada.
 - Todas las mutaciones que puedan afectar a estas invariantes son atómicas y
   serializan cambios concurrentes sobre los registros implicados.
-- La ausencia posterior, el cambio o la invalidez de un paquete desplegado no
+- La ausencia posterior, el cambio o la invalidez de un paquete registrado no
   modifica estados persistidos durante `cms:template:sync`; la operación falla de
   forma explícita y deja los datos intactos.
+- El identificador y el directorio de un template registrado son inmutables. Un
+  cambio de identificador en el manifiesto de un directorio registrado, un cambio
+  de directorio de un template registrado o la ausencia de uno registrado hace
+  que `sync` falle sin crear un nuevo registro ni modificar el existente.
 
 ### Paquetes, manifiesto y presentaciones
 
 - La raíz de paquetes es `Templates/`. Cada paquete ocupa el directorio directo
-  `Templates/<Nombre>`; no se recorren subdirectorios ni rutas configurables.
+  `Templates/<Nombre>`; no se recorren subdirectorios ni rutas configurables. El
+  nombre del directorio debe tener entre 1 y 100 caracteres ASCII alfanuméricos,
+  empezar por una letra y no incluir espacios, puntos ni separadores.
 - Base reside exactamente en `Templates/Base`.
 - Cada paquete contiene un archivo regular `template.json`, nunca un enlace
   simbólico. Su ruta canónica debe permanecer dentro de su directorio de template.
@@ -157,6 +163,11 @@ textos de interfaz propios.
 - No se ejecutan datos del manifiesto. La confianza del código Blade procede solo
   de su despliegue versionado junto al CMS; el comando no descarga, copia ni
   ejecuta paquetes aportados por el usuario.
+- Al registrar un paquete, Core persiste su nombre de directorio junto al
+  identificador. En una sincronización posterior, el directorio registrado debe
+  seguir presente y su manifiesto debe conservar el mismo identificador. Un
+  renombrado no está admitido en este incremento; se rechazará en vez de crear un
+  segundo registro que pueda dejar el anterior activo o predeterminado.
 
 ### Entidades y migraciones
 
@@ -165,6 +176,7 @@ La migración del módulo Core creará:
 ```text
 cms_templates
 - id: bigint, PK
+- directory: varchar(100), unique, not null
 - identifier: varchar(100), unique, not null
 - name: varchar(100), not null
 - manifest_hash: char(64), not null
@@ -180,12 +192,13 @@ cms_template_settings
 - updated_at: timestamp, not null
 ```
 
-- La migración insertará el registro Base con el hash SHA-256 de una única
-  instantánea de `Templates/Base/template.json`, activo y referenciado como
-  predeterminado global.
-- La migración debe validar el paquete Base antes de insertar datos y fallar sin
-  dejar tablas parcialmente migradas si falta, es inseguro o no satisface el
-  contrato.
+- Antes de ejecutar cualquier `CREATE TABLE`, la migración debe leer una única
+  instantánea de `Templates/Base/template.json` y validar todo el paquete Base,
+  incluido su Blade convencional. Si el preflight falla, no debe ejecutar DDL ni
+  dejar esquema creado, también en motores sin DDL transaccional.
+- Solo después del preflight correcto, la migración crea las tablas e inserta el
+  registro Base con el hash SHA-256 de la instantánea validada, `directory = Base`,
+  activo y referenciado como predeterminado global.
 - La base de datos debe imponer que `cms_template_settings.id` sea siempre `1`
   mediante una restricción `CHECK` portable o una construcción equivalente con
   la misma garantía en SQLite, MySQL y MariaDB.
@@ -211,16 +224,20 @@ cms:template:set-default {identifier}
 - `cms:template:list` muestra identificador, nombre, estado activo y si es el
   predeterminado.
 - `cms:template:sync` valida todos los directorios directos presentes bajo
-  `Templates/`, registra los paquetes válidos nuevos como inactivos y actualiza
-  nombre y hash de los ya registrados solo tras validar la instantánea del mismo
-  archivo. No activa, desactiva ni cambia el predeterminado.
-- Si cualquier paquete descubierto es inválido, duplicado, inseguro o colisiona
-  con un identificador de otro directorio, `sync` falla y no modifica datos.
-- `cms:template:activate` solo activa un template registrado e inactivo.
+  `Templates/`, comprueba que todos los directorios registrados siguen presentes
+  y registra los paquetes válidos nuevos como inactivos. Para los ya registrados,
+  actualiza nombre y hash solo tras validar la instantánea del mismo archivo y
+  confirmar que conserva su identificador. No activa, desactiva ni cambia el
+  predeterminado.
+- Si cualquier paquete descubierto o registrado es inválido, ausente, duplicado,
+  inseguro, cambia su identificador o colisiona con un identificador o directorio
+  de otro paquete, `sync` falla y no modifica datos.
+- `cms:template:activate` revalida el paquete desplegado en su directorio
+  persistido antes de activar un template registrado e inactivo.
 - `cms:template:disable` solo desactiva un template activo que no sea Base ni el
   predeterminado y mantiene al menos un template activo.
-- `cms:template:set-default` solo acepta un template registrado y activo; el
-  cambio es atómico.
+- `cms:template:set-default` revalida el paquete desplegado en su directorio
+  persistido y solo acepta un template registrado y activo; el cambio es atómico.
 - Los comandos correctos terminan con código `0` y muestran solo el estado
   resultante. Entradas inválidas, manifiestos inválidos, templates desconocidos o
   transiciones prohibidas terminan con código distinto de `0` y mensaje
@@ -245,13 +262,17 @@ cms:template:set-default {identifier}
   validación de manifiestos por ser comportamientos deterministas y de seguridad.
 - Probar migración e integridad en SQLite 3.45+, MySQL 8.4.x LTS y MariaDB 11.4.x
   LTS, incluida la imposibilidad de insertar `cms_template_settings.id = 2`.
+- Probar que un preflight inválido de Base aborta la migración antes de cualquier
+  DDL y no deja las tablas de templates en SQLite, MySQL ni MariaDB.
 - Probar Base en instalación limpia, sus protecciones y todos los cambios de
   estado permitidos y denegados.
 - Probar manifiestos válidos, JSON inválido, schema desconocido, identificadores
   o presentaciones inválidos, claves duplicadas, vistas ausentes, archivos
   sobredimensionados, rutas inseguras y colisiones entre directorios.
 - Probar que `sync` no deja escrituras parciales ante cualquier paquete inválido
-  y que usa el hash de la instantánea validada.
+  o registrado ausente/renombrado, y que usa el hash de la instantánea validada.
+- Probar que activar o seleccionar como predeterminado revalida el paquete y
+  rechaza el registro cuando falta o deja de ser válido después de `sync`.
 - Ejecutar pruebas enfocadas, suite afectada, Pint, build frontend y controles
   de seguridad configurados.
 - Documentar el contrato de `template.json`, la operación por Artisan y el
@@ -277,15 +298,19 @@ cms:template:set-default {identifier}
 
 - **CA-01:** Una instalación limpia registra Base, activo y como único template
   predeterminado; SQLite, MySQL y MariaDB rechazan insertar un segundo
-  `cms_template_settings` con `id = 2` sin alterar el singleton.
+  `cms_template_settings` con `id = 2` sin alterar el singleton. Un Base inválido
+  aborta antes de crear las tablas en los tres motores.
 - **CA-02:** Base declara `public.page.standard` y su Blade convencional existe,
   pero el incremento no crea rutas HTTP ni ejecuta la presentación.
 - **CA-03:** `cms:template:sync` registra un paquete desplegado válido como
   inactivo, conserva Base y no cambia el template predeterminado.
 - **CA-04:** Un manifiesto o árbol de paquete inválido, inseguro, con colisiones
-  o con una presentación sin Blade hace que `sync` falle sin modificar datos.
+  o con una presentación sin Blade hace que `sync` falle sin modificar datos. Un
+  paquete registrado ausente o cuyo identificador/directorio cambie también falla
+  sin crear un registro de sustitución.
 - **CA-05:** Solo un template registrado e inactivo puede activarse; solo uno
-  activo puede hacerse predeterminado; ambas operaciones son atómicas.
+  activo y actualmente válido puede hacerse predeterminado; ambas operaciones son
+  atómicas y revalidan el paquete desplegado.
 - **CA-06:** No se puede desactivar Base, el predeterminado ni el último template
   activo.
 - **CA-07:** Los comandos listan el estado y comunican errores mediante códigos

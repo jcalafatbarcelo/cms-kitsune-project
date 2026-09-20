@@ -1,7 +1,7 @@
 # ADR-0004: Arquitectura de CMS Templates
 
 - **Fecha:** 2026-09-20 21:37 UTC
-- **Última actualización:** 2026-09-20 21:51 UTC
+- **Última actualización:** 2026-09-20 22:37 UTC
 - **Estado:** Aceptado
 - **Autores:** Responsable del proyecto y OpenCode (asistencia de redacción)
 - **Reemplaza a:** No aplica
@@ -18,9 +18,10 @@ administrativo puede seleccionar una ruta Blade, una clase PHP o un asset por su
 nombre; solicita una clave de presentación declarada y el CMS Template efectivo
 resuelve su implementación interna.
 
-Fuera de alcance: instalación dinámica, subida desde backoffice, distribución
-remota, firma, dependencias de terceros, PageBuilder, login, recuperación de
-contraseña, backoffice y sus vistas tematizables.
+Fuera de alcance: instalación dinámica desde el producto, subida desde
+backoffice, descarga o distribución remota, firma, dependencias de terceros,
+PageBuilder, login, recuperación de contraseña, backoffice y sus vistas
+tematizables.
 
 ## Contexto
 
@@ -32,10 +33,12 @@ del PageBuilder: puede incluir Blade, assets, UI catalogs, configuración y, en
 incrementos posteriores, bloques propios.
 
 El proyecto entrega inicialmente un único CMS Template Base junto al código del
-CMS. Aunque el MVP/TFM no permitirá instalar templates desde el producto, una
-instalación futura debe poder cambiar de CMS Template sin reinstalar el CMS. Por
-ello, el contrato de paquetes y su ciclo de vida no se debe sustituir por vistas
-globales o por un nombre Blade almacenado en Page.
+CMS. El MVP/TFM no distribuye otros templates, pero un administrador técnico
+puede desplegar manualmente un paquete compatible y sincronizarlo mediante
+Artisan. La instalación desde el producto sigue fuera de alcance. Una instalación
+futura debe poder cambiar de CMS Template sin reinstalar el CMS; por ello, el
+contrato de paquetes y su ciclo de vida no se debe sustituir por vistas globales
+o por un nombre Blade almacenado en Page.
 
 ADR-0002 ya exige que los templates futuros sean propietarios de UI catalogs
 JSON, pero aplaza su raíz y ciclo de carga. El SDD y ADR-0001 exigen Blade para
@@ -50,8 +53,9 @@ el contenido público esencial, con Vue solo donde sea necesario.
 - Funcionales: debe existir un CMS Template Base integrado y no eliminable. Debe
   existir exactamente un CMS Template predeterminado activo. Pages podrá heredar
   ese predeterminado o fijar un template explícito, cuando su Spec lo habilite.
-- Temporales: el MVP/TFM solo contempla el CMS Template Base desplegado con el
-  CMS. La instalación o sustitución dinámica desde el producto queda diferida.
+- Temporales: el MVP/TFM distribuye solo el CMS Template Base con el CMS. Admite
+  paquetes compatibles desplegados manualmente por un administrador técnico, pero
+  la instalación o sustitución dinámica desde el producto queda diferida.
 - Económicas: no se incorpora en el MVP infraestructura de marketplace,
   repositorio de paquetes, revisión de procedencia o distribución remota.
 - Equipo: los contratos de presentación deben ser revisables y comprobables sin
@@ -64,8 +68,10 @@ el contenido público esencial, con Vue solo donde sea necesario.
    assets, UI catalogs, configuración declarada y extensiones que se aprueben en
    Specs posteriores.
 2. Incluir un CMS Template Base desplegado y versionado con el CMS. Será el único
-   disponible en el primer MVP, no podrá eliminarse y deberá implementar las
-   presentaciones mínimas que establezcan las Specs aplicables.
+   template distribuido por defecto en el MVP, no podrá eliminarse y deberá
+   implementar las presentaciones mínimas que establezcan las Specs aplicables.
+   Un administrador técnico podrá desplegar manualmente otros paquetes
+   compatibles y sincronizarlos mediante el ciclo de vida definido por Spec.
 3. Registrar las capacidades de presentación mediante claves estables, como
    `public.page.standard`, y no mediante nombres de Blade. Una Page solicitará
    una clave; el CMS Template efectivo declarará si la implementa y resolverá su
@@ -87,10 +93,11 @@ el contenido público esencial, con Vue solo donde sea necesario.
    presentación registrada. Un template no registra rutas arbitrarias ni ejecuta
    comportamiento elegido por contenido.
 7. En el MVP, el ciclo de vida se limita a paquetes confiables ya desplegados por
-   una actualización del CMS. La arquitectura preserva una instalación futura
-   sin reinstalación, pero esa capacidad requerirá una Spec independiente que
-   defina procedencia, compatibilidad, integridad, autorización, auditoría,
-   instalación atómica, rollback y el tratamiento de código ejecutable.
+   una actualización del CMS o manualmente por un administrador técnico. La
+   arquitectura preserva una instalación futura desde el producto sin
+   reinstalación, pero esa capacidad requerirá una Spec independiente que defina
+   procedencia, compatibilidad, integridad, autorización, auditoría, instalación
+   atómica, rollback y el tratamiento de código ejecutable.
 8. La primera presentación mínima será pública y editorial, `public.page.standard`.
    Las presentaciones de login, recuperación y backoffice se definirán después de
    que existan sus módulos y contratos funcionales.
