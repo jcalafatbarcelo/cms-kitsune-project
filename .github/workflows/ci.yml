@@ -63,16 +63,19 @@ jobs:
             database-name: ":memory:"
             image: ""
             admin-command: ""
+            server-options: ""
           - database: mysql
             connection: mysql
             database-name: kitsune_test
             image: "mysql:8.4.11@sha256:85b9bf2e29cf836ecb8c2a15a935d4ba0c606631dff1dd79531a11983c638f2a"
             admin-command: mysqladmin
+            server-options: "--log-bin-trust-function-creators=1"
           - database: mariadb
             connection: mariadb
             database-name: kitsune_test
             image: "mariadb:11.4.13@sha256:70cc072b29b4a89ae07abb2d4da2c64678a7f2dfe092751bb51c87d67dc1338b"
             admin-command: mariadb-admin
+            server-options: ""
     env:
       APP_ENV: testing
       CMS_UI_CATALOG_FALLBACK_MODE: key
@@ -113,17 +116,28 @@ jobs:
         if: matrix.image != ''
         env:
           DATABASE_IMAGE: ${{ matrix.image }}
+          DATABASE_OPTIONS: ${{ matrix.server-options }}
         run: |
-          docker run --detach --name kitsune-database --publish 3306:3306 \
-            --env MYSQL_DATABASE=kitsune_test \
-            --env MYSQL_USER=kitsune \
-            --env MYSQL_PASSWORD=kitsune_test_password \
-            --env MYSQL_ROOT_PASSWORD=kitsune_root_test_password \
-            --env MARIADB_DATABASE=kitsune_test \
-            --env MARIADB_USER=kitsune \
-            --env MARIADB_PASSWORD=kitsune_test_password \
-            --env MARIADB_ROOT_PASSWORD=kitsune_root_test_password \
+          docker_arguments=(
+            --detach
+            --name kitsune-database
+            --publish 3306:3306
+            --env MYSQL_DATABASE=kitsune_test
+            --env MYSQL_USER=kitsune
+            --env MYSQL_PASSWORD=kitsune_test_password
+            --env MYSQL_ROOT_PASSWORD=kitsune_root_test_password
+            --env MARIADB_DATABASE=kitsune_test
+            --env MARIADB_USER=kitsune
+            --env MARIADB_PASSWORD=kitsune_test_password
+            --env MARIADB_ROOT_PASSWORD=kitsune_root_test_password
             "${DATABASE_IMAGE}"
+          )
+
+          if [[ -n "${DATABASE_OPTIONS}" ]]; then
+            docker_arguments+=("${DATABASE_OPTIONS}")
+          fi
+
+          docker run "${docker_arguments[@]}"
 
       - name: Wait for database service
         if: matrix.image != ''

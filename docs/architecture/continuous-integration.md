@@ -111,7 +111,10 @@ no una etiqueta flotante.
 SQLite se ejecuta directamente en el runner. Las otras entradas inician
 contenedores efímeros con base, usuario y contraseñas ficticias de testing. Solo
 la prueba `tests/Feature/Core/LanguageInstallationTest.php` se repite en los tres
-motores; la suite completa no se triplica.
+motores; la suite completa no se triplica. La entrada MySQL habilita
+`log_bin_trust_function_creators` solo dentro de su contenedor efímero para poder
+crear y verificar los triggers de integridad con el usuario de testing; no es una
+configuración de producción.
 
 Para reproducir MySQL o MariaDB en local se necesita un contenedor de la misma
 imagen, una base vacía y las variables `DB_CONNECTION`, `DB_HOST`, `DB_PORT`,
