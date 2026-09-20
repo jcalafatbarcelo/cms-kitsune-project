@@ -1,0 +1,11 @@
+{
+    "name": "kitsune/core-module",
+    "description": "Core services for CMS Kitsune.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Modules\\Core\\": "app/"
+        }
+    }
+}

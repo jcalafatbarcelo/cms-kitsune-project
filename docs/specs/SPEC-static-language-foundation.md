@@ -1,6 +1,6 @@
 # SPEC: Fundación de idiomas estáticos y UI catalogs
 
-- **Estado:** Aprobada
+- **Estado:** Completada
 - **Perfil:** feature
 - **Origen de la planificación:** Petición y decisiones del responsable del
   proyecto, resumidas en el
@@ -110,8 +110,9 @@ contenido editorial se aplazan a incrementos posteriores.
 - `en` no se puede desinstalar. Este incremento no ofrece ninguna operación de
   desinstalación para ningún idioma.
 - Siempre debe existir al menos un idioma instalado y activo.
-- Los predeterminados globales de frontend y backoffice deben referenciar un
-  idioma instalado y activo.
+- Debe existir exactamente un predeterminado global para frontend y exactamente
+  uno para backoffice. Cada uno debe referenciar un idioma instalado y activo;
+  ambos contextos pueden usar el mismo idioma o idiomas distintos.
 - Un idioma predeterminado en cualquiera de los dos contextos no se puede
   desactivar.
 - `en` puede desactivarse solamente si ha dejado de ser ambos predeterminados y

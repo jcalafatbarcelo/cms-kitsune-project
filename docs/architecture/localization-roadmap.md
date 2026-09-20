@@ -8,10 +8,10 @@ desarrolladores de extensiones y agentes que necesiten continuar el trabajo sin
 mezclar incrementos ni presentar capacidades previstas como disponibles.
 
 > [!IMPORTANT]
-> El proyecto solo dispone actualmente de la fundación modular. No hay idiomas,
-> `UI catalogs`, overrides, negociación HTTP ni contenido multiidioma
-> implementados. La primera Spec está `Aprobada`, pero su implementación todavía
-> no se ha iniciado.
+> El módulo Core ya proporciona el registro de idiomas, los predeterminados
+> globales, los `UI catalogs` estáticos y su operación mediante Artisan. Overrides,
+> negociación HTTP, rutas localizadas, backoffice y contenido multiidioma siguen
+> sin estar implementados.
 
 Fuentes prescriptivas relacionadas:
 
@@ -21,7 +21,7 @@ Fuentes prescriptivas relacionadas:
 - [ADR-0003](../adr/ADR-0003-baseline-moderna-de-bases-de-datos.md): motores,
   versiones mínimas y política de soporte de persistencia.
 - [SPEC de fundación estática](../specs/SPEC-static-language-foundation.md):
-  contrato candidato del primer incremento.
+  contrato completado del primer incremento.
 - [Roadmap de calidad](quality-roadmap.md): momento de evaluación de auditoría,
   seguridad y observabilidad.
 
@@ -48,7 +48,7 @@ documentación técnica empleará siempre `UI catalog`.
 | ID | Incremento | Estado | Entrada | Resultado esperado |
 | :--- | :--- | :--- | :--- | :--- |
 | LOC-00 | Planificación y decisión de `UI catalogs` | Completado | Fundación modular disponible | ADR aceptado, vocabulario y secuencia documentados |
-| LOC-01 | Fundación de idiomas estáticos | Spec aprobada; implementación pendiente | Ejecutar `/build docs/specs/SPEC-static-language-foundation.md` | Core, `en`, registro, predeterminados, JSON, fallback y Artisan |
+| LOC-01 | Fundación de idiomas estáticos | Completado | LOC-00 completado y Spec aprobada | Core, `en`, registro, predeterminados, JSON, fallback y Artisan |
 | LOC-02 | Overrides | Pendiente | LOC-01 completado | Sustituciones y traducciones locales validadas, con actor y caché |
 | LOC-03 | Auditoría administrativa | Pendiente | Antes del primer backoffice mutable | Historial durable independiente de logs operativos |
 | LOC-04 | Backoffice de idiomas y overrides | Pendiente | LOC-01, LOC-02 y garantías de LOC-03 | Gestión autorizada, protegida y auditable |
@@ -67,10 +67,10 @@ Estados de LOC-01:
 - [x] Primera Spec creada y validada estructuralmente.
 - [x] Revisión semántica y aprobación explícita de la Spec.
 - [x] Baseline moderna de SQLite, MySQL y MariaDB decidida.
-- [ ] Implementación TDD de LOC-01.
-- [ ] Matriz CI multi-motor con verificación de versiones y restricciones.
-- [ ] Documentación de administración y extensibilidad basada en código real.
-- [ ] Cierre de criterios, suite, quality gate y estado `Completada`.
+- [x] Implementación TDD de LOC-01.
+- [x] Matriz CI multi-motor con verificación de versiones y restricciones.
+- [x] Documentación de administración y extensibilidad basada en código real.
+- [x] Cierre de criterios, suite, quality gate y estado `Completada`.
 
 ## Reglas transversales decididas
 
@@ -78,7 +78,8 @@ Estados de LOC-01:
 
 - Inglés neutro `en` es el idioma base integrado y nunca se desinstala.
 - `en` comienza activo y como predeterminado global de frontend y backoffice.
-- Los predeterminados pueden cambiar, pero siempre apuntan a idiomas activos.
+- Debe existir exactamente un predeterminado por contexto. Los predeterminados
+  pueden coincidir o ser distintos, y siempre apuntan a idiomas activos.
 - Un idioma predeterminado no puede desactivarse.
 - Siempre debe permanecer al menos un idioma instalado y activo.
 - `en` puede quedar inactivo si no es predeterminado y existe otro idioma activo;
@@ -237,6 +238,6 @@ Antes de continuar cualquier incremento:
 7. No marcar un incremento como completado hasta cerrar aceptación, pruebas,
    documentación y quality gate.
 
-Próximo paso autorizado pendiente: iniciar LOC-01 mediante una orden `/build` que
-identifique `SPEC-static-language-foundation.md`, aplicar TDD por criterio y
-mantener este roadmap actualizado sin incorporar incrementos posteriores.
+El siguiente incremento candidato es LOC-02. Requiere planificación, una Spec
+concreta y aprobación antes de implementar overrides; la finalización de LOC-01
+no autoriza ese alcance posterior.

@@ -40,7 +40,7 @@ es arquitectónica, transversal y duradera.
 
 | Iniciativa | Objetivo | Prioridad orientativa | Hito de evaluación | Estado |
 | :--- | :--- | :--- | :--- | :--- |
-| Quality gates en CI | Hacer obligatorios formato, análisis estático, tests y controles de seguridad reproducibles | Alta | Bootstrap de la aplicación | En curso: [CI](continuous-integration.md) con formato, tests, build y seguridad de dependencias; análisis estático pendiente |
+| Quality gates en CI | Hacer obligatorios formato, análisis estático, tests y controles de seguridad reproducibles | Alta | Bootstrap de la aplicación | En curso: [CI](continuous-integration.md) con formato, tests, matriz SQLite/MySQL/MariaDB, build y seguridad de dependencias; análisis estático pendiente |
 | Hooks locales con Husky | Adelantar feedback sobre archivos preparados para commit o push | Media | Cuando existan scripts frontend estables | Candidata |
 | Cabeceras HTTP y Content Security Policy (CSP) para Laravel | Reducir exposición a ejecución, framing, filtrado de información y transporte inseguro | Alta | Primer endpoint HTTP; endurecimiento antes de staging | Candidata |
 | Observabilidad con Sentry | Detectar y diagnosticar errores de Laravel y Vue por entorno y release | Media/Alta | Integración básica tras el bootstrap; completar antes de staging | Candidata |
@@ -135,7 +135,9 @@ El workflow [CI](continuous-integration.md) añade el formato con Pint, la suite
 de Pest, la compilación de assets con Vite y la validación de los workflows con
 `actionlint`. `actionlint` se adopta con la versión `1.7.12` fijada y verificada
 por SHA-256, sin instalación global ni Action de terceros. El análisis estático y
-el umbral de cobertura de pruebas siguen pendientes.
+el umbral de cobertura de pruebas siguen pendientes. Las primeras migraciones de
+dominio añaden una matriz enfocada sobre SQLite, MySQL y MariaDB que comprueba la
+versión efectiva y las mismas restricciones persistentes en los tres motores.
 
 ### Auditoría administrativa durable
 

@@ -1,0 +1,14 @@
+{
+    "name": "Core",
+    "alias": "core",
+    "description": "Core language registry and static UI catalogs.",
+    "keywords": [
+        "core",
+        "localization"
+    ],
+    "priority": 0,
+    "providers": [
+        "Modules\\Core\\Providers\\CoreServiceProvider"
+    ],
+    "files": []
+}

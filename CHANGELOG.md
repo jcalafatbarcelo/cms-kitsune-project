@@ -52,6 +52,11 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
   las primeras pantallas mutables del backoffice.
 - ADR-0003 aceptado para limitar la persistencia a SQLite moderno en desarrollo
   y a las series LTS MySQL 8.4 y MariaDB 11.4 en producción.
+- Módulo Core con registro persistente de idiomas, inglés base, predeterminados
+  globales, `UI catalogs` JSON validados y fallback configurable.
+- Comandos Artisan para instalar, validar, listar, activar, desactivar y cambiar
+  los idiomas predeterminados sin depender de un backoffice.
+- Guías de instalación, administración de idiomas y desarrollo de `UI catalogs`.
 
 ### Modificado
 
@@ -92,6 +97,8 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Reforzada la Spec de fundación de idiomas con una matriz CI multi-motor que
   verifica versiones y demuestra en SQLite, MySQL y MariaDB el rechazo de un
   segundo registro de `language_settings`.
+- Ampliado el quality gate con una matriz de integración fijada para SQLite,
+  MySQL 8.4.11 y MariaDB 11.4.13.
 
 ### Eliminado
 
@@ -100,4 +107,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-09-20 00:52 UTC
+Fecha de última modificación: 2026-09-20 08:28 UTC

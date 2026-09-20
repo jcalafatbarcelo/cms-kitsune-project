@@ -8,9 +8,9 @@ y extensible, construido mediante **Spec Driven Development (SDD)**.
 
 > [!WARNING]
 > **Este repositorio se encuentra en desarrollo inicial.** Ya dispone de un
-> bootstrap ejecutable de Laravel y controles básicos de calidad, pero los
-> módulos funcionales del CMS descritos en este documento siguen previstos y no
-> deben interpretarse como disponibles salvo indicación expresa.
+> bootstrap ejecutable, el módulo Core con fundación estática de idiomas y
+> controles de calidad. Páginas, PageBuilder, medios, menús y administración web
+> siguen previstos y no deben interpretarse como disponibles.
 
 ## Objetivos principales
 
@@ -51,8 +51,8 @@ definida en Specs concretas y aprobadas.
   en su último patch mantenido, manteniendo Eloquent como capa de persistencia.
   Las versiones legacy y las ramas de innovación quedan fuera de soporte.
 - **Infraestructura modular disponible:** `nWidart/laravel-modules` 13 para
-  descubrir y cargar módulos futuros. Los módulos de dominio todavía no están
-  implementados.
+  descubrir y cargar módulos. Core registra idiomas, predeterminados globales y
+  `UI catalogs`; los demás módulos de dominio todavía no están implementados.
 - **Frontend previsto:** Blade como base del backoffice y del sitio público, con
   Vue 3 y Composition API para el PageBuilder y otras islas interactivas. Vue
   todavía no está incorporado al proyecto.
@@ -86,6 +86,12 @@ el formato de almacenamiento de su contenido.
 - [`docs/architecture/localization-roadmap.md`](docs/architecture/localization-roadmap.md):
   secuencia prevista para idiomas, `UI catalogs`, overrides, negociación HTTP y
   contenido localizado, con su estado de avance.
+- [`docs/administration/languages.md`](docs/administration/languages.md):
+  operación de idiomas mediante los comandos Artisan disponibles.
+- [`docs/developers/ui-catalogs.md`](docs/developers/ui-catalogs.md): contrato,
+  validación y resolución de textos estáticos JSON.
+- [`docs/getting-started/installation.md`](docs/getting-started/installation.md):
+  requisitos, instalación y configuración de persistencia y fallback.
 - [`docs/architecture/continuous-integration.md`](docs/architecture/continuous-integration.md):
   quality gate de CI, comandos locales y validación de workflows.
 - [`docs/architecture/dependency-security.md`](docs/architecture/dependency-security.md):
@@ -161,9 +167,10 @@ GitHub Actions en Pull Requests, pushes a `main`, diariamente y bajo demanda.
 ## Estado del proyecto
 
 El repositorio contiene el bootstrap ejecutable de Laravel, configuración de
-Pest con pruebas iniciales, compilación frontend con Vite y auditorías
-automatizadas de dependencias. Los módulos de dominio del CMS todavía no están
-implementados; se incorporarán mediante Specs concretas y aprobadas.
+Pest, compilación frontend con Vite, auditorías automatizadas de dependencias y
+el módulo Core con registro de idiomas, `UI catalogs`, fallback y administración
+manual mediante Artisan. Los módulos de páginas, medios, menús y PageBuilder se
+incorporarán mediante Specs concretas y aprobadas.
 
 La documentación canónica se mantendrá en el repositorio. La selección de un
 portal público y la posible incorporación de una wiki asistida por IA se

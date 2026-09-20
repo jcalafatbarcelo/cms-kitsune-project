@@ -50,6 +50,105 @@ jobs:
       - name: Run test suite
         run: composer test
 
+  database-integration:
+    name: Database integration (${{ matrix.database }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - database: sqlite
+            connection: sqlite
+            database-name: ":memory:"
+            image: ""
+            admin-command: ""
+          - database: mysql
+            connection: mysql
+            database-name: kitsune_test
+            image: "mysql:8.4.11@sha256:85b9bf2e29cf836ecb8c2a15a935d4ba0c606631dff1dd79531a11983c638f2a"
+            admin-command: mysqladmin
+          - database: mariadb
+            connection: mariadb
+            database-name: kitsune_test
+            image: "mariadb:11.4.13@sha256:70cc072b29b4a89ae07abb2d4da2c64678a7f2dfe092751bb51c87d67dc1338b"
+            admin-command: mariadb-admin
+    env:
+      APP_ENV: testing
+      CMS_UI_CATALOG_FALLBACK_MODE: key
+      DB_CONNECTION: ${{ matrix.connection }}
+      DB_DATABASE: ${{ matrix.database-name }}
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USERNAME: kitsune
+      DB_PASSWORD: kitsune_test_password
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: "8.5"
+          extensions: pdo_mysql, pdo_sqlite
+          tools: composer:v2
+          coverage: none
+        env:
+          fail-fast: "true"
+          update: "true"
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate --ansi
+          php artisan config:clear --ansi
+
+      - name: Start database service
+        if: matrix.image != ''
+        env:
+          DATABASE_IMAGE: ${{ matrix.image }}
+        run: |
+          docker run --detach --name kitsune-database --publish 3306:3306 \
+            --env MYSQL_DATABASE=kitsune_test \
+            --env MYSQL_USER=kitsune \
+            --env MYSQL_PASSWORD=kitsune_test_password \
+            --env MYSQL_ROOT_PASSWORD=kitsune_root_test_password \
+            --env MARIADB_DATABASE=kitsune_test \
+            --env MARIADB_USER=kitsune \
+            --env MARIADB_PASSWORD=kitsune_test_password \
+            --env MARIADB_ROOT_PASSWORD=kitsune_root_test_password \
+            "${DATABASE_IMAGE}"
+
+      - name: Wait for database service
+        if: matrix.image != ''
+        env:
+          ADMIN_COMMAND: ${{ matrix.admin-command }}
+        run: |
+          for attempt in {1..60}; do
+            if docker exec kitsune-database "${ADMIN_COMMAND}" ping \
+              --host=127.0.0.1 \
+              --user=kitsune \
+              --password=kitsune_test_password \
+              --silent; then
+              exit 0
+            fi
+
+            echo "Database not ready (attempt ${attempt}/60)."
+            sleep 2
+          done
+
+          docker logs kitsune-database
+          exit 1
+
+      - name: Run database integration test
+        run: php artisan test tests/Feature/Core/LanguageInstallationTest.php
+
   frontend-build:
     name: Frontend build
     runs-on: ubuntu-24.04

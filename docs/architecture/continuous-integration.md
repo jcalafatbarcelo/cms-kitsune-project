@@ -20,6 +20,7 @@ Todos los jobs usan `ubuntu-24.04`, fijan las Actions por commit SHA, declaran
 | Job | Entorno | Comprobaciones |
 | :--- | :--- | :--- |
 | `PHP quality` | PHP 8.5, último patch; Composer 2 | `composer install` reproducible, formato con Pint y suite de Pest. |
+| `Database integration (motor)` | PHP 8.5; SQLite 3.45+, MySQL 8.4.11 y MariaDB 11.4.13 | Versión efectiva, migración limpia y restricciones persistentes de Core. |
 | `Frontend build` | Node 24 LTS, último patch; npm incluido | `npm ci` y compilación de assets con Vite. |
 | `Workflow lint` | `actionlint` 1.7.12 | Validez de los workflows de `.github/workflows/`. |
 
@@ -86,22 +87,18 @@ el workflow se haya publicado y sus ejecuciones sean estables.
 - Caché de dependencias de Composer en CI.
 - Despliegue o verificación de entornos remotos.
 
-## Matriz de bases de datos prevista
+## Matriz de bases de datos
 
-La CI actual ejecuta Pest únicamente con SQLite en memoria. Esto es suficiente
-para el bootstrap sin tablas de dominio, pero no demuestra compatibilidad con la
-persistencia de producción.
-
-Cuando se implemente LOC-01 mediante la
-[SPEC de fundación de idiomas estáticos](../specs/SPEC-static-language-foundation.md),
-el quality gate deberá añadir pruebas de integración sobre la baseline del
+La suite completa de `PHP quality` usa SQLite en memoria. El job `Database
+integration` ejecuta además la misma prueba enfocada de instalación sobre la
+baseline del
 [ADR-0003](../adr/ADR-0003-baseline-moderna-de-bases-de-datos.md):
 
 | Motor | Baseline | Uso |
 | :--- | :--- | :--- |
 | SQLite | `>= 3.45.0`, paquete con actualizaciones de seguridad | Desarrollo y pruebas; no producción |
-| MySQL | `8.4.x LTS`, último patch mantenido y fijado | Producción y pruebas de integración |
-| MariaDB | `11.4.x LTS`, último patch mantenido y fijado | Producción y pruebas de integración |
+| MySQL | `8.4.11`, imagen fijada por digest | Producción y pruebas de integración |
+| MariaDB | `11.4.13`, imagen fijada por digest | Producción y pruebas de integración |
 
 Cada entrada consultará la versión efectiva del motor y fallará si no cumple la
 baseline. La matriz ejecutará las migraciones y las pruebas de integridad
@@ -111,9 +108,16 @@ ejecución. Los servicios fijarán la versión exacta y el digest de imagen cuan
 aplique; actualizar un patch requerirá la revisión reproducible de dependencias,
 no una etiqueta flotante.
 
-Esta sección describe un gate aprobado pero todavía no implementado. Hasta que
-LOC-01 lo incorpore, `PHP quality` continúa siendo una ejecución solo sobre
-SQLite y no constituye evidencia de compatibilidad MySQL/MariaDB.
+SQLite se ejecuta directamente en el runner. Las otras entradas inician
+contenedores efímeros con base, usuario y contraseñas ficticias de testing. Solo
+la prueba `tests/Feature/Core/LanguageInstallationTest.php` se repite en los tres
+motores; la suite completa no se triplica.
+
+Para reproducir MySQL o MariaDB en local se necesita un contenedor de la misma
+imagen, una base vacía y las variables `DB_CONNECTION`, `DB_HOST`, `DB_PORT`,
+`DB_DATABASE`, `DB_USERNAME` y `DB_PASSWORD`. Las credenciales reales permanecen
+fuera de Git. Los patches y digests se actualizan mediante una revisión manual de
+dependencias con ejecución real de la matriz.
 
 ## Fuentes de verdad
 
