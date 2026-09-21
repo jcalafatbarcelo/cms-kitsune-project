@@ -1,0 +1,8 @@
+{
+    "schema_version": 1,
+    "identifier": "base",
+    "name": "Base",
+    "presentations": [
+        "public.page.standard"
+    ]
+}

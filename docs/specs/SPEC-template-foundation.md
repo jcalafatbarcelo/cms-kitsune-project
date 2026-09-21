@@ -1,6 +1,6 @@
 # SPEC: Fundación de CMS Templates
 
-- **Estado:** Borrador
+- **Estado:** Aprobada
 - **Perfil:** feature
 - **Origen de la planificación:** Decisiones del responsable del proyecto sobre
   CMS Templates y [ADR-0004](../adr/ADR-0004-arquitectura-de-cms-templates.md).

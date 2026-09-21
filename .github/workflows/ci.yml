@@ -161,7 +161,7 @@ jobs:
           exit 1
 
       - name: Run database integration test
-        run: php artisan test tests/Feature/Core/LanguageInstallationTest.php
+        run: php artisan test tests/Feature/Core/LanguageInstallationTest.php tests/Feature/Core/TemplateFoundationTest.php
 
   frontend-build:
     name: Frontend build
