@@ -38,6 +38,8 @@ test('a clean installation registers Base and enforces the template settings sin
 })->group('database-integration');
 
 test('sync registers a valid deployed template and preserves transactional safety', function () {
+    file_put_contents($this->templateRoot.DIRECTORY_SEPARATOR.'README.md', 'not a package');
+    mkdir($this->templateRoot.DIRECTORY_SEPARATOR.'.metadata');
     writeTemplate($this->templateRoot, 'Acme', 'acme');
 
     $this->templates->sync();

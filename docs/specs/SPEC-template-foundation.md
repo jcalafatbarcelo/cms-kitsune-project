@@ -130,6 +130,9 @@ textos de interfaz propios.
   `Templates/<Nombre>`; no se recorren subdirectorios ni rutas configurables. El
   nombre del directorio debe tener entre 1 y 100 caracteres ASCII alfanuméricos,
   empezar por una letra y no incluir espacios, puntos ni separadores.
+- Los archivos regulares y directorios ocultos directamente bajo `Templates/` no
+  son paquetes y se ignoran durante la sincronización. Enlaces simbólicos y
+  entradas especiales se rechazan como inseguras.
 - La identidad de directorio usa `directory_key`, obtenido al convertir el nombre
   ASCII del directorio a minúsculas. Dos directorios cuyo nombre solo difiera en
   mayúsculas o minúsculas, como `Acme` y `acme`, colisionan y hacen que `sync`

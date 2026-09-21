@@ -49,7 +49,7 @@ class CoreServiceProvider extends ServiceProvider
             LanguageManager::class,
             fn ($app) => new LanguageManager($app->make(UiCatalogRepository::class)),
         );
-        $this->app->singleton(TemplateManager::class, fn () => new TemplateManager((string) config('core.template_path')));
+        $this->app->singleton(TemplateManager::class, fn () => new TemplateManager(base_path('Templates')));
     }
 
     public function boot(): void

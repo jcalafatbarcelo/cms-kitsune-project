@@ -37,9 +37,15 @@ class TemplateManager
             if ($entry->isDot()) {
                 continue;
             }
-            if (! $entry->isDir() || $entry->isLink()) {
+
+            if ($entry->isLink() || (! $entry->isDir() && ! $entry->isFile())) {
                 throw new TemplateOperationException('Template root contains an unsafe entry.');
             }
+
+            if (! $entry->isDir() || str_starts_with($entry->getFilename(), '.')) {
+                continue;
+            }
+
             $snapshot = $this->validator->inspect($entry->getFilename());
             if (isset($snapshots[$snapshot['directory_key']])) {
                 throw new TemplateOperationException('Template directories collide by case.');
