@@ -30,7 +30,7 @@ Fuentes relacionadas:
 
 | Orden | Incremento | Estado | Entrada | Resultado verificable |
 | :--- | :--- | :--- | :--- | :--- |
-| 1 | Fundación de CMS Templates | En validación | ADR-0004 aceptado | Base, manifiesto, ciclo de vida local y predeterminado gestionados por Core |
+| 1 | Fundación de CMS Templates | Completado | ADR-0004 aceptado | Base, manifiesto, ciclo de vida local y predeterminado gestionados por Core |
 | 2 | Fundación de Pages | Previsto | Fundación de CMS Templates completada | `Page`/`PageTranslation`, jerarquía, publicación en cascada y primera página Base renderizada en Blade |
 | 3 | Rutas públicas localizadas | Previsto | Pages especificado y registro de idiomas estable | Locale de petición, URL canónica, resolución a traducción, redirecciones y cambio de idioma sin salto a otra página |
 | 4 | Fundación de Navigation | Previsto | Pages y rutas públicas localizadas completadas | Menús independientes, ítems traducibles y visibilidad según disponibilidad pública |
@@ -38,10 +38,10 @@ Fuentes relacionadas:
 | 6 | Extensiones de CMS Templates | Previsto | PageBuilder o una necesidad de presentación comprobable | UI catalogs propios, configuración, assets, presentaciones y bloques aportados por templates |
 | 7 | Tematización de vistas de sistema | Previsto | Módulo funcional y contrato de cada vista disponibles | Apariencia intercambiable de login, recuperación o backoffice sin alterar sus rutas, autorización o lógica |
 
-El primer paso está implementado localmente mediante `SPEC-template-foundation`,
-pero requiere cerrar su matriz MySQL/MariaDB antes de considerarse completado. La
-finalización no autoriza automáticamente el paso 2: requiere su propia Spec
-concreta y aprobación explícita.
+El primer paso está implementado mediante `SPEC-template-foundation` y su matriz
+SQLite, MySQL y MariaDB está verificada. La finalización no autoriza
+automáticamente el paso 2: requiere su propia Spec concreta y aprobación
+explícita.
 
 ## Dependencias de localización
 

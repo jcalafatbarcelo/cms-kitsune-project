@@ -48,22 +48,27 @@ o seleccionar un template.
 ## Validación multi-motor
 
 La fundación debe verificarse también contra MySQL 8.4 y MariaDB 11.4, además de
-SQLite. Para iniciar MySQL localmente sin ocupar el puerto interno del motor,
-usa el puerto host `3306`:
+SQLite. Para iniciar MySQL localmente, publícalo solo en loopback mediante el
+puerto host `3306`. Introduce credenciales de prueba locales fuera del
+historial de la shell; no reutilices una contraseña real:
 
 ```powershell
-docker run --detach --name kitsune-mysql --publish 3306:3306 `
+$env:MYSQL_PASSWORD = Read-Host 'Contraseña para el usuario de prueba kitsune'
+$env:MYSQL_ROOT_PASSWORD = Read-Host 'Contraseña para root de MySQL'
+$env:MYSQL_PWD = $env:MYSQL_PASSWORD
+
+docker run --detach --name kitsune-mysql --publish 127.0.0.1:3306:3306 `
   --env MYSQL_DATABASE=kitsune_test `
   --env MYSQL_USER=kitsune `
-  --env MYSQL_PASSWORD=kitsune_test_password `
-  --env MYSQL_ROOT_PASSWORD=kitsune_root_test_password `
+  --env MYSQL_PASSWORD `
+  --env MYSQL_ROOT_PASSWORD `
   mysql:8.4.11 --log-bin-trust-function-creators=1
 ```
 
 Espera a que el servicio responda y ejecuta las pruebas con el mismo puerto:
 
 ```powershell
-docker exec kitsune-mysql mysqladmin ping --host=127.0.0.1 --user=kitsune --password=kitsune_test_password --silent
+docker exec --env MYSQL_PWD kitsune-mysql mysqladmin ping --host=127.0.0.1 --user=kitsune --silent
 
 $env:APP_ENV='testing'
 $env:CMS_UI_CATALOG_FALLBACK_MODE='key'
@@ -72,7 +77,7 @@ $env:DB_DATABASE='kitsune_test'
 $env:DB_HOST='127.0.0.1'
 $env:DB_PORT='3306'
 $env:DB_USERNAME='kitsune'
-$env:DB_PASSWORD='kitsune_test_password'
+$env:DB_PASSWORD=$env:MYSQL_PASSWORD
 php artisan config:clear
 php artisan test tests/Feature/Core/LanguageInstallationTest.php tests/Feature/Core/TemplateFoundationTest.php
 ```
