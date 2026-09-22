@@ -22,7 +22,7 @@ class TemplateManifestValidator
         $rootPath = realpath($this->root);
         $resolvedPath = realpath($templatePath);
 
-        if ($rootPath === false || $resolvedPath === false || ! is_dir($resolvedPath)
+        if (is_link($templatePath) || $rootPath === false || $resolvedPath === false || ! is_dir($resolvedPath)
             || dirname($resolvedPath) !== $rootPath) {
             throw new TemplateOperationException("Template directory [$directory] is unavailable or unsafe.");
         }
@@ -54,13 +54,18 @@ class TemplateManifestValidator
             || ! preg_match('/^[a-z][a-z0-9-]{0,99}$/D', $manifest['identifier'])
             || ! is_string($manifest['name'])
             || $manifest['name'] === ''
-            || strlen($manifest['name']) > 100
+            || mb_strlen($manifest['name'], 'UTF-8') > 100
             || preg_match('/[\x00-\x1F\x7F]/', $manifest['name'])
             || ! is_array($manifest['presentations'])
             || count($manifest['presentations']) < 1
             || count($manifest['presentations']) > 100) {
             throw new TemplateOperationException("Template manifest [$directory] has an unsupported schema.");
         }
+
+        $viewsPath = $resolvedPath.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'views';
+        $this->assertSafeDirectory($resolvedPath.DIRECTORY_SEPARATOR.'Resources', $resolvedPath);
+        $this->assertSafeDirectory($viewsPath, $resolvedPath);
+        $resolvedViewsPath = realpath($viewsPath);
 
         if ($directory === 'Base' && $manifest['identifier'] !== 'base') {
             throw new TemplateOperationException('Base must use the [base] identifier.');
@@ -73,8 +78,13 @@ class TemplateManifestValidator
                 throw new TemplateOperationException("Template [$directory] has an invalid presentation.");
             }
 
-            $viewPath = $resolvedPath.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.str_replace('.', DIRECTORY_SEPARATOR, $presentation).'.blade.php';
-            if (is_link($viewPath) || ! is_file($viewPath)) {
+            $relativePath = str_replace('.', DIRECTORY_SEPARATOR, $presentation).'.blade.php';
+            $viewPath = $viewsPath.DIRECTORY_SEPARATOR.$relativePath;
+            $this->assertSafePathComponents($viewsPath, $relativePath);
+            $resolvedViewPath = realpath($viewPath);
+
+            if ($resolvedViewPath === false || ! is_file($resolvedViewPath)
+                || ! str_starts_with($resolvedViewPath, $resolvedViewsPath.DIRECTORY_SEPARATOR)) {
                 throw new TemplateOperationException("Template [$directory] is missing the Blade for [$presentation].");
             }
         }
@@ -86,5 +96,28 @@ class TemplateManifestValidator
             'name' => $manifest['name'],
             'manifest_hash' => hash('sha256', $bytes),
         ];
+    }
+
+    private function assertSafeDirectory(string $path, string $templatePath): void
+    {
+        $resolvedPath = realpath($path);
+
+        if (is_link($path) || $resolvedPath === false || ! is_dir($resolvedPath)
+            || ! str_starts_with($resolvedPath, $templatePath.DIRECTORY_SEPARATOR)) {
+            throw new TemplateOperationException('Template views directory is unavailable or unsafe.');
+        }
+    }
+
+    private function assertSafePathComponents(string $basePath, string $relativePath): void
+    {
+        $currentPath = $basePath;
+
+        foreach (explode(DIRECTORY_SEPARATOR, $relativePath) as $component) {
+            $currentPath .= DIRECTORY_SEPARATOR.$component;
+
+            if (is_link($currentPath)) {
+                throw new TemplateOperationException('Template Blade path contains a symbolic link.');
+            }
+        }
     }
 }

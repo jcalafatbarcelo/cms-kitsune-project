@@ -34,7 +34,9 @@ test('a clean installation registers Base and enforces the template settings sin
             'default_template_id' => $base->id,
             'created_at' => now(),
             'updated_at' => now(),
-        ]))->toThrow(QueryException::class);
+        ]))->toThrow(QueryException::class)
+        ->and(fn () => DB::table('cms_template_settings')->where('id', 1)->delete())
+        ->toThrow(QueryException::class);
 })->group('database-integration');
 
 test('sync registers a valid deployed template and preserves transactional safety', function () {
@@ -65,6 +67,31 @@ test('activation and default selection reject a changed manifest identity', func
         ->and(fn () => $this->templates->setDefault('acme'))
         ->toThrow(TemplateOperationException::class);
 });
+
+test('manifest validation counts multibyte names by character count', function () {
+    writeTemplate($this->templateRoot, 'Acme', 'acme');
+    $manifest = $this->templateRoot.DIRECTORY_SEPARATOR.'Acme'.DIRECTORY_SEPARATOR.'template.json';
+    $data = json_decode(file_get_contents($manifest), true, flags: JSON_THROW_ON_ERROR);
+    $data['name'] = str_repeat("\xC3\xA1", 100);
+    file_put_contents($manifest, json_encode($data, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE));
+
+    $this->templates->sync();
+
+    expect(CmsTemplate::query()->where('identifier', 'acme')->sole()->name)->toBe($data['name']);
+});
+
+test('manifest validation rejects symlinked view components', function () {
+    writeTemplate($this->templateRoot, 'Acme', 'acme');
+
+    $views = $this->templateRoot.DIRECTORY_SEPARATOR.'Acme'.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'views';
+    $target = $this->templateRoot.DIRECTORY_SEPARATOR.'outside';
+    mkdir($target);
+    rename($views.DIRECTORY_SEPARATOR.'public', $target.DIRECTORY_SEPARATOR.'public');
+
+    symlink($target.DIRECTORY_SEPARATOR.'public', $views.DIRECTORY_SEPARATOR.'public');
+
+    expect(fn () => $this->templates->sync())->toThrow(TemplateOperationException::class);
+})->skip(PHP_OS_FAMILY === 'Windows', 'Symbolic link tests run in CI on Linux.');
 
 test('template transitions preserve active and default invariants', function () {
     writeTemplate($this->templateRoot, 'Acme', 'acme');
@@ -134,7 +161,9 @@ function removeTemplateTree(string $path): void
     );
 
     foreach ($iterator as $entry) {
-        $entry->isDir() ? rmdir($entry->getPathname()) : unlink($entry->getPathname());
+        $entry->isLink() || ! $entry->isDir()
+            ? unlink($entry->getPathname())
+            : rmdir($entry->getPathname());
     }
 
     rmdir($path);

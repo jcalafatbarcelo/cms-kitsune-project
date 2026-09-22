@@ -51,6 +51,7 @@ return new class extends Migration
     {
         DB::unprepared('DROP TRIGGER IF EXISTS cms_template_settings_singleton_insert');
         DB::unprepared('DROP TRIGGER IF EXISTS cms_template_settings_singleton_update');
+        DB::unprepared('DROP TRIGGER IF EXISTS cms_template_settings_singleton_delete');
         Schema::dropIfExists('cms_template_settings');
         Schema::dropIfExists('cms_templates');
     }
@@ -60,11 +61,13 @@ return new class extends Migration
         if (DB::getDriverName() === 'sqlite') {
             DB::unprepared("CREATE TRIGGER cms_template_settings_singleton_insert BEFORE INSERT ON cms_template_settings WHEN NEW.id <> 1 BEGIN SELECT RAISE(ABORT, 'cms_template_settings.id must be 1'); END");
             DB::unprepared("CREATE TRIGGER cms_template_settings_singleton_update BEFORE UPDATE OF id ON cms_template_settings WHEN NEW.id <> 1 BEGIN SELECT RAISE(ABORT, 'cms_template_settings.id must be 1'); END");
+            DB::unprepared("CREATE TRIGGER cms_template_settings_singleton_delete BEFORE DELETE ON cms_template_settings BEGIN SELECT RAISE(ABORT, 'cms_template_settings cannot be deleted'); END");
 
             return;
         }
 
         DB::unprepared("CREATE TRIGGER cms_template_settings_singleton_insert BEFORE INSERT ON cms_template_settings FOR EACH ROW BEGIN IF NEW.id <> 1 THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'cms_template_settings.id must be 1'; END IF; END");
         DB::unprepared("CREATE TRIGGER cms_template_settings_singleton_update BEFORE UPDATE ON cms_template_settings FOR EACH ROW BEGIN IF NEW.id <> 1 THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'cms_template_settings.id must be 1'; END IF; END");
+        DB::unprepared("CREATE TRIGGER cms_template_settings_singleton_delete BEFORE DELETE ON cms_template_settings FOR EACH ROW BEGIN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'cms_template_settings cannot be deleted'; END");
     }
 };
