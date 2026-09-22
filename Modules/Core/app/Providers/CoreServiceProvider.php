@@ -13,6 +13,12 @@ use Modules\Core\Language\Services\LanguageManager;
 use Modules\Core\Localization\Services\UiCatalogOwnerRegistry;
 use Modules\Core\Localization\Services\UiCatalogRepository;
 use Modules\Core\Localization\Services\UiCatalogResolver;
+use Modules\Core\Template\Console\ActivateTemplateCommand;
+use Modules\Core\Template\Console\DisableTemplateCommand;
+use Modules\Core\Template\Console\SetDefaultTemplateCommand;
+use Modules\Core\Template\Console\TemplateListCommand;
+use Modules\Core\Template\Console\TemplateSyncCommand;
+use Modules\Core\Template\Services\TemplateManager;
 use Psr\Log\LoggerInterface;
 
 class CoreServiceProvider extends ServiceProvider
@@ -43,6 +49,7 @@ class CoreServiceProvider extends ServiceProvider
             LanguageManager::class,
             fn ($app) => new LanguageManager($app->make(UiCatalogRepository::class)),
         );
+        $this->app->singleton(TemplateManager::class, fn () => new TemplateManager(base_path('Templates')));
     }
 
     public function boot(): void
@@ -56,6 +63,11 @@ class CoreServiceProvider extends ServiceProvider
             ActivateLanguageCommand::class,
             DisableLanguageCommand::class,
             SetDefaultLanguageCommand::class,
+            TemplateListCommand::class,
+            TemplateSyncCommand::class,
+            ActivateTemplateCommand::class,
+            DisableTemplateCommand::class,
+            SetDefaultTemplateCommand::class,
         ]);
     }
 }

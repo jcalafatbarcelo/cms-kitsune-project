@@ -57,6 +57,9 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Comandos Artisan para instalar, validar, listar, activar, desactivar y cambiar
   los idiomas predeterminados sin depender de un backoffice.
 - Guías de instalación, administración de idiomas y desarrollo de `UI catalogs`.
+- Fundación de CMS Templates: Base integrado, manifiestos JSON validados,
+  sincronización local, invariantes persistentes y comandos Artisan para su
+  ciclo de vida.
 
 ### Modificado
 
@@ -109,4 +112,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-09-20 13:27 UTC
+Fecha de última modificación: 2026-09-21 18:46 UTC

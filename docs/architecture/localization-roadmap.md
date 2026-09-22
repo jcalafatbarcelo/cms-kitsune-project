@@ -238,6 +238,9 @@ Antes de continuar cualquier incremento:
 7. No marcar un incremento como completado hasta cerrar aceptación, pruebas,
    documentación y quality gate.
 
-El siguiente incremento candidato es LOC-02. Requiere planificación, una Spec
-concreta y aprobación antes de implementar overrides; la finalización de LOC-01
-no autoriza ese alcance posterior.
+El siguiente incremento candidato dentro de la línea de localización es LOC-02.
+Requiere planificación, una Spec concreta y aprobación antes de implementar
+overrides; la finalización de LOC-01 no autoriza ese alcance posterior. La
+secuencia independiente de CMS Templates, Pages, navegación y PageBuilder se
+coordina en el [roadmap de contenido, templates y navegación](content-delivery-roadmap.md)
+y no altera por sí misma el estado de ninguna fila `LOC-*`.
