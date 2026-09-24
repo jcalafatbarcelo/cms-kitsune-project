@@ -48,8 +48,7 @@ localizadas, la selección HTTP de locale y PageBuilder a incrementos posteriore
 - Renderizar una Page pública mínima mediante el Blade convencional de Base, sin
   permitir que datos editoriales resuelvan una vista arbitraria.
 - Proporcionar una vía reproducible y autorizable para crear, traducir y publicar
-  la primera Page; su contrato concreto queda pendiente de decisión en este
-  borrador.
+  la primera Page mediante los comandos Artisan definidos en esta Spec.
 
 ### Fuera de alcance
 
@@ -109,7 +108,7 @@ localizadas, la selección HTTP de locale y PageBuilder a incrementos posteriore
 
 ## 5. Requisitos y bloques técnicos aplicables
 
-### Dominio e invariantes propuestos
+### Dominio e invariantes
 
 - Una `Page` es la identidad estable de contenido y puede tener una Page padre o
   ser raíz. No puede ser su propia ancestro ni formar ciclos.
@@ -142,9 +141,9 @@ localizadas, la selección HTTP de locale y PageBuilder a incrementos posteriore
   templates será atómica y bloqueará los registros implicados cuando el motor lo
   permita.
 
-### Entidades y migraciones propuestas
+### Entidades y migraciones
 
-La decisión final de campos editoriales está abierta. La base candidata es:
+Este incremento no persiste contenido editorial. Su esquema es:
 
 ```text
 pages
@@ -189,8 +188,10 @@ page_language_homes
 - La integridad que un motor no pueda expresar portablemente, como la ausencia de
   ciclos transitivos o la correspondencia de publicación de ancestros por idioma,
   se impondrá en el servicio de dominio y mediante pruebas de integración.
-- La semántica de publicación, nombres de tablas definitivos, nulabilidad y
-  límites de los campos pendientes no pueden aprobarse hasta resolver D-01.
+- Las tablas, nulabilidad y límites de este incremento quedan fijados por este
+  esquema: `title` es obligatorio con un máximo de 255 caracteres, `slug` es
+  obligatorio con un máximo de 100 caracteres y ambos estados de publicación son
+  booleanos con valor predeterminado `false`.
 
 ### Renderizado, HTTP y contratos
 
@@ -243,15 +244,15 @@ cms:page:set-home {page} {locale}
 
 ### Seguridad y validación
 
-- Las entradas editoriales usarán validación cerrada de tipos, tamaño, UTF-8 y
-  caracteres de control según los límites que se aprueben en D-01.
+- `title` debe ser texto UTF-8 no vacío de hasta 255 caracteres y no admite
+  caracteres de control. El slug cumple la gramática y el límite definidos en el
+  esquema antes de persistirse.
 - Los slugs no podrán convertirse en rutas de filesystem, nombres de vista ni
   identificadores de template.
 - Las claves de UI se validarán conforme al contrato de UI catalogs y las claves
   editoriales futuras no admitirán el separador reservado `::`.
-- El contenido se escapará por defecto en Blade. La admisión de HTML enriquecido
-  queda fuera del incremento salvo que la decisión D-01 lo incluya junto con una
-  política de sanitización verificable.
+- El contenido se escapará por defecto en Blade. HTML enriquecido y contenido
+  editorial quedan fuera de este incremento.
 - No se registrarán contenidos editoriales completos en diagnósticos.
 
 ## 6. Calidad, seguridad y deuda
