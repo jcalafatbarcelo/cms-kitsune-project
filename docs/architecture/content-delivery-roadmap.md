@@ -43,6 +43,11 @@ SQLite, MySQL y MariaDB está verificada. La finalización no autoriza
 automáticamente el paso 2: requiere su propia Spec concreta y aprobación
 explícita.
 
+`SPEC-pages-foundation` está aprobada para su implementación. Prevé que la
+primera presentación estática resuelva las claves semánticas de UI a través del
+propietario del template efectivo, sin persistir prefijos como `base::` en Pages.
+Esta integración sigue prevista y no está disponible hasta implementar su Spec.
+
 ## Dependencias de localización
 
 La secuencia principal no sustituye `LOC-02` a `LOC-08` ni altera sus estados.
