@@ -2,6 +2,7 @@
 
 namespace Modules\Pages\Services;
 
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Language\Models\Language;
 use Modules\Core\Template\Models\CmsTemplate;
@@ -18,51 +19,67 @@ class PageManager
 
     public function create(string $locale, string $slug, string $title, ?int $parentId = null, ?string $templateIdentifier = null): PageTranslation
     {
-        return DB::transaction(function () use ($locale, $slug, $title, $parentId, $templateIdentifier) {
-            $language = $this->language($locale);
-            $this->validateText($slug, $title);
-            $home = PageLanguageHome::query()->lockForUpdate()->find($language->id);
-            $template = $this->template($templateIdentifier);
-            $page = Page::query()->create([
-                'parent_id' => $parentId,
-                'uses_explicit_template' => $templateIdentifier !== null,
-                'explicit_template_id' => $templateIdentifier === null ? null : $template->id,
-                'presentation_key' => 'public.page.standard',
-                'is_published' => $home === null,
-            ]);
-            $translation = PageTranslation::query()->create([
-                'page_id' => $page->id,
-                'language_id' => $language->id,
-                'title' => $title,
-                'slug' => $slug,
-                'is_published' => $home === null,
-            ]);
-            if ($home === null) {
-                $this->setHomeLocked($language, $translation);
-            }
+        try {
+            return DB::transaction(function () use ($locale, $slug, $title, $parentId, $templateIdentifier) {
+                $language = $this->language($locale);
+                $this->validateText($slug, $title);
+                if ($parentId !== null && Page::query()->lockForUpdate()->find($parentId) === null) {
+                    throw new PageOperationException("Parent page [$parentId] is not available.");
+                }
+                $this->ensureSlugIsAvailable($language->id, $slug);
+                $home = PageLanguageHome::query()->lockForUpdate()->find($language->id);
+                $template = $this->template($templateIdentifier);
+                $page = Page::query()->create([
+                    'parent_id' => $parentId,
+                    'uses_explicit_template' => $templateIdentifier !== null,
+                    'explicit_template_id' => $templateIdentifier === null ? null : $template->id,
+                    'presentation_key' => 'public.page.standard',
+                    'is_published' => $home === null,
+                ]);
+                $translation = PageTranslation::query()->create([
+                    'page_id' => $page->id,
+                    'language_id' => $language->id,
+                    'title' => $title,
+                    'slug' => $slug,
+                    'is_published' => $home === null,
+                ]);
+                if ($home === null) {
+                    $this->setHomeLocked($language, $translation);
+                }
 
-            return $translation;
-        }, attempts: 5);
+                return $translation;
+            }, attempts: 5);
+        } catch (QueryException $exception) {
+            $this->throwExpectedConstraintError($exception);
+        }
     }
 
     public function translate(int $pageId, string $locale, string $slug, string $title): PageTranslation
     {
-        return DB::transaction(function () use ($pageId, $locale, $slug, $title) {
-            $language = $this->language($locale);
-            $this->validateText($slug, $title);
-            $page = Page::query()->lockForUpdate()->find($pageId);
-            if ($page === null) {
-                throw new PageOperationException("Page [$pageId] is not available.");
-            }
-            $home = PageLanguageHome::query()->lockForUpdate()->find($language->id);
-            $translation = PageTranslation::query()->create(['page_id' => $page->id, 'language_id' => $language->id, 'title' => $title, 'slug' => $slug, 'is_published' => $home === null]);
-            if ($home === null) {
-                $page->update(['is_published' => true]);
-                $this->setHomeLocked($language, $translation);
-            }
+        try {
+            return DB::transaction(function () use ($pageId, $locale, $slug, $title) {
+                $language = $this->language($locale);
+                $this->validateText($slug, $title);
+                $page = Page::query()->lockForUpdate()->find($pageId);
+                if ($page === null) {
+                    throw new PageOperationException("Page [$pageId] is not available.");
+                }
+                if (PageTranslation::query()->where('page_id', $page->id)->where('language_id', $language->id)->lockForUpdate()->exists()) {
+                    throw new PageOperationException("Page [$pageId] already has a translation for [$locale].");
+                }
+                $this->ensureSlugIsAvailable($language->id, $slug);
+                $home = PageLanguageHome::query()->lockForUpdate()->find($language->id);
+                $translation = PageTranslation::query()->create(['page_id' => $page->id, 'language_id' => $language->id, 'title' => $title, 'slug' => $slug, 'is_published' => $home === null]);
+                if ($home === null) {
+                    $page->update(['is_published' => true]);
+                    $this->setHomeLocked($language, $translation);
+                }
 
-            return $translation;
-        }, attempts: 5);
+                return $translation;
+            }, attempts: 5);
+        } catch (QueryException $exception) {
+            $this->throwExpectedConstraintError($exception);
+        }
     }
 
     public function publish(int $pageId, string $locale): void
@@ -80,7 +97,8 @@ class PageManager
             $translation = $this->translation($pageId, $locale);
             $language = $this->language($locale);
             $home = PageLanguageHome::query()->lockForUpdate()->find($language->id);
-            if ($home?->page_translation_id === $translation->id) {
+            $homeTranslation = $home === null ? null : PageTranslation::query()->with('page')->find($home->page_translation_id);
+            if ($homeTranslation !== null && $this->isAncestorOf($translation->page_id, $homeTranslation->page)) {
                 throw new PageOperationException('The home page cannot be unpublished without a replacement.');
             }
             $translation->update(['is_published' => false]);
@@ -159,7 +177,16 @@ class PageManager
 
     private function templateFor(Page $page): CmsTemplate
     {
-        return $this->template($page->uses_explicit_template ? CmsTemplate::query()->find($page->explicit_template_id)?->identifier : null);
+        if (! $page->uses_explicit_template) {
+            return $this->template(null);
+        }
+
+        $template = CmsTemplate::query()->find($page->explicit_template_id);
+        if ($template === null) {
+            throw new PageOperationException("Explicit template [{$page->explicit_template_id}] is not available.");
+        }
+
+        return $this->template($template->identifier);
     }
 
     private function isPublic(PageTranslation $translation, int $languageId): bool
@@ -173,6 +200,35 @@ class PageManager
         }
 
         return true;
+    }
+
+    private function isAncestorOf(int $pageId, Page $page): bool
+    {
+        while (true) {
+            if ($page->id === $pageId) {
+                return true;
+            }
+            if ($page->parent === null) {
+                return false;
+            }
+            $page = $page->parent;
+        }
+    }
+
+    private function ensureSlugIsAvailable(int $languageId, string $slug): void
+    {
+        if (PageTranslation::query()->where('language_id', $languageId)->where('slug', $slug)->lockForUpdate()->exists()) {
+            throw new PageOperationException("Slug [$slug] is already in use for this language.");
+        }
+    }
+
+    private function throwExpectedConstraintError(QueryException $exception): never
+    {
+        if (str_starts_with((string) $exception->getCode(), '23')) {
+            throw new PageOperationException('The page data conflicts with an existing Page or translation.', previous: $exception);
+        }
+
+        throw $exception;
     }
 
     private function validateText(string $slug, string $title): void

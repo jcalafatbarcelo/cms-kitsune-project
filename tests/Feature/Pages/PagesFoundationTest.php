@@ -51,10 +51,65 @@ test('a home page cannot be unpublished without a replacement', function () {
         ->toThrow(PageOperationException::class);
 });
 
+test('an ancestor of the home page cannot be unpublished without a replacement', function () {
+    $pages = app(PageManager::class);
+    $root = PageTranslation::query()->sole();
+    $child = $pages->create('en', 'child', 'Child', $root->page_id);
+    $pages->publish($child->page_id, 'en');
+    $pages->setHome($child->page_id, 'en');
+
+    expect(fn () => $pages->unpublish($root->page_id, 'en'))
+        ->toThrow(PageOperationException::class)
+        ->and($root->fresh()->is_published)->toBeTrue();
+});
+
+test('page creation and translation reject invalid parent and duplicate records with domain errors', function () {
+    $pages = app(PageManager::class);
+    $home = PageTranslation::query()->sole();
+    $pages->create('en', 'about', 'About');
+
+    expect(fn () => $pages->create('en', 'child', 'Child', 999))
+        ->toThrow(PageOperationException::class, 'Parent page [999] is not available.')
+        ->and(fn () => $pages->create('en', 'about', 'Another about'))
+        ->toThrow(PageOperationException::class, 'Slug [about] is already in use for this language.')
+        ->and(fn () => $pages->translate($home->page_id, 'en', 'another-home', 'Another home'))
+        ->toThrow(PageOperationException::class, "Page [{$home->page_id}] already has a translation for [en].");
+});
+
 test('page commands create deterministic draft pages after the initial home', function () {
     $this->artisan('cms:page:create', ['locale' => 'en', 'slug' => 'about', 'title' => 'About'])
         ->expectsOutputToContain('created')
         ->assertSuccessful();
 
     expect(PageTranslation::query()->where('slug', 'about')->sole()->is_published)->toBeFalse();
+});
+
+test('page commands return a controlled failure for domain and catalog errors', function () {
+    $this->artisan('cms:page:create', ['locale' => 'en', 'slug' => 'child', 'title' => 'Child', '--parent' => 999])
+        ->expectsOutputToContain('Parent page [999] is not available.')
+        ->assertFailed();
+
+    $catalog = base_path('Templates/Base/Resources/lang/en.json');
+    $missingCatalog = $catalog.'.missing';
+    rename($catalog, $missingCatalog);
+
+    try {
+        $this->artisan('cms:page:create', ['locale' => 'en', 'slug' => 'catalog-error', 'title' => 'Catalog error'])
+            ->expectsOutputToContain('UI catalog [en] is not a regular file.')
+            ->assertFailed();
+    } finally {
+        rename($missingCatalog, $catalog);
+    }
+});
+
+test('the public route returns service unavailable when its template catalog is invalid', function () {
+    $catalog = base_path('Templates/Base/Resources/lang/en.json');
+    $missingCatalog = $catalog.'.missing';
+    rename($catalog, $missingCatalog);
+
+    try {
+        $this->get('/')->assertServiceUnavailable();
+    } finally {
+        rename($missingCatalog, $catalog);
+    }
 });
