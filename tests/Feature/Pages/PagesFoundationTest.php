@@ -43,6 +43,35 @@ test('the first page translation for an installed language becomes its published
         ->and(PageLanguageHome::query()->where('page_translation_id', $translation->id)->exists())->toBeTrue();
 });
 
+test('automatic home assignment rejects a page whose ancestor is not public in its language', function () {
+    $now = now();
+    DB::table('languages')->insert([
+        'locale' => 'es_ES',
+        'name' => 'Spanish',
+        'native_name' => 'Español',
+        'text_direction' => 'ltr',
+        'is_active' => true,
+        'installed_at' => $now,
+        'created_at' => $now,
+        'updated_at' => $now,
+    ]);
+    $pages = app(PageManager::class);
+    $root = PageTranslation::query()->sole();
+    $languageId = DB::table('languages')->where('locale', 'es_ES')->value('id');
+
+    expect(fn () => $pages->create('es_ES', 'inicio', 'Inicio', $root->page_id))
+        ->toThrow(PageOperationException::class, 'The home page must be publicly available.')
+        ->and(PageLanguageHome::query()->where('language_id', $languageId)->exists())->toBeFalse()
+        ->and(PageTranslation::query()->where('slug', 'inicio')->exists())->toBeFalse();
+
+    $child = $pages->create('en', 'child', 'Child', $root->page_id);
+
+    expect(fn () => $pages->translate($child->page_id, 'es_ES', 'hijo', 'Hijo'))
+        ->toThrow(PageOperationException::class, 'The home page must be publicly available.')
+        ->and(PageLanguageHome::query()->where('language_id', $languageId)->exists())->toBeFalse()
+        ->and(PageTranslation::query()->where('slug', 'hijo')->exists())->toBeFalse();
+});
+
 test('a home page cannot be unpublished without a replacement', function () {
     $home = PageLanguageHome::query()->sole();
     $translation = PageTranslation::query()->findOrFail($home->page_translation_id);

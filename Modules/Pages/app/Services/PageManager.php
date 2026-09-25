@@ -110,7 +110,7 @@ class PageManager
         DB::transaction(function () use ($pageId, $locale) {
             $language = $this->language($locale);
             $translation = $this->translation($pageId, $locale);
-            if (! $translation->is_published || ! $translation->page->is_published || ! $language->is_active) {
+            if (! $language->is_active) {
                 throw new PageOperationException('The home page must be publicly available.');
             }
             $this->setHomeLocked($language, $translation);
@@ -137,6 +137,10 @@ class PageManager
 
     private function setHomeLocked(Language $language, PageTranslation $translation): void
     {
+        if (! $this->isPublic($translation, $language->id)) {
+            throw new PageOperationException('The home page must be publicly available.');
+        }
+
         PageLanguageHome::query()->updateOrCreate(['language_id' => $language->id], ['page_translation_id' => $translation->id]);
     }
 
