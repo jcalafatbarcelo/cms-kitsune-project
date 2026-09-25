@@ -31,7 +31,7 @@ Fuentes relacionadas:
 | Orden | Incremento | Estado | Entrada | Resultado verificable |
 | :--- | :--- | :--- | :--- | :--- |
 | 1 | Fundación de CMS Templates | Completado | ADR-0004 aceptado | Base, manifiesto, ciclo de vida local y predeterminado gestionados por Core |
-| 2 | Fundación de Pages | Previsto | Fundación de CMS Templates completada | `Page`/`PageTranslation`, jerarquía, publicación en cascada y primera página Base renderizada en Blade |
+| 2 | Fundación de Pages | Completado | Fundación de CMS Templates completada | `Page`/`PageTranslation`, jerarquía, publicación en cascada y primera página Base renderizada en Blade |
 | 3 | Rutas públicas localizadas | Previsto | Pages especificado y registro de idiomas estable | Locale de petición, URL canónica, resolución a traducción, redirecciones y cambio de idioma sin salto a otra página |
 | 4 | Fundación de Navigation | Previsto | Pages y rutas públicas localizadas completadas | Menús independientes, ítems traducibles y visibilidad según disponibilidad pública |
 | 5 | Fundación de PageBuilder | Previsto | Pages y contrato de presentación estables | Bloques declarativos, valores por instancia y locale, validación y renderizado Blade |
@@ -42,6 +42,10 @@ El primer paso está implementado mediante `SPEC-template-foundation` y su matri
 SQLite, MySQL y MariaDB está verificada. La finalización no autoriza
 automáticamente el paso 2: requiere su propia Spec concreta y aprobación
 explícita.
+
+`SPEC-pages-foundation` está completada. La primera presentación estática
+resuelve las claves semánticas de UI a través del propietario del template
+efectivo, sin persistir prefijos como `base::` en Pages.
 
 ## Dependencias de localización
 

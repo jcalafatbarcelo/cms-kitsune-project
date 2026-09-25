@@ -1,0 +1,9 @@
+{
+    "name": "Pages",
+    "alias": "pages",
+    "description": "Editorial page identities, translations and public home pages.",
+    "keywords": ["pages", "content"],
+    "priority": 10,
+    "providers": ["Modules\\Pages\\Providers\\PagesServiceProvider"],
+    "files": []
+}

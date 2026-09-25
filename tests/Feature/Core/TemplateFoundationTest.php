@@ -3,6 +3,7 @@
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Localization\Exceptions\CatalogValidationException;
 use Modules\Core\Template\Exceptions\TemplateOperationException;
 use Modules\Core\Template\Models\CmsTemplate;
 use Modules\Core\Template\Services\TemplateManager;
@@ -54,6 +55,15 @@ test('sync registers a valid deployed template and preserves transactional safet
     expect(fn () => $this->templates->sync())
         ->toThrow(TemplateOperationException::class)
         ->and(CmsTemplate::query()->where('identifier', 'broken')->exists())->toBeFalse();
+});
+
+test('sync rejects a standard presentation without its required template UI catalog', function () {
+    writeTemplate($this->templateRoot, 'Acme', 'acme');
+    unlink($this->templateRoot.DIRECTORY_SEPARATOR.'Acme'.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'lang'.DIRECTORY_SEPARATOR.'en.json');
+
+    expect(fn () => $this->templates->sync())
+        ->toThrow(CatalogValidationException::class)
+        ->and(CmsTemplate::query()->where('identifier', 'acme')->exists())->toBeFalse();
 });
 
 test('activation and default selection reject a changed manifest identity', function () {
@@ -139,6 +149,13 @@ function writeTemplate(string $root, string $directory, string $identifier, arra
         'identifier' => $identifier,
         'name' => ucfirst($identifier),
         'presentations' => $presentations,
+    ], JSON_THROW_ON_ERROR));
+
+    $catalog = $path.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'lang';
+    is_dir($catalog) || mkdir($catalog, recursive: true);
+    file_put_contents($catalog.DIRECTORY_SEPARATOR.'en.json', json_encode([
+        $identifier.'::page.home.under-construction.heading' => 'Under construction',
+        $identifier.'::page.home.under-construction.message' => 'This site is being prepared.',
     ], JSON_THROW_ON_ERROR));
 
     foreach ($presentations as $presentation) {

@@ -19,6 +19,7 @@ use Modules\Core\Template\Console\SetDefaultTemplateCommand;
 use Modules\Core\Template\Console\TemplateListCommand;
 use Modules\Core\Template\Console\TemplateSyncCommand;
 use Modules\Core\Template\Services\TemplateManager;
+use Modules\Core\Template\Services\TemplateUiCatalogs;
 use Psr\Log\LoggerInterface;
 
 class CoreServiceProvider extends ServiceProvider
@@ -50,6 +51,10 @@ class CoreServiceProvider extends ServiceProvider
             fn ($app) => new LanguageManager($app->make(UiCatalogRepository::class)),
         );
         $this->app->singleton(TemplateManager::class, fn () => new TemplateManager(base_path('Templates')));
+        $this->app->singleton(TemplateUiCatalogs::class, fn ($app) => new TemplateUiCatalogs(
+            base_path('Templates'),
+            $app->make(LoggerInterface::class),
+        ));
     }
 
     public function boot(): void
