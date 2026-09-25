@@ -16,6 +16,7 @@ class UiCatalogResolver
         private readonly UiCatalogRepository $repository,
         private readonly string $fallbackMode,
         private readonly LoggerInterface $logger,
+        private readonly string $owner = 'core',
     ) {
         if (! in_array($fallbackMode, ['base', 'key'], true)) {
             throw new InvalidArgumentException(
@@ -27,7 +28,7 @@ class UiCatalogResolver
     /** @param array<string, scalar|null> $replace */
     public function get(string $key, string $locale, array $replace = []): string
     {
-        UiCatalogRepository::assertKey($key);
+        UiCatalogRepository::assertKey($key, $this->owner);
         UiCatalogRepository::assertLocale($locale);
 
         $line = $this->line($key, $locale);
@@ -70,7 +71,7 @@ class UiCatalogResolver
                 $this->reportedMissingKeys[$reportKey] = true;
                 $this->logger->warning('UI catalog could not be loaded.', [
                     'locale' => $locale,
-                    'owner' => 'core',
+                    'owner' => $this->owner,
                     'reason' => $exception->getMessage(),
                 ]);
             }

@@ -3,6 +3,7 @@
 namespace Modules\Core\Template\Services;
 
 use JsonException;
+use Modules\Core\Localization\Services\UiCatalogRepository;
 use Modules\Core\Template\Exceptions\TemplateOperationException;
 
 class TemplateManifestValidator
@@ -86,6 +87,18 @@ class TemplateManifestValidator
             if ($resolvedViewPath === false || ! is_file($resolvedViewPath)
                 || ! str_starts_with($resolvedViewPath, $resolvedViewsPath.DIRECTORY_SEPARATOR)) {
                 throw new TemplateOperationException("Template [$directory] is missing the Blade for [$presentation].");
+            }
+        }
+
+        if (in_array('public.page.standard', $manifest['presentations'], true)) {
+            $catalog = (new UiCatalogRepository(
+                $resolvedPath.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'lang',
+                $manifest['identifier'],
+            ))->snapshot('en');
+            foreach (['page.home.under-construction.heading', 'page.home.under-construction.message'] as $key) {
+                if (! array_key_exists($manifest['identifier'].'::'.$key, $catalog->lines)) {
+                    throw new TemplateOperationException("Template [$directory] is missing required UI key [$key].");
+                }
             }
         }
 

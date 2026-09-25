@@ -1,0 +1,7 @@
+{
+    "name": "kitsune/pages-module",
+    "description": "Pages module for CMS Kitsune.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {"psr-4": {"Modules\\Pages\\": "app/"}}
+}

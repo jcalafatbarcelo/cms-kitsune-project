@@ -60,6 +60,9 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Fundación de CMS Templates: Base integrado, manifiestos JSON validados,
   sincronización local, invariantes persistentes y comandos Artisan para su
   ciclo de vida.
+- Fundación de Pages: home inglesa preinstalada, traducciones por idioma,
+  publicación en cascada, selección de template, UI catalogs de templates y
+  operación inicial mediante Artisan.
 
 ### Modificado
 
@@ -112,4 +115,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-09-21 18:46 UTC
+Fecha de última modificación: 2026-09-25 17:55 UTC

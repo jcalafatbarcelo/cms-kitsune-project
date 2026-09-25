@@ -21,7 +21,10 @@ class UiCatalogRepository
 
     private ?string $validatedBaseHash = null;
 
-    public function __construct(private readonly string $catalogDirectory) {}
+    public function __construct(
+        private readonly string $catalogDirectory,
+        private readonly string $owner = 'core',
+    ) {}
 
     public function snapshot(string $locale): UiCatalogSnapshot
     {
@@ -62,10 +65,10 @@ class UiCatalogRepository
         }
     }
 
-    public static function assertKey(string $key): void
+    public static function assertKey(string $key, string $owner = 'core'): void
     {
         if (strlen($key) > self::MAX_KEY_BYTES
-            || ! preg_match('/^core::[a-z0-9]+(?:[._-][a-z0-9]+)*$/D', $key)) {
+            || ! preg_match('/^'.preg_quote($owner, '/').'::[a-z0-9]+(?:[._-][a-z0-9]+)*$/D', $key)) {
             throw new CatalogValidationException('A UI catalog key is invalid.');
         }
     }
@@ -129,7 +132,7 @@ class UiCatalogRepository
                 throw new CatalogValidationException('A UI catalog key is invalid.');
             }
 
-            self::assertKey($key);
+            self::assertKey($key, $this->owner);
 
             if (! is_string($value)
                 || $value === ''

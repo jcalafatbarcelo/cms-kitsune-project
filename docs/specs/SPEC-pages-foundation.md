@@ -1,6 +1,6 @@
 # SPEC: Fundación de Pages
 
-- **Estado:** Aprobada
+- **Estado:** Completada
 - **Perfil:** feature
 - **Origen de la planificación:** Segundo incremento de la secuencia definida en
   el [roadmap de contenido, templates y navegación](../architecture/content-delivery-roadmap.md).
