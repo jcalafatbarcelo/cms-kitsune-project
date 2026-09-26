@@ -6,4 +6,4 @@ use Modules\Pages\Services\PublicPageResolver;
 
 Route::get('/{path?}', fn (PublicPageResolver $resolver, string $path = '') => $resolver->handle(request(), $path))
     ->middleware(StartSession::class)
-    ->where('path', '.*');
+    ->where('path', '^(?!up$).*');

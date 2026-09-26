@@ -32,7 +32,7 @@ class PublicPageResolver
         if ($explicit) {
             $request->session()->put('public_locale', $language->locale);
             if ($language->id === $default->id) {
-                return $this->permanentRedirect($this->url(null, $slugs));
+                return $this->redirect($this->url(null, $slugs));
             }
             if ($segments[0] !== $canonicalPrefix) {
                 return $this->redirect($this->url($language->id === $default->id ? null : $canonicalPrefix, $slugs));

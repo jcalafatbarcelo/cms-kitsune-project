@@ -60,8 +60,10 @@ Los hitos que deben coordinarse son:
   pero no introduce todavía selección HTTP, prefijos ni contenido accesible en
   varios locales.
 - Las rutas públicas localizadas reúnen el flujo HTTP previsto en LOC-05 y la
-  parte de URL, locale y canonicidad de LOC-06. Su Spec decidirá la precedencia
-  exacta sin asumirla en este roadmap.
+  parte de URL, locale y canonicidad de LOC-06. La precedencia implementada es
+  URL explícita, sesión válida, negociación inicial del navegador y, por último,
+  el predeterminado de frontend; véase
+  [SPEC-public-localized-routes](../specs/SPEC-public-localized-routes.md).
 - Navigation necesita la disponibilidad pública localizada para no ofrecer
   destinos sin traducción publicable; su integración con los items de menú de
   LOC-06 se concretará en su propia Spec.

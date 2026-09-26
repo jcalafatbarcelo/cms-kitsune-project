@@ -74,8 +74,8 @@ test('a general language is required before activating a second variant and alia
     DB::table('language_settings')->where('id', 1)->update([
         'frontend_default_language_id' => DB::table('languages')->where('locale', 'es_ES')->value('id'),
     ]);
-    $this->get('/es')->assertRedirect('/')->assertStatus(301);
-    $this->get('/es-es')->assertRedirect('/')->assertStatus(301);
+    $this->get('/es')->assertRedirect('/')->assertStatus(302)->assertHeader('Cache-Control', 'no-store, private');
+    $this->get('/es-es')->assertRedirect('/')->assertStatus(302)->assertHeader('Cache-Control', 'no-store, private');
 });
 
 test('only localized homes retain a trailing slash', function () {
@@ -97,4 +97,29 @@ test('root prefix-shaped slugs are reserved while nested slugs remain valid', fu
         ->toThrow(PageOperationException::class);
     $root = $pages->create('en', 'parent', 'Parent');
     expect($pages->create('en', 'es-es', 'Nested', $root->page_id)->slug)->toBe('es-es');
+});
+
+test('the configured health endpoint bypasses the Pages catch-all', function () {
+    $this->get('/up')->assertOk();
+});
+
+test('a short prefix cannot activate beside a regional URL general language', function () {
+    addPublicLanguage('es_ES', 'es-es', true);
+    $now = now();
+    DB::table('languages')->insert([
+        'locale' => 'es',
+        'url_prefix' => 'es',
+        'name' => 'Spanish',
+        'native_name' => 'Spanish',
+        'text_direction' => 'ltr',
+        'is_active' => false,
+        'is_url_general' => false,
+        'installed_at' => $now,
+        'created_at' => $now,
+        'updated_at' => $now,
+    ]);
+
+    expect(fn () => app(LanguageManager::class)->activate('es'))
+        ->toThrow(LanguageOperationException::class)
+        ->and((bool) DB::table('languages')->where('locale', 'es')->value('is_active'))->toBeFalse();
 });

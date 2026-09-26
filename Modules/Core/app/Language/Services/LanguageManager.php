@@ -248,6 +248,9 @@ class LanguageManager
         if ($language->is_url_general && $active->contains('is_url_general', true)) {
             throw new LanguageOperationException("Family [$family] already has a URL general language.");
         }
+        if ($language->url_prefix === $family && ! $language->is_url_general && $active->isNotEmpty()) {
+            throw new LanguageOperationException("Short URL prefix [$family] must be the URL general language of its family.");
+        }
     }
 
     private function family(string $prefix): string

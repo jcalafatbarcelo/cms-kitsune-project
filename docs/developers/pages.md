@@ -55,5 +55,6 @@ ancestro no publicable responde `404`.
 En `/`, la selección usa locale activo de sesión, después `Accept-Language` y,
 por último, el predeterminado de frontend. Las URLs explícitas y las rutas sin
 prefijo distintas de `/` actualizan la sesión según su idioma representado. Las
-redirecciones de negociación, sesión y canonicidad incluyen
-`Cache-Control: private, no-store`; no se crea una cookie persistente.
+redirecciones de negociación, sesión y alias de idioma incluyen
+`Cache-Control: private, no-store`; las normalizaciones sintácticas de barra
+final usan `301`. No se crea una cookie persistente.
