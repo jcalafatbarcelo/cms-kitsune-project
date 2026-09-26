@@ -32,7 +32,7 @@ Fuentes relacionadas:
 | :--- | :--- | :--- | :--- | :--- |
 | 1 | Fundación de CMS Templates | Completado | ADR-0004 aceptado | Base, manifiesto, ciclo de vida local y predeterminado gestionados por Core |
 | 2 | Fundación de Pages | Completado | Fundación de CMS Templates completada | `Page`/`PageTranslation`, jerarquía, publicación en cascada y primera página Base renderizada en Blade |
-| 3 | Rutas públicas localizadas | Previsto | Pages especificado y registro de idiomas estable | Locale de petición, URL canónica, resolución a traducción, redirecciones y cambio de idioma sin salto a otra página |
+| 3 | Rutas públicas localizadas | Completado | Pages especificado y registro de idiomas estable | Locale de petición, URL canónica, resolución a traducción y redirecciones |
 | 4 | Fundación de Navigation | Previsto | Pages y rutas públicas localizadas completadas | Menús independientes, ítems traducibles y visibilidad según disponibilidad pública |
 | 5 | Fundación de PageBuilder | Previsto | Pages y contrato de presentación estables | Bloques declarativos, valores por instancia y locale, validación y renderizado Blade |
 | 6 | Extensiones de CMS Templates | Previsto | PageBuilder o una necesidad de presentación comprobable | UI catalogs propios, configuración, assets, presentaciones y bloques aportados por templates |
@@ -46,6 +46,10 @@ explícita.
 `SPEC-pages-foundation` está completada. La primera presentación estática
 resuelve las claves semánticas de UI a través del propietario del template
 efectivo, sin persistir prefijos como `base::` en Pages.
+
+`SPEC-public-localized-routes` está completada. Las URLs canónicas derivan los
+slugs y ancestros de cada traducción, sin persistir paths completos ni acoplar
+Navigation a la resolución de Pages.
 
 ## Dependencias de localización
 

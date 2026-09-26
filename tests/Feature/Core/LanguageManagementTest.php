@@ -109,8 +109,10 @@ function languageManifest(string $root, string $catalogPath): string
 
     $manifest = $root.DIRECTORY_SEPARATOR.'es_ES-manifest.json';
     file_put_contents($manifest, json_encode([
-        'schema_version' => 1,
+        'schema_version' => 2,
         'locale' => 'es_ES',
+        'url_prefix' => 'es-es',
+        'is_url_general' => false,
         'name' => 'Spanish (Spain)',
         'native_name' => 'Español (España)',
         'text_direction' => 'ltr',

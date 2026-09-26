@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\Core\Language\Models\Language;
 use Modules\Core\Language\Services\LanguageManager;
 use Modules\Core\Localization\Services\UiCatalogRepository;
 
@@ -20,8 +21,10 @@ beforeEach(function () {
 
     $manifest = $this->languageCommandRoot.DIRECTORY_SEPARATOR.'manifest.json';
     file_put_contents($manifest, json_encode([
-        'schema_version' => 1,
+        'schema_version' => 2,
         'locale' => 'es_ES',
+        'url_prefix' => 'es-es',
+        'is_url_general' => true,
         'name' => 'Spanish (Spain)',
         'native_name' => 'Español (España)',
         'text_direction' => 'ltr',
@@ -58,8 +61,12 @@ test('language commands expose deterministic successful operations', function ()
     $this->artisan('cms:language:install', ['manifest' => $this->manifest])
         ->expectsOutputToContain('es_ES')
         ->assertSuccessful();
+    expect(Language::query()->where('locale', 'es_ES')->sole()->is_url_general)->toBeTrue();
     $this->artisan('cms:language:activate', ['locale' => 'es_ES'])
         ->expectsOutputToContain('es_ES')
+        ->assertSuccessful();
+    $this->artisan('cms:language:set-url-general', ['locale' => 'es_ES'])
+        ->expectsOutputToContain('URL general')
         ->assertSuccessful();
     $this->artisan('cms:language:set-default', ['context' => 'frontend', 'locale' => 'es_ES'])
         ->expectsOutputToContain('frontend')

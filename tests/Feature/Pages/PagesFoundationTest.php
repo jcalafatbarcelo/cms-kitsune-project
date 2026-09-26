@@ -27,6 +27,7 @@ test('the first page translation for an installed language becomes its published
     $now = now();
     DB::table('languages')->insert([
         'locale' => 'es_ES',
+        'url_prefix' => 'es-es',
         'name' => 'Spanish',
         'native_name' => 'Español',
         'text_direction' => 'ltr',
@@ -47,6 +48,7 @@ test('automatic home assignment rejects a page whose ancestor is not public in i
     $now = now();
     DB::table('languages')->insert([
         'locale' => 'es_ES',
+        'url_prefix' => 'es-es',
         'name' => 'Spanish',
         'native_name' => 'Español',
         'text_direction' => 'ltr',

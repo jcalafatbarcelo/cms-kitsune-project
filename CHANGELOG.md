@@ -63,6 +63,9 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Fundación de Pages: home inglesa preinstalada, traducciones por idioma,
   publicación en cascada, selección de template, UI catalogs de templates y
   operación inicial mediante Artisan.
+- Rutas públicas localizadas: prefijos URL, alias de familia, idioma general,
+  rutas jerárquicas de Pages, negociación inicial por navegador y sesión de
+  Laravel sin cookie persistente.
 
 ### Modificado
 
@@ -115,4 +118,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-09-25 17:55 UTC
+Fecha de última modificación: 2026-09-26 18:00 UTC

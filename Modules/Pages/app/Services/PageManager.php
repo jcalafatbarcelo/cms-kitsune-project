@@ -22,7 +22,7 @@ class PageManager
         try {
             return DB::transaction(function () use ($locale, $slug, $title, $parentId, $templateIdentifier) {
                 $language = $this->language($locale);
-                $this->validateText($slug, $title);
+                $this->validateText($slug, $title, $parentId === null);
                 if ($parentId !== null && Page::query()->lockForUpdate()->find($parentId) === null) {
                     throw new PageOperationException("Parent page [$parentId] is not available.");
                 }
@@ -59,11 +59,11 @@ class PageManager
         try {
             return DB::transaction(function () use ($pageId, $locale, $slug, $title) {
                 $language = $this->language($locale);
-                $this->validateText($slug, $title);
                 $page = Page::query()->lockForUpdate()->find($pageId);
                 if ($page === null) {
                     throw new PageOperationException("Page [$pageId] is not available.");
                 }
+                $this->validateText($slug, $title, $page->parent_id === null);
                 if (PageTranslation::query()->where('page_id', $page->id)->where('language_id', $language->id)->lockForUpdate()->exists()) {
                     throw new PageOperationException("Page [$pageId] already has a translation for [$locale].");
                 }
@@ -128,6 +128,25 @@ class PageManager
         $translation = $home === null ? null : PageTranslation::query()->with('page')->find($home->page_translation_id);
         if ($translation === null || ! $this->isPublic($translation, $language->id)) {
             throw new PageOperationException('No public home page is available.');
+        }
+        $template = $this->templateFor($translation->page);
+        $this->templateUi->validateStandard($template);
+
+        return ['translation' => $translation, 'template' => $template];
+    }
+
+    /** @return array{translation: PageTranslation, template: CmsTemplate} */
+    public function resolve(string $locale, array $slugs): array
+    {
+        if ($slugs === []) {
+            return $this->home($locale);
+        }
+
+        $language = Language::query()->where('locale', $locale)->where('is_active', true)->first();
+        $translation = $language === null ? null : PageTranslation::query()->with('page')
+            ->where('language_id', $language->id)->where('slug', end($slugs))->first();
+        if ($translation === null || ! $this->matchesHierarchy($translation, $language->id, $slugs) || ! $this->isPublic($translation, $language->id)) {
+            throw new PageOperationException('The requested page is unavailable.');
         }
         $template = $this->templateFor($translation->page);
         $this->templateUi->validateStandard($template);
@@ -226,6 +245,22 @@ class PageManager
         }
     }
 
+    private function matchesHierarchy(PageTranslation $translation, int $languageId, array $slugs): bool
+    {
+        $actual = [];
+        $page = $translation->page;
+        while ($page !== null) {
+            $segment = PageTranslation::query()->where('page_id', $page->id)->where('language_id', $languageId)->value('slug');
+            if (! is_string($segment)) {
+                return false;
+            }
+            array_unshift($actual, $segment);
+            $page = $page->parent;
+        }
+
+        return $actual === $slugs;
+    }
+
     private function throwExpectedConstraintError(QueryException $exception): never
     {
         if (str_starts_with((string) $exception->getCode(), '23')) {
@@ -235,9 +270,10 @@ class PageManager
         throw $exception;
     }
 
-    private function validateText(string $slug, string $title): void
+    private function validateText(string $slug, string $title, bool $isRoot = false): void
     {
         if (! preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/D', $slug) || strlen($slug) > 100
+            || ($isRoot && preg_match('/^[a-z]{2}(?:-[a-z]{2})?$/D', $slug))
             || $title === '' || mb_strlen($title, 'UTF-8') > 255 || preg_match('/[\x00-\x1F\x7F]/', $title)) {
             throw new PageOperationException('The page title or slug is invalid.');
         }

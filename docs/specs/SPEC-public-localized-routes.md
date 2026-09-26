@@ -1,6 +1,6 @@
 # SPEC: Rutas públicas localizadas
 
-- **Estado:** Aprobada
+- **Estado:** Completada
 - **Perfil:** feature
 - **Origen de la planificación:** Tercer incremento del [roadmap de contenido,
   templates y navegación](../architecture/content-delivery-roadmap.md), que
@@ -41,6 +41,8 @@ expone `/` con el idioma predeterminado de frontend. El SDD exige prefijos de UR
   los slugs, sin persistir el path completo.
 - Usar rutas sin prefijo para el idioma predeterminado de frontend y rutas con
   prefijo para cualquier idioma secundario activo.
+- Normalizar las barras finales: la home de un idioma con prefijo termina siempre
+  en `/`; cualquier Page identificada por uno o más slugs no termina en `/`.
 - Negociar `Accept-Language` solo en la primera petición a `/` que no tenga
   idioma válido en sesión, y guardar el idioma resultante en la sesión.
 - Priorizar locale explícito en URL sobre sesión; la sesión sobre la negociación
@@ -120,8 +122,9 @@ expone `/` con el idioma predeterminado de frontend. El SDD exige prefijos de UR
 - El idioma predeterminado de frontend se resuelve sin prefijo. Todo idioma
   secundario debe estar activo y se resuelve con su `url_prefix`.
 - Si un prefijo regional o alias corto resuelve el idioma predeterminado de
-  frontend, redirige a la ruta equivalente sin prefijo. El idioma predeterminado
-  puede ser el general de su familia sin impedir variantes secundarias.
+  frontend, redirige permanentemente a la ruta equivalente sin prefijo. El idioma
+  predeterminado puede ser el general de su familia sin impedir variantes
+  secundarias.
 - Una ruta localizada solo resuelve una traducción públicamente disponible para
   el idioma seleccionado. No existe fallback de contenido a otro idioma.
 - Los segmentos de una Page deben coincidir en orden con su cadena de ancestros,
@@ -189,6 +192,11 @@ Las formas canónicas son:
 
 - Los ejemplos usan `es` como alias corto y `es-es` como prefijo regional; el
   valor real procede de `languages.url_prefix` y de su familia.
+- `/{prefix}` redirige permanentemente a `/{prefix}/`, salvo que ese prefijo
+  resuelva el idioma predeterminado, cuyo destino canónico es `/`.
+- Una URL de Page con barra final redirige permanentemente a la misma URL sin
+  barra: `/parent/` a `/parent` y `/es/parent/` a `/es/parent`. La home con
+  prefijo `/{prefix}/` es la única excepción a esa normalización.
 - `/` selecciona idioma con esta precedencia: locale válido de sesión; en su
   ausencia, mejor coincidencia activa de `Accept-Language`; en su ausencia, el
   predeterminado de frontend. Si el resultado es secundario, responde con una
@@ -214,9 +222,11 @@ Las formas canónicas son:
 - Un alias corto o prefijo regional que resuelve el idioma predeterminado
   redirige con `302` a su forma canónica sin prefijo, incluida su jerarquía de
   slugs cuando corresponda.
-- Las redirecciones decididas por sesión o navegador deben usar `302` y
-  `Cache-Control: private, no-store`; no se compartirán en cachés HTTP. No se
-  define canónica SEO ni redirección permanente en este incremento.
+- Las redirecciones decididas por sesión, navegador o cambio entre alias y
+  variante regional deben usar `302` y `Cache-Control: private, no-store`; no se
+  compartirán en cachés HTTP. Las normalizaciones de barra final deben usar
+  `301`, pues su forma canónica no depende de sesión ni de configuración de
+  idioma.
 - La ruta entrega al renderizador la `PageTranslation`, locale y template ya
   resueltos. El renderizador no recibe ni interpreta segmentos de URL como una
   vista Blade.
@@ -249,8 +259,8 @@ externos.
   disponibilidad y colisiones URL.
 - Cubrir HTTP para idioma predeterminado, secundario, home, Page anidada,
   alias corto, variante regional explícita, `404`, redirección por sesión,
-  redirección canónica, negociación inicial y actualización de sesión por URL
-  explícita.
+  redirección canónica, barras finales, negociación inicial y actualización de
+  sesión por URL explícita.
 - Cubrir locale inactivo, sesión inválida, `Accept-Language` exacto, coincidencia
   de idioma base no ambigua, prefijo exacto inactivo con alias activo resoluble y
   caso ambiguo que vuelve al predeterminado.
@@ -301,7 +311,9 @@ No aplica. Las funcionalidades diferidas tienen condición de entrada propia.
   slug hijo sí puede. Los segmentos URL no pueden seleccionar archivos Blade,
   templates ni rutas de filesystem.
 - **CA-09:** Las redirecciones por sesión, navegador o forma canónica usan `302`
-  y `Cache-Control: private, no-store`; no se crea cookie persistente.
+  y `Cache-Control: private, no-store`; las normalizaciones de barra final usan
+  `301`. La home con prefijo solo es canónica con barra final y las Pages solo sin
+  ella. No se crea cookie persistente.
 
 ## 8. Trazabilidad de pruebas y documentación
 
@@ -315,7 +327,7 @@ No aplica. Las funcionalidades diferidas tienen condición de entrada propia.
 | CA-06 | Negociación inicial incorrecta | HTTP | Navegador, sesión y redirección | Configuración de idioma |
 | CA-07 | Exposición o fallback de contenido inválido | HTTP e integración | Matriz de errores y disponibilidad | Diagnóstico público |
 | CA-08 | Ambigüedad o selección de código | Integración y seguridad | Colisiones y entrada hostil rechazadas | Extensión de Pages |
-| CA-09 | Redirección cacheada o persistencia no consentida | HTTP | Código, cabeceras y cookies comprobados | Privacidad y operación |
+| CA-09 | URL duplicada, redirección cacheada o persistencia no consentida | HTTP | Código, cabeceras y cookies comprobados | Privacidad y operación |
 
 ## 9. Plan de implementación
 
@@ -323,8 +335,8 @@ No aplica. Las funcionalidades diferidas tienen condición de entrada propia.
    implementar la persistencia y la validación de Core hasta CA-01 y CA-02.
 2. Crear pruebas HTTP rojas de paths por defecto y con prefijo; implementar la
    resolución jerárquica y la disponibilidad hasta CA-03, CA-04 y CA-08.
-3. Crear pruebas HTTP rojas de sesión y negociación; implementar precedencia,
-   redirecciones y cabeceras hasta CA-05 a CA-07 y CA-09.
+3. Crear pruebas HTTP rojas de sesión, negociación y barras finales; implementar
+   precedencia, redirecciones y cabeceras hasta CA-05 a CA-07 y CA-09.
 4. Ejecutar matriz multi-motor, quality gates, documentación de administración y
    desarrollo, y actualizar ambos roadmaps al completar el incremento.
 

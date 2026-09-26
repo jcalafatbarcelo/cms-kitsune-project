@@ -9,9 +9,9 @@ mezclar incrementos ni presentar capacidades previstas como disponibles.
 
 > [!IMPORTANT]
 > El módulo Core ya proporciona el registro de idiomas, los predeterminados
-> globales, los `UI catalogs` estáticos y su operación mediante Artisan. Overrides,
-> negociación HTTP, rutas localizadas, backoffice y contenido multiidioma siguen
-> sin estar implementados.
+> globales, los `UI catalogs` estáticos, sus prefijos URL y la operación mediante
+> Artisan. Overrides, backoffice y contenido editorial multiidioma siguen sin estar
+> implementados.
 
 Fuentes prescriptivas relacionadas:
 
@@ -52,8 +52,8 @@ documentación técnica empleará siempre `UI catalog`.
 | LOC-02 | Overrides | Pendiente | LOC-01 completado | Sustituciones y traducciones locales validadas, con actor y caché |
 | LOC-03 | Auditoría administrativa | Pendiente | Antes del primer backoffice mutable | Historial durable independiente de logs operativos |
 | LOC-04 | Backoffice de idiomas y overrides | Pendiente | LOC-01, LOC-02 y garantías de LOC-03 | Gestión autorizada, protegida y auditable |
-| LOC-05 | Selección temporal y negociación HTTP | Pendiente | Registro de idiomas estable | Sesión, cookie consentida y primera visita por navegador |
-| LOC-06 | URL amigables, idioma e items de menú | Pendiente | Modelo de páginas y menús especificado | Precedencia URL/locale y navegación coherente |
+| LOC-05 | Selección temporal y negociación HTTP | Completado parcialmente | Registro de idiomas estable | Sesión y primera visita por navegador; cookie consentida diferida |
+| LOC-06 | URL amigables, idioma e items de menú | Completado parcialmente | Modelo de páginas y menús especificado | Rutas canónicas y precedencia URL/locale; Navigation e items de menú diferidos |
 | LOC-07 | Contenido y PageBuilder traducibles | Pendiente | Entidades y schemas aprobados | Valores por locale e instancia, separados de la UI |
 | LOC-08 | Paquetes dinámicos de idioma | Fuera del MVP/TFM | Distribución real y auditoría disponibles | Instalación segura sin ejecutar código del paquete |
 
@@ -186,6 +186,12 @@ fallida no debe registrarse como cambio realizado.
 
 ### LOC-05: selección temporal y navegador
 
+`SPEC-public-localized-routes` completó la selección por sesión y la negociación
+de `Accept-Language` limitada a `/`. La sesión guarda solo un locale interno
+activo; URL explícita, sesión, navegador y predeterminado aplican esa precedencia.
+Las redirecciones temporales no son compartibles por caché. La cookie persistente
+sigue diferida y requerirá una Spec de consentimiento.
+
 No se añadirá una preferencia de locale al perfil persistente de un usuario
 registrado dentro del TFM. La selección será propia del navegador:
 
@@ -206,6 +212,10 @@ negociación del navegador solo en primera visita y predeterminado global. Tambi
 deberá resolver redirecciones, caché HTTP, SEO, privacidad y consentimiento.
 
 ### LOC-06 y LOC-07: URL y contenido
+
+`SPEC-public-localized-routes` completó las rutas jerárquicas de Pages y sus
+prefijos canónicos. Navigation e items de menú no forman parte de esa entrega y
+requerirán su propio incremento.
 
 La localización de frontend se especificará con URL amigables e items de menú.
 No se fijará ahora si el locale predeterminado lleva prefijo.
