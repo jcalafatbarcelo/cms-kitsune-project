@@ -1,6 +1,6 @@
 # SPEC: Rutas públicas localizadas
 
-- **Estado:** Propuesta
+- **Estado:** Aprobada
 - **Perfil:** feature
 - **Origen de la planificación:** Tercer incremento del [roadmap de contenido,
   templates y navegación](../architecture/content-delivery-roadmap.md), que
