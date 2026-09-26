@@ -100,7 +100,9 @@ test('root prefix-shaped slugs are reserved while nested slugs remain valid', fu
 });
 
 test('the configured health endpoint bypasses the Pages catch-all', function () {
-    $this->get('/up')->assertOk();
+    $this->getJson('/up')
+        ->assertOk()
+        ->assertJsonPath('status', 'up');
 });
 
 test('a short prefix cannot activate beside a regional URL general language', function () {
