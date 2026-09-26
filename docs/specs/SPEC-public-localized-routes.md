@@ -109,6 +109,9 @@ expone `/` con el idioma predeterminado de frontend. El SDD exige prefijos de UR
   Si no existe general y hay exactamente un idioma activo en la familia, resuelve
   ese idioma. Si hay varias variantes activas sin general, ninguna operación puede
   dejar esa familia en dicho estado.
+- La resolución de un prefijo exacto considera únicamente idiomas activos. Un
+  prefijo exacto de idioma inactivo no bloquea el alias que resulte resoluble
+  entre las variantes activas de su familia.
 - El alias corto es la URL canónica de la única variante activa o de la variante
   general. La ruta regional explícita de esa misma variante redirige al alias.
 - Activar una segunda variante de una familia exige que una variante activa esté
@@ -116,6 +119,9 @@ expone `/` con el idioma predeterminado de frontend. El SDD exige prefijos de UR
   marcarla antes de activar la segunda variante.
 - El idioma predeterminado de frontend se resuelve sin prefijo. Todo idioma
   secundario debe estar activo y se resuelve con su `url_prefix`.
+- Si un prefijo regional o alias corto resuelve el idioma predeterminado de
+  frontend, redirige a la ruta equivalente sin prefijo. El idioma predeterminado
+  puede ser el general de su familia sin impedir variantes secundarias.
 - Una ruta localizada solo resuelve una traducción públicamente disponible para
   el idioma seleccionado. No existe fallback de contenido a otro idioma.
 - Los segmentos de una Page deben coincidir en orden con su cadena de ancestros,
@@ -198,12 +204,16 @@ Las formas canónicas son:
   coincidencia exacta, puede usar el idioma base solo cuando existe exactamente
   un idioma activo con ese primer segmento; de otro modo usa el predeterminado.
 - Un prefijo desconocido, inactivo o una cadena de slugs inexistente, incompleta,
-  con jerarquía incorrecta o no pública devuelve `404`. Un alias corto con varias
-  variantes activas exige una general y no puede resolverse de forma arbitraria.
+  con jerarquía incorrecta o no pública devuelve `404` cuando no existe un alias
+  activo resoluble. Un alias corto con varias variantes activas exige una general
+  y no puede resolverse de forma arbitraria.
 - Una ruta regional explícita que corresponde a la única variante activa o a la
   variante general redirige con `302` a la forma canónica con alias corto. Las
   variantes activas no generales conservan su prefijo regional explícito como URL
   canónica.
+- Un alias corto o prefijo regional que resuelve el idioma predeterminado
+  redirige con `302` a su forma canónica sin prefijo, incluida su jerarquía de
+  slugs cuando corresponda.
 - Las redirecciones decididas por sesión o navegador deben usar `302` y
   `Cache-Control: private, no-store`; no se compartirán en cachés HTTP. No se
   define canónica SEO ni redirección permanente en este incremento.
@@ -242,7 +252,8 @@ externos.
   redirección canónica, negociación inicial y actualización de sesión por URL
   explícita.
 - Cubrir locale inactivo, sesión inválida, `Accept-Language` exacto, coincidencia
-  de idioma base no ambigua y caso ambiguo que vuelve al predeterminado.
+  de idioma base no ambigua, prefijo exacto inactivo con alias activo resoluble y
+  caso ambiguo que vuelve al predeterminado.
 - Cubrir migración, backfill, unicidad de `url_prefix`, alias corto, idioma
   general y sus invariantes en SQLite, MySQL 8.4 y MariaDB 11.4.
 - Ejecutar pruebas enfocadas, suite afectada, Pint, build frontend y controles de
@@ -274,9 +285,11 @@ No aplica. Las funcionalidades diferidas tienen condición de entrada propia.
   Pages publicables del idioma secundario activo correspondiente, sin fallback de
   contenido. El alias elige el idioma general o la única variante activa y es su
   URL canónica; el prefijo regional equivalente redirige temporalmente al alias.
+  Un prefijo exacto inactivo no impide resolver un alias activo de su familia.
 - **CA-05:** Una URL localizada explícita actualiza la sesión y tiene precedencia
   sobre cualquier valor previo; una URL sin prefijo distinta de `/` representa el
-  idioma predeterminado sin redirigir por sesión.
+  idioma predeterminado sin redirigir por sesión. Un alias o prefijo que resuelve
+  el idioma predeterminado redirige a la forma sin prefijo equivalente.
 - **CA-06:** La primera visita a `/` negocia un idioma activo desde
   `Accept-Language`, lo guarda en sesión y redirige temporalmente a su home con
   prefijo solo si no es el idioma predeterminado. Una sesión válida conserva ese
@@ -297,8 +310,8 @@ No aplica. Las funcionalidades diferidas tienen condición de entrada propia.
 | CA-01 | Prefijos ambiguos o migración parcial | Integración/BD multi-motor | Backfill y restricción única | Administración de idiomas |
 | CA-02 | Alta de idioma o general inválidos | Integración/BD | Manifiesto y carrera rechazados | Administración de idiomas |
 | CA-03 | URL por defecto que expone contenido incorrecto | HTTP e integración | Home, paths jerárquicos y publicación | Rutas públicas |
-| CA-04 | Alias, URL secundaria o canónica incorrectos | HTTP e integración | Home, paths, publicación y redirección | Rutas públicas |
-| CA-05 | Precedencia impredecible de idioma | HTTP | Sesión y URL explícita | Configuración de idioma |
+| CA-04 | Alias, idioma inactivo o URL secundaria incorrectos | HTTP e integración | Home, paths, publicación y redirección | Rutas públicas |
+| CA-05 | Precedencia o canónica del predeterminado impredecibles | HTTP | Sesión, URL explícita y redirección | Configuración de idioma |
 | CA-06 | Negociación inicial incorrecta | HTTP | Navegador, sesión y redirección | Configuración de idioma |
 | CA-07 | Exposición o fallback de contenido inválido | HTTP e integración | Matriz de errores y disponibilidad | Diagnóstico público |
 | CA-08 | Ambigüedad o selección de código | Integración y seguridad | Colisiones y entrada hostil rechazadas | Extensión de Pages |
