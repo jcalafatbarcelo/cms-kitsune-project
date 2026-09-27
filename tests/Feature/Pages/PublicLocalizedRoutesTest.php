@@ -143,6 +143,9 @@ test('browser negotiation ignores zero-quality and unsupported primary language 
     $this->withHeaders(['Accept-Language' => 'es-ES;q=0, en;q=0.5'])->get('/')
         ->assertOk()
         ->assertSessionHas('public_locale', 'en');
+
+    $this->flushSession();
+
     $this->withHeaders(['Accept-Language' => 'ast, en;q=0.5'])->get('/')
         ->assertOk()
         ->assertSessionHas('public_locale', 'en');
