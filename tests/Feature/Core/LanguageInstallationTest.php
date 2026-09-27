@@ -37,6 +37,7 @@ test('a clean installation creates the base language and enforces the settings s
 
     $secondLanguageId = DB::table('languages')->insertGetId([
         'locale' => 'es_ES',
+        'url_prefix' => 'es-es',
         'name' => 'Spanish (Spain)',
         'native_name' => 'Español (España)',
         'text_direction' => 'ltr',
@@ -59,6 +60,7 @@ test('a clean installation creates the base language and enforces the settings s
         ->toThrow(QueryException::class)
         ->and(fn () => DB::table('languages')->insert([
             'locale' => 'ar',
+            'url_prefix' => 'ar',
             'name' => 'Arabic',
             'native_name' => 'Arabic',
             'text_direction' => 'invalid',

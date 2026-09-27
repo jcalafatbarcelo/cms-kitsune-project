@@ -9,12 +9,14 @@ use Modules\Pages\Console\SetHomeCommand;
 use Modules\Pages\Console\TranslatePageCommand;
 use Modules\Pages\Console\UnpublishPageCommand;
 use Modules\Pages\Services\PageManager;
+use Modules\Pages\Services\PublicPageResolver;
 
 class PagesServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
         $this->app->singleton(PageManager::class);
+        $this->app->singleton(PublicPageResolver::class);
     }
 
     public function boot(): void

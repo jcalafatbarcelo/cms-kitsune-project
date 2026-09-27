@@ -8,6 +8,7 @@ use Modules\Core\Language\Console\DisableLanguageCommand;
 use Modules\Core\Language\Console\InstallLanguageCommand;
 use Modules\Core\Language\Console\LanguageListCommand;
 use Modules\Core\Language\Console\SetDefaultLanguageCommand;
+use Modules\Core\Language\Console\SetUrlGeneralLanguageCommand;
 use Modules\Core\Language\Console\ValidateLanguageCommand;
 use Modules\Core\Language\Services\LanguageManager;
 use Modules\Core\Localization\Services\UiCatalogOwnerRegistry;
@@ -68,6 +69,7 @@ class CoreServiceProvider extends ServiceProvider
             ActivateLanguageCommand::class,
             DisableLanguageCommand::class,
             SetDefaultLanguageCommand::class,
+            SetUrlGeneralLanguageCommand::class,
             TemplateListCommand::class,
             TemplateSyncCommand::class,
             ActivateTemplateCommand::class,

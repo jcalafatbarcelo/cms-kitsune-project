@@ -32,7 +32,7 @@ Fuentes relacionadas:
 | :--- | :--- | :--- | :--- | :--- |
 | 1 | Fundación de CMS Templates | Completado | ADR-0004 aceptado | Base, manifiesto, ciclo de vida local y predeterminado gestionados por Core |
 | 2 | Fundación de Pages | Completado | Fundación de CMS Templates completada | `Page`/`PageTranslation`, jerarquía, publicación en cascada y primera página Base renderizada en Blade |
-| 3 | Rutas públicas localizadas | Previsto | Pages especificado y registro de idiomas estable | Locale de petición, URL canónica, resolución a traducción, redirecciones y cambio de idioma sin salto a otra página |
+| 3 | Rutas públicas localizadas | Completado | Pages especificado y registro de idiomas estable | Locale de petición, URL canónica, resolución a traducción y redirecciones |
 | 4 | Fundación de Navigation | Previsto | Pages y rutas públicas localizadas completadas | Menús independientes, ítems traducibles y visibilidad según disponibilidad pública |
 | 5 | Fundación de PageBuilder | Previsto | Pages y contrato de presentación estables | Bloques declarativos, valores por instancia y locale, validación y renderizado Blade |
 | 6 | Extensiones de CMS Templates | Previsto | PageBuilder o una necesidad de presentación comprobable | UI catalogs propios, configuración, assets, presentaciones y bloques aportados por templates |
@@ -47,6 +47,10 @@ explícita.
 resuelve las claves semánticas de UI a través del propietario del template
 efectivo, sin persistir prefijos como `base::` en Pages.
 
+`SPEC-public-localized-routes` está completada. Las URLs canónicas derivan los
+slugs y ancestros de cada traducción, sin persistir paths completos ni acoplar
+Navigation a la resolución de Pages.
+
 ## Dependencias de localización
 
 La secuencia principal no sustituye `LOC-02` a `LOC-08` ni altera sus estados.
@@ -56,8 +60,10 @@ Los hitos que deben coordinarse son:
   pero no introduce todavía selección HTTP, prefijos ni contenido accesible en
   varios locales.
 - Las rutas públicas localizadas reúnen el flujo HTTP previsto en LOC-05 y la
-  parte de URL, locale y canonicidad de LOC-06. Su Spec decidirá la precedencia
-  exacta sin asumirla en este roadmap.
+  parte de URL, locale y canonicidad de LOC-06. La precedencia implementada es
+  URL explícita, sesión válida, negociación inicial del navegador y, por último,
+  el predeterminado de frontend; véase
+  [SPEC-public-localized-routes](../specs/SPEC-public-localized-routes.md).
 - Navigation necesita la disponibilidad pública localizada para no ofrecer
   destinos sin traducción publicable; su integración con los items de menú de
   LOC-06 se concretará en su propia Spec.

@@ -35,8 +35,10 @@ contenido completo del `UI catalog`.
 
 ```json
 {
-  "schema_version": 1,
-  "locale": "es_ES",
+    "schema_version": 2,
+    "locale": "es_ES",
+    "url_prefix": "es-es",
+    "is_url_general": false,
   "name": "Spanish (Spain)",
   "native_name": "Español (España)",
   "text_direction": "ltr",
@@ -53,7 +55,8 @@ php artisan cms:language:install /ruta/segura/es_ES-manifest.json
 php artisan cms:language:validate es_ES
 ```
 
-El idioma queda inactivo. Repetir la instalación falla sin modificar datos. El
+El idioma queda inactivo. `url_prefix` usa `xx` o `xx-xx`, es único incluso para
+idiomas inactivos y no puede cambiarse después de la instalación. Repetir la instalación falla sin modificar datos. El
 manifiesto debe ser un archivo regular JSON de hasta 64 KiB y no puede ser un
 enlace simbólico. El directorio de `UI catalogs` y los manifiestos preparados
 para instalar deben admitir escritura solo de administradores de despliegue; no
@@ -63,6 +66,7 @@ se deben validar mientras otro proceso los sustituye.
 
 ```shell
 php artisan cms:language:activate es_ES
+php artisan cms:language:set-url-general es_ES
 php artisan cms:language:set-default frontend es_ES
 php artisan cms:language:set-default backoffice es_ES
 ```
@@ -71,6 +75,12 @@ Cada contexto conserva exactamente un predeterminado. Solo un idioma instalado y
 activo puede convertirse en predeterminado, sustituyendo el anterior de ese
 contexto. `context` admite exactamente `frontend` o `backoffice`; ambos contextos
 pueden apuntar al mismo idioma o a idiomas distintos.
+
+Antes de activar una segunda variante de una familia, marque una variante activa
+como general. Por ejemplo, para `es-es` y `es-mx`, ejecute
+`cms:language:set-url-general es_ES` antes de activar la segunda variante. El
+alias corto `/es/` resuelve la única variante activa o la marcada como general;
+la variante regional equivalente redirige temporalmente a ese alias.
 
 ## Desactivar
 

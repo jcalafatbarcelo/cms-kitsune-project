@@ -63,6 +63,9 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Fundación de Pages: home inglesa preinstalada, traducciones por idioma,
   publicación en cascada, selección de template, UI catalogs de templates y
   operación inicial mediante Artisan.
+- Rutas públicas localizadas: prefijos URL, alias de familia, idioma general,
+  rutas jerárquicas de Pages, negociación inicial por navegador y sesión de
+  Laravel sin cookie persistente.
 
 ### Modificado
 
@@ -108,6 +111,12 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Elevado el requisito mínimo del CMS a PHP 8.4 para alinear la configuración
   TLS de MySQL y MariaDB con la API `Pdo\Mysql` utilizada.
 
+### Fijado
+
+- Restaurada la redirección temporal al idioma predeterminado, preservada la ruta
+  de salud de Laravel y reforzada la activación de prefijos cortos junto a
+  variantes regionales generales.
+
 ### Eliminado
 
 - Skills genéricas instaladas por Boost que no aportaban una ventaja neta frente
@@ -115,4 +124,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-09-25 17:55 UTC
+Fecha de última modificación: 2026-09-26 23:57 UTC
