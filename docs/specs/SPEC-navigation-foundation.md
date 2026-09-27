@@ -1,6 +1,6 @@
 # SPEC: Fundación de Navigation
 
-- **Estado:** Borrador
+- **Estado:** Propuesta
 - **Perfil:** feature
 - **Origen de la planificación:** Cuarto incremento del
   [roadmap de contenido, templates y navegación](../architecture/content-delivery-roadmap.md).
@@ -14,8 +14,8 @@ menús como árboles visuales independientes de la jerarquía de Pages, con íte
 localizados que solo ofrezcan destinos de Page públicamente disponibles en el
 idioma efectivo.
 
-La Spec no autoriza implementación hasta cerrar las decisiones de modelo,
-destinos y contrato entre Navigation y Pages indicadas en la sección 10.
+La Spec no autoriza implementación hasta que sea aprobada explícitamente y el
+ADR que gobierna el contrato entre Pages y Navigation esté aceptado.
 
 ## 2. Contexto y evidencia
 
@@ -35,9 +35,12 @@ selección HTTP o publicación de Pages.
 
 - Crear el módulo de dominio `Navigation` mediante `nwidart/laravel-modules`.
 - Persistir menús y un árbol visual de ítems separado de la jerarquía de Pages.
+- Identificar cada menú mediante una clave técnica única e inmutable, para que un
+  template Blade solicite explícitamente el menú que necesita sin imponer una
+  posición visual global.
 - Asociar cada ítem, su etiqueta, posición y relación padre-hijo a un idioma
   instalado, permitiendo árboles distintos para cada idioma de un mismo menú.
-- Permitir que un ítem destinado a una Page obtenga la URL canónica localizada
+- Cada ítem referencia una Page estable y obtiene su URL canónica localizada
   exclusivamente a través de un contrato controlado por Pages.
 - Resolver un menú para un idioma efectivo, omitiendo ítems cuyo destino de Page
   no sea públicamente disponible en ese idioma.
@@ -83,9 +86,9 @@ selección HTTP o publicación de Pages.
   hay conflicto.
 - Roadmap de localización: Navigation completa la parte diferida de LOC-06 sin
   declarar LOC-02, LOC-03, LOC-04 o LOC-07 como disponibles. No hay conflicto.
-- Código, datos y pruebas: no existe módulo Navigation ni datos que migrar. No
-  hay conflicto irresoluble, pero el contrato intermodular queda pendiente de
-  aprobación.
+- Código, datos y pruebas: no existe módulo Navigation ni datos que migrar. El
+  contrato intermodular se propone en ADR-0005 y requiere aceptación antes de
+  implementar. No hay conflicto irresoluble.
 
 ## 5. Requisitos y bloques técnicos aplicables
 
@@ -97,64 +100,111 @@ selección HTTP o publicación de Pages.
   Page destino.
 - La posición y la relación padre-hijo de los ítems pertenecen a Navigation; no
   pueden crear ciclos.
+- Los hermanos de un mismo menú, idioma y padre usan posiciones enteras
+  contiguas desde `1`. Crear, mover o retirar un ítem reindexa atómicamente los
+  grupos de hermanos afectados.
 - Un ítem pertenece a un único idioma instalado. Su etiqueta es contenido
   localizado del propio ítem y no tiene fallback editorial desde `en`.
 - Un ítem padre y todos sus hijos pertenecen al mismo idioma y al mismo menú.
 - Los árboles de ítems de idiomas distintos pueden tener estructura, orden y
   destinos diferentes dentro del mismo menú.
+- Intentar asignar un padre de otro idioma o de otro menú se rechaza de forma
+  atómica, sin modificar el árbol existente.
 - Un ítem destinado a una Page solo se incluye si Pages confirma que la
   traducción destino es públicamente disponible para el idioma efectivo.
+- Si un ítem se omite por destino no disponible, todos sus descendientes también
+  se omiten; no se promocionan a la raíz ni se reasignan a otro padre.
 - Navigation no construye URLs desde `slug`, `url_prefix`, locale ni segmentos;
   consume una URL ya canónica del contrato de Pages.
 
 ### Entidades y migraciones
 
-Aplicable, pendiente de decisión antes de aprobar esta Spec. El modelo deberá
-definir como mínimo:
+El modelo del incremento es:
 
 ```text
 menus
-- identidad estable y clave técnica única del menú
+- id: bigint, PK
+- identifier: varchar(100), unique, not null, inmutable
+- created_at, updated_at
 
 menu_items
-- identidad estable, menú propietario, idioma, padre opcional y orden visual
-- etiqueta visible localizada
-- tipo de destino aprobado y referencia controlada a su destino
+- id: bigint, PK
+- menu_id: bigint, FK menus.id, restrict
+- language_id: bigint, FK languages.id, restrict
+- parent_id: bigint, FK menu_items.id, nullable, restrict
+- page_id: bigint, FK pages.id, restrict
+- label: varchar(255), not null
+- position: unsigned integer, not null
+- created_at, updated_at
 ```
 
-- Las tablas, claves foráneas, índices, nulabilidad, límites de longitud y la
-  estrategia portable de orden se fijarán tras elegir el tipo de destino inicial.
+- `identifier` usa entre 1 y 100 caracteres ASCII en minúscula, números y
+  guiones simples; empieza y termina por un carácter alfanumérico y no admite
+  guiones consecutivos. No se puede modificar después de crear el menú.
+- `label` es obligatorio, UTF-8, de hasta 255 caracteres y no admite caracteres
+  de control.
+- `position` es mayor o igual que `1`. La unicidad y contigüidad de posiciones
+  entre hermanos, y la coincidencia de menú e idioma entre padre e hijo, se
+  imponen mediante transacciones, bloqueos y pruebas de integración porque no son
+  expresables de forma portable con una restricción de base de datos.
+- Tras excluir temporalmente el ítem que se mueve, una inserción o movimiento en
+  un conjunto de `n` hermanos admite solo posiciones de `1` a `n + 1`. Un valor
+  fuera de rango se rechaza de forma atómica, sin reindexado parcial.
+- Retirar un ítem que tiene hijos se rechaza; los hijos deben moverse o retirarse
+  explícitamente antes de eliminar su padre.
 - La migración deberá ser compatible con SQLite, MySQL 8.4 y MariaDB 11.4. No hay
   backfill porque no existen menús previos.
 
 ### Contrato entre módulos y HTTP
 
-- Pages deberá exponer un contrato explícito, de solo lectura y comprobable para
-  resolver una PageTranslation públicamente disponible y su URL canónica para un
-  locale dado.
+- Pages deberá exponer el servicio de solo lectura
+  `PublicPageUrlResolver::forPage(int $pageId, string $locale): ?string`. Devuelve
+  la URL canónica de una Page públicamente disponible para ese locale o `null` si
+  la Page, su traducción o alguno de sus ancestros no está disponible.
 - El contrato no devuelve Blade, rutas de filesystem, un template ni segmentos
   sin validar; Navigation no depende de `PublicPageResolver` ni interpreta la
   petición HTTP.
 - Navigation recibe el idioma efectivo ya decidido por la capa HTTP y resuelve
   exclusivamente el árbol de ítems de ese idioma; no consulta la sesión ni
   `Accept-Language`.
-- La primera integración pública recibe una estructura de menú ya filtrada y la
-  renderiza con Blade. El punto de inserción de esa presentación y su marcado
-  semántico requieren decisión antes de aprobación.
+- Navigation verifica que el idioma recibido existe y está activo. Un idioma
+  desconocido o inactivo es una entrada inválida y provoca una excepción de
+  dominio de Navigation; la capa llamadora conserva la decisión sobre su
+  respuesta HTTP.
+- Navigation registra un componente Blade que recibe el `identifier` del menú y
+  el locale efectivo. El template que lo necesite lo invoca explícitamente; este
+  incremento no altera ni presupone una posición global en Base u otro template.
 
 ### Comandos y contratos públicos
 
-Aplicable, pendiente de decisión. Antes de aprobar deberán concretarse nombres,
-firmas, opciones, operaciones atómicas y errores de los comandos Artisan para
-crear menús, añadir, localizar, reordenar y retirar ítems. No se expondrá una
-mutación HTTP en este incremento.
+Los contratos Artisan son:
+
+```text
+cms:menu:create {identifier}
+cms:menu:item:create {menu} {locale} {page} {label} {--parent=} {--position=}
+cms:menu:item:update {item} {page} {label}
+cms:menu:item:move {item} {position} {--parent=}
+cms:menu:item:remove {item}
+```
+
+- `create` registra un menú vacío. `item:create` añade el ítem al final de sus
+  hermanos si omite `--position`; si lo proporciona, inserta en esa posición y
+  reindexa sus hermanos. Una posición fuera del rango permitido se rechaza.
+- `item:update` cambia atómicamente la Page destino y la etiqueta localizada de
+  un ítem, sin modificar su idioma, padre ni posición.
+- `item:move` asigna explícitamente el padre indicado por `--parent` o convierte
+  el ítem en raíz si omite la opción; después lo coloca en la posición indicada y
+  reindexa origen y destino. El movimiento conserva el subárbol del ítem.
+- `item:remove` se rechaza si el ítem tiene hijos. Todos los comandos son
+  atómicos, deterministas y no interactivos. No se expone una mutación HTTP en
+  este incremento.
 
 ### Seguridad y validación
 
 - Las etiquetas son texto UTF-8 acotado y sin caracteres de control; se escapan
   por defecto en Blade.
-- Las referencias de destino se validan contra entidades existentes y no permiten
-  introducir URLs, nombres de rutas, vistas, clases, HTML o JavaScript.
+- La referencia obligatoria a Page se valida contra una entidad existente y no
+  permite introducir URLs, nombres de rutas, vistas, clases, HTML o JavaScript.
 - La resolución pública no revela etiquetas ni destinos de traducciones de Page
   ausentes, inactivas o no publicables.
 - Toda mutación que afecte al árbol, orden, idioma o destino debe ser
@@ -174,8 +224,15 @@ colas ni servicios externos.
 - Probar que Navigation no puede alterar la jerarquía ni la URL canónica de una
   Page.
 - Probar árboles diferentes por idioma, relaciones padre-hijo entre idiomas
-  distintos, destino ausente, idioma inactivo, Page no pública, ancestro no
+  distintos rechazadas, relaciones válidas dentro del mismo idioma, aislamiento
+  entre árboles, destino ausente, idioma inactivo, Page no pública, ancestro no
   publicable y árbol cíclico, según las decisiones aprobadas.
+- Probar que filtrar un ítem por disponibilidad de destino filtra también todo su
+  subárbol, sin promocionar descendientes.
+- Probar inserción, movimiento, reindexado y retirada denegada de ítems con hijos
+  en árboles con varias raíces y niveles.
+- Probar actualización atómica de etiqueta y destino, y posiciones fuera de rango
+  rechazadas sin alterar el árbol.
 - Probar el contrato entre módulos y el renderizado Blade sin JavaScript.
 - Ejecutar pruebas enfocadas, suite afectada, Pint, build frontend y la matriz
   SQLite, MySQL 8.4 y MariaDB 11.4 cuando exista persistencia.
@@ -193,32 +250,43 @@ como deuda implícita.
 ## 7. Criterios de aceptación
 
 - **CA-01:** Navigation mantiene un árbol de menús independiente de la jerarquía
-  de Pages y rechaza ciclos o relaciones entre menús no autorizadas.
+  de Pages y rechaza ciclos o relaciones entre menús no autorizadas. Cada menú
+  tiene un `identifier` técnico único e inmutable.
 - **CA-02:** Cada ítem pertenece a un único idioma instalado y el menú resuelto
   para ese idioma puede tener un árbol, etiquetas, orden y destinos distintos de
-  los de otro idioma, sin fallback editorial entre ellos.
+  los de otro idioma, sin fallback editorial entre ellos. Las relaciones
+  padre-hijo entre idiomas o menús distintos se rechazan atómicamente.
 - **CA-03:** Un ítem de Page se muestra solo cuando Pages confirma una traducción
   pública y proporciona su URL canónica localizada; Navigation no compone paths.
+  Si un ítem se filtra, todos sus descendientes se filtran sin cambiar la
+  jerarquía del menú resultante.
 - **CA-04:** El menú público se renderiza con Blade desde una estructura filtrada
   y no expone destinos o etiquetas no disponibles.
 - **CA-05:** Las operaciones aprobadas son atómicas, no interactivas y preservan
-  integridad de árbol, orden, traducciones y destinos.
+  integridad de árbol, orden, idioma y destinos. Las posiciones de hermanos son
+  enteros contiguos desde `1`; una posición fuera de rango y la retirada de un
+  ítem con hijos se rechazan. La etiqueta y Page destino se actualizan
+  atómicamente sin alterar el árbol localizado.
+- **CA-06:** Un idioma inexistente o inactivo no resuelve un menú ni expone ítems
+  o destinos: el resolvedor lanza una excepción de dominio y Navigation no decide
+  la respuesta HTTP de la capa llamadora.
 
 ## 8. Trazabilidad de pruebas y documentación
 
 | Criterio | Riesgo cubierto | Nivel de prueba | Evidencia esperada | Impacto documental |
 | :--- | :--- | :--- | :--- | :--- |
-| CA-01 | Acoplamiento o ciclo visual | Integración/BD | Árbol válido e independencia de Pages | Módulo Navigation |
+| CA-01 | Acoplamiento, ciclo o menú ambiguo | Integración/BD | Árbol válido e identificador único | Módulo Navigation |
 | CA-02 | Árbol o etiqueta en idioma incorrecto | Integración | Árbol localizado aislado | Administración de menús |
 | CA-03 | Enlace a contenido inaccesible o URL duplicada | Integración/HTTP | Disponibilidad y URL de Pages consumidas | Rutas y navegación |
 | CA-04 | Exposición pública o dependencia de JavaScript | HTTP | Blade solo recibe ítems filtrados | Uso público |
-| CA-05 | Estado parcial o carrera de edición | Integración/BD | Operación y fallo atómicos | Operación por Artisan |
+| CA-05 | Estado parcial, orden ambiguo o carrera de edición | Integración/BD | Reindexado, actualización y fallo atómicos | Operación por Artisan |
+| CA-06 | Contenido servido para un idioma inactivo | Integración | Excepción de dominio sin ítems | Contrato de Navigation |
 
 ## 9. Plan de implementación
 
-1. Aprobar las decisiones de la sección 10 y fijar el esquema, contrato de Pages
-   y comandos antes de escribir pruebas o código funcional.
-2. Crear pruebas rojas de persistencia, árbol localizado e invariantes;
+1. Aceptar ADR-0005 y aprobar esta Spec antes de escribir pruebas o código
+   funcional.
+2. Crear pruebas rojas de persistencia, árbol localizado, orden e invariantes;
    implementar el módulo Navigation, migraciones y operaciones Artisan hasta
    CA-01, CA-02 y CA-05.
 3. Crear pruebas rojas del contrato con Pages y del filtrado localizado;
@@ -228,18 +296,6 @@ como deuda implícita.
 
 ## 10. Decisiones abiertas
 
-- **Modelo de destino inicial:** confirmar si el incremento solo admite destinos
-  a `Page` o si incorpora otros tipos. Recomendación: solo `Page`, para conservar
-  un primer contrato cerrado y evitar URLs arbitrarias.
-- **Identidad y número de menús:** decidir la clave técnica, si habrá un único
-  menú inicial o varios menús nombrados, y dónde se inserta su presentación.
-  Recomendación: varios menús por clave técnica única, sin fijar aún una posición
-  visual global.
-- **Orden y operaciones Artisan:** decidir la representación de orden y las
-  firmas de creación, traducción, movimiento y retirada. Recomendación: definir
-  operaciones explícitas y atómicas tras seleccionar la estrategia portable de
-  orden.
-- **Contrato de Pages:** decidir la clase o servicio público que devuelve destino
-  canónico y disponibilidad, sin acoplar Navigation al resolvedor HTTP.
-  Recomendación: un servicio de lectura de Pages con una firma tipada y datos
-  mínimos.
+No hay decisiones funcionales abiertas. ADR-0005 permanece `Propuesto`; su
+aceptación y la aprobación explícita de esta Spec son condiciones previas a la
+implementación.
