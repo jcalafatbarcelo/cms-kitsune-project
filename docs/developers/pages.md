@@ -57,4 +57,6 @@ por último, el predeterminado de frontend. Las URLs explícitas y las rutas sin
 prefijo distintas de `/` actualizan la sesión según su idioma representado. Las
 redirecciones de negociación, sesión y alias de idioma incluyen
 `Cache-Control: private, no-store`; las normalizaciones sintácticas de barra
-final usan `301`. No se crea una cookie persistente.
+final usan `301`. La negociación acepta solo idiomas base ISO 639-1 de dos letras
+y regiones alfabéticas opcionales de dos letras, e ignora preferencias con
+`q=0` y etiquetas fuera de ese contrato. No se crea una cookie persistente.

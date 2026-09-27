@@ -117,8 +117,10 @@ class PublicPageResolver
         $choices = [];
         foreach (explode(',', (string) $request->header('Accept-Language')) as $position => $choice) {
             [$tag, $quality] = array_pad(explode(';q=', trim($choice), 2), 2, '1');
-            if (preg_match('/^[A-Za-z]{2,3}(?:-[A-Za-z]{2})?$/D', $tag) === 1 && is_numeric($quality)) {
-                $choices[] = ['locale' => str_replace('-', '_', strtolower(substr($tag, 0, 2)).(strlen($tag) > 2 ? '_'.strtoupper(substr($tag, -2)) : '')), 'base' => strtolower(substr($tag, 0, 2)), 'quality' => (float) $quality, 'position' => $position];
+            $quality = is_numeric($quality) ? (float) $quality : 0;
+            if (preg_match('/^([A-Za-z]{2})(?:-([A-Za-z]{2}))?$/D', $tag, $matches) === 1 && $quality > 0) {
+                $base = strtolower($matches[1]);
+                $choices[] = ['locale' => isset($matches[2]) ? $base.'_'.strtoupper($matches[2]) : $base, 'base' => $base, 'quality' => $quality, 'position' => $position];
             }
         }
         usort($choices, fn (array $a, array $b) => $b['quality'] <=> $a['quality'] ?: $a['position'] <=> $b['position']);

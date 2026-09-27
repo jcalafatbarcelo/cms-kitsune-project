@@ -28,7 +28,9 @@ permite una familia ambigua.
 
 **Resultado esperado:** esas URLs reciben una redirección temporal privada, la
 salud conserva el callback de Laravel y la activación ambigua se rechaza sin
-mutar el estado.
+mutar el estado. La promoción de una variante regional no puede reemplazar un
+prefijo corto activo como idioma general, y una negociación de navegador nunca
+trunca ni selecciona un idioma excluido.
 
 ## 3. Alcance
 
@@ -37,6 +39,11 @@ mutar el estado.
 - Excluir la ruta de salud configurada del catch-all de Pages.
 - Rechazar la activación de un prefijo corto si ya existe un idioma general
   regional activo de la misma familia.
+- Rechazar la promoción de una variante regional si existe un prefijo corto
+  activo de la misma familia que debe conservar la designación general.
+- Limitar la negociación `Accept-Language` a idiomas base ISO 639-1 de dos
+  letras y regiones alfabéticas opcionales de dos letras; ignorar entradas no
+  soportadas y preferencias con `q=0`.
 - Actualizar documentación, roadmap, pruebas y changelog para reflejar el
   comportamiento restaurado.
 
@@ -45,6 +52,8 @@ mutar el estado.
 - Cambiar la precedencia de locale, los formatos de prefijo, la jerarquía de
   rutas, los aliases, la selección de idioma general o las reglas de slashes.
 - Añadir rutas de salud nuevas o alterar la configuración de Laravel.
+- Admitir idiomas base de tres letras, regiones numéricas o ampliar el formato de
+  `url_prefix`.
 
 ### Alcance diferido
 
@@ -81,7 +90,17 @@ el comportamiento especificado para rutas localizadas.
 
 - Si existe un idioma general regional activo de una familia, no puede activarse
   un idioma de prefijo corto no general de esa misma familia.
+- Si existe un prefijo corto activo, una variante regional de su familia no puede
+  sustituirlo como idioma general.
 - El rechazo no modifica el estado de activación ni el idioma general existente.
+
+### Negociación del navegador
+
+- Solo se consideran etiquetas `Accept-Language` con idioma base ISO 639-1 de
+  dos letras y región alfabética opcional de dos letras.
+- Una preferencia con calidad `q=0` no participa en la negociación.
+- Las etiquetas fuera de este contrato se ignoran; no se truncan para intentar
+  resolver otro idioma instalado.
 
 ### Seguridad y validación
 
@@ -102,6 +121,10 @@ externos.
 - Pruebas HTTP para `302`, cabecera privada y normalización `301` separadas.
 - Prueba de integración que garantiza la respuesta de salud configurada.
 - Prueba de integración para la activación denegada del prefijo corto.
+- Prueba de integración para impedir que una variante regional sustituya un
+  prefijo corto activo como idioma general.
+- Pruebas HTTP para una preferencia `q=0` y una etiqueta base de tres letras que
+  no pueden seleccionar otro idioma.
 - Ejecutar pruebas enfocadas, suite afectada, Pint, build y controles de seguridad
   configurados.
 
@@ -124,6 +147,10 @@ No aplica.
   activo de su familia falla sin alterar idiomas ni alias.
 - **CA-04:** La documentación de desarrolladores y roadmaps describe la
   precedencia y redirecciones realmente implementadas.
+- **CA-05:** Promover una variante regional no puede reemplazar el idioma general
+  de un prefijo corto activo de su familia.
+- **CA-06:** `Accept-Language` solo negocia idiomas base ISO 639-1 admitidos y
+  con calidad positiva, sin truncar etiquetas no soportadas.
 
 ## 8. Trazabilidad de pruebas y documentación
 
@@ -133,6 +160,8 @@ No aplica.
 | CA-02 | Degradación de salud operativa | HTTP | Callback de Laravel responde | Operación |
 | CA-03 | Alias de familia inconsistente | Integración | Activación rechazada y estado intacto | Administración de idiomas |
 | CA-04 | Contrato documental erróneo | Documentación | Referencias y comportamiento alineados | Roadmaps y guías |
+| CA-05 | Alias corto que sirve otro idioma | Integración | Promoción rechazada y general intacto | Administración de idiomas |
+| CA-06 | Selección de idioma no aceptado o erróneo | HTTP | Redirección al idioma permitido o fallback | Rutas públicas |
 
 ## 9. Plan de implementación
 
@@ -141,6 +170,8 @@ No aplica.
 2. Crear prueba roja para la activación de prefijo corto; reforzar el servicio de
    idioma hasta CA-03.
 3. Actualizar documentación, ejecutar quality gates y cerrar la Spec hasta CA-04.
+4. Añadir regresiones de promoción de idioma general y negociación HTTP hasta
+   CA-05 y CA-06.
 
 ## 10. Decisiones abiertas
 

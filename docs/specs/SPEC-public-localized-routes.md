@@ -122,9 +122,9 @@ expone `/` con el idioma predeterminado de frontend. El SDD exige prefijos de UR
 - El idioma predeterminado de frontend se resuelve sin prefijo. Todo idioma
   secundario debe estar activo y se resuelve con su `url_prefix`.
 - Si un prefijo regional o alias corto resuelve el idioma predeterminado de
-  frontend, redirige permanentemente a la ruta equivalente sin prefijo. El idioma
-  predeterminado puede ser el general de su familia sin impedir variantes
-  secundarias.
+  frontend, redirige con `302` y `Cache-Control: private, no-store` a la ruta
+  equivalente sin prefijo. El idioma predeterminado puede ser el general de su
+  familia sin impedir variantes secundarias.
 - Una ruta localizada solo resuelve una traducción públicamente disponible para
   el idioma seleccionado. No existe fallback de contenido a otro idioma.
 - Los segmentos de una Page deben coincidir en orden con su cadena de ancestros,

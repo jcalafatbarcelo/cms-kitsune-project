@@ -82,10 +82,14 @@ class LanguageManager
             }
 
             $family = $this->family($language->url_prefix);
-            $generals = Language::query()->where('is_active', true)->where('is_url_general', true)->lockForUpdate()->get()
+            $active = Language::query()->where('is_active', true)->lockForUpdate()->get()
                 ->filter(fn (Language $candidate) => $this->family($candidate->url_prefix) === $family);
+            $generals = $active->where('is_url_general', true);
             if ($language->url_prefix === $family && $generals->contains(fn (Language $candidate) => $candidate->url_prefix !== $family)) {
                 throw new LanguageOperationException("Short URL prefix [$family] conflicts with an existing regional general language.");
+            }
+            if ($language->url_prefix !== $family && $active->contains('url_prefix', $family)) {
+                throw new LanguageOperationException("Active short URL prefix [$family] must remain the URL general language of its family.");
             }
 
             $generals->each->update(['is_url_general' => false]);

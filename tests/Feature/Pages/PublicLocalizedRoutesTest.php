@@ -125,3 +125,25 @@ test('a short prefix cannot activate beside a regional URL general language', fu
         ->toThrow(LanguageOperationException::class)
         ->and((bool) DB::table('languages')->where('locale', 'es')->value('is_active'))->toBeFalse();
 });
+
+test('a regional variant cannot replace an active short URL general language', function () {
+    addPublicLanguage('es', 'es', true);
+    addPublicLanguage('es_MX', 'es-mx');
+
+    expect(fn () => app(LanguageManager::class)->setUrlGeneral('es_MX'))
+        ->toThrow(LanguageOperationException::class)
+        ->and((bool) DB::table('languages')->where('locale', 'es')->value('is_url_general'))->toBeTrue()
+        ->and((bool) DB::table('languages')->where('locale', 'es_MX')->value('is_url_general'))->toBeFalse();
+});
+
+test('browser negotiation ignores zero-quality and unsupported primary language subtags', function () {
+    addPublicLanguage('es_ES', 'es-es');
+    addPublicLanguage('as_ST', 'as');
+
+    $this->withHeaders(['Accept-Language' => 'es-ES;q=0, en;q=0.5'])->get('/')
+        ->assertOk()
+        ->assertSessionHas('public_locale', 'en');
+    $this->withHeaders(['Accept-Language' => 'ast, en;q=0.5'])->get('/')
+        ->assertOk()
+        ->assertSessionHas('public_locale', 'en');
+});
