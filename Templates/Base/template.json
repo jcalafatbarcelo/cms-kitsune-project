@@ -3,6 +3,7 @@
     "identifier": "base",
     "name": "Base",
     "presentations": [
-        "public.page.standard"
+        "public.page.standard",
+        "public.navigation.menu"
     ]
 }

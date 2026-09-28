@@ -55,6 +55,11 @@ Navigation a la resolución de Pages.
 visuales localizados y Blade obtiene sus destinos exclusivamente mediante el
 contrato de URL pública de Pages.
 
+`SPEC-template-presentation-resolution-foundation` está en `Revisión`. Core
+resuelve las presentaciones públicas de Pages y Navigation desde el template
+efectivo o Base, sin permitir que datos editables seleccionen Blades o rutas;
+no se considera completada hasta verificar todos sus criterios de aceptación.
+
 ## Dependencias de localización
 
 La secuencia principal no sustituye `LOC-02` a `LOC-08` ni altera sus estados.

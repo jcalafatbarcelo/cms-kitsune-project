@@ -66,7 +66,7 @@ antes de implementar cambios funcionales.
    cada bloque técnico relevante, completarlo o declarar `No aplicable` con una
    justificación concreta.
 5. Usar `Borrador` al crear una Spec, salvo que el usuario aporte aprobación
-   explícita. Estados admitidos: `Borrador`, `Propuesta`, `Aprobada`,
+   explícita. Estados admitidos: `Borrador`, `Propuesta`, `Aprobada`, `Revisión`,
    `Completada`, `Rechazada` y `Reemplazada`. Solo `Aprobada` autoriza iniciar la
    implementación; `Completada` registra que el alcance ya fue implementado.
 6. Formular criterios de aceptación numerados `CA-01`, `CA-02`, etc., observables

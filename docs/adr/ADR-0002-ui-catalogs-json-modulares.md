@@ -1,7 +1,7 @@
 # ADR-0002: UI catalogs JSON modulares
 
 - **Fecha:** 2026-09-19 23:23 UTC
-- **Última actualización:** 2026-09-20 00:40 UTC
+- **Última actualización:** 2026-09-28 19:57 UTC
 - **Estado:** Aceptado
 - **Autores:** Responsable del proyecto y OpenCode (asistencia de redacción)
 - **Reemplaza a:** No aplica
@@ -69,9 +69,12 @@ templates.
    registran por identificador normalizado antes de cargar líneas; `core` queda
    reservado y cualquier segundo identificador de origen que normalice al mismo
    valor se rechaza en lugar de fusionarse con el primero.
-5. Exigir que todo propietario aporte un `UI catalog` `en` con todas sus claves. Una
-   clave presente solo en otro locale se ignora en runtime y la validación la
-   trata como error.
+5. Exigir que todo propietario que aporte claves de interfaz distribuya un `UI
+   catalog` `en` con todas sus claves. Una clave presente solo en otro locale se
+   ignora en runtime y la validación la trata como error. Un template que no
+   distribuya ningún `UI catalog` no aporta textos propios y puede heredar la
+   presentación y los textos de otro template conforme al contrato de
+   presentaciones aplicable.
 6. Exigir completitud respecto de `en` cuando un propietario declare un `UI catalog`
    para otro locale. Un módulo o template puede omitir por completo locales
    distintos de `en`.
@@ -92,8 +95,12 @@ templates.
     disponible. Para módulos se utilizará la convención `Resources/lang`; para
     templates se conservará `Resources/lang` bajo la raíz que defina su futura
     Spec y se registrarán en el traductor de forma equivalente a los módulos, sin
-    una arquitectura de traducción separada ni prefijos anticipados como
-    `template_` o `tmp_`.
+   una arquitectura de traducción separada ni prefijos anticipados como
+   `template_` o `tmp_`.
+12. Distinguir el idioma base integrado `en` de los `UI catalogs` `en` de cada
+    propietario. Base distribuye sus textos mínimos en su propio catálogo; un
+    template Custom puede omitirlo para heredar Base o distribuir uno propio para
+    personalizar claves semánticas sin copiar el Blade de la presentación.
 
 ## Criterios de decisión
 
@@ -112,6 +119,8 @@ templates.
 - La propiedad explícita reduce colisiones entre extensiones.
 - Los módulos y templates pueden distribuir solo `en` sin bloquear otros idiomas
   instalados en el CMS.
+- Un template que no define textos propios no necesita duplicar el catálogo de
+  Base para heredar sus valores.
 - El modo `key` hace visibles las ausencias que el fallback inglés ocultaría.
 - La completitud por propietario permite validar soporte declarado sin exigir a
   todas las extensiones todos los idiomas del sitio.
@@ -124,10 +133,12 @@ templates.
   proyecto utilizará claves técnicas exactas, comportamiento soportado por el
   traductor pero que debe protegerse con pruebas de integración al actualizar
   Laravel.
-- La ausencia del `UI catalog` localizado de un propietario instalado producirá
-  inglés o la clave visible según el modo elegido. Si el propietario no dispone
-  de `UI catalog` `en`, no es válido y ambos modos devuelven la clave. Los
-  overrides permitirán traducciones locales sin modificar la extensión.
+- La ausencia del `UI catalog` localizado de un propietario que aporta textos
+  producirá inglés o la clave visible según el modo elegido. Si ese propietario
+  no dispone de `UI catalog` `en`, su contribución es inválida. Un template sin
+  catálogo no aporta textos y usa el fallback de presentación definido por su
+  contrato. Los overrides permitirán traducciones locales sin modificar la
+  extensión.
 - Un instalador futuro deberá registrar ubicaciones externas, validar manifiestos
   y resolver conflictos de propietarios. Esa complejidad se aplaza hasta que
   exista distribución dinámica real.

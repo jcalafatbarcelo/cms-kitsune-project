@@ -37,14 +37,15 @@ mueve el ítem a la raíz. No se puede retirar un ítem con hijos.
 
 ## Presentación pública
 
-Un template solicita el menú de forma explícita y entrega el locale efectivo
-decidido por la capa HTTP:
+Un Blade de presentación solicita el menú mediante el componente de Core y
+entrega el locale y CMS Template efectivo decididos por la capa HTTP:
 
 ```blade
-<x-navigation-menu identifier="main-menu" :locale="$locale" />
+<x-cms-navigation identifier="main-menu" :locale="$locale" :effective-template="$effectiveTemplate" />
 ```
 
-El componente renderiza solo con Blade. Para cada destino, Navigation consume
+El componente entrega el árbol al Blade `public.navigation.menu` resuelto desde
+el template efectivo o Base. Para cada destino, Navigation consume
 `PublicPageUrlResolver` de Pages: omite el ítem y todo su subárbol cuando la Page
 no tiene una traducción pública disponible para ese locale. Navigation no
 construye URLs ni consulta la jerarquía o traducciones internas de Pages.

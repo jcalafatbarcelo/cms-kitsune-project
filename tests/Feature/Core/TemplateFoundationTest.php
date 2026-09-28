@@ -3,10 +3,13 @@
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Modules\Core\Localization\Exceptions\CatalogValidationException;
+use Modules\Core\Template\Enums\CmsPresentation;
 use Modules\Core\Template\Exceptions\TemplateOperationException;
 use Modules\Core\Template\Models\CmsTemplate;
 use Modules\Core\Template\Services\TemplateManager;
+use Modules\Core\Template\Services\TemplatePresentationResolver;
+use Modules\Core\Template\Services\TemplateUiCatalogs;
+use Psr\Log\NullLogger;
 
 uses(RefreshDatabase::class);
 
@@ -15,11 +18,15 @@ beforeEach(function () {
     mkdir($this->templateRoot, recursive: true);
     writeTemplate($this->templateRoot, 'Base', 'base');
     $this->templates = new TemplateManager($this->templateRoot);
+    $this->presentations = new TemplatePresentationResolver($this->templateRoot);
     $this->app->instance(TemplateManager::class, $this->templates);
+    $this->app->instance(TemplatePresentationResolver::class, $this->presentations);
 });
 
 afterEach(function () {
     removeTemplateTree($this->templateRoot);
+    $this->app->forgetInstance(TemplateManager::class);
+    $this->app->forgetInstance(TemplatePresentationResolver::class);
 });
 
 test('a clean installation registers Base and enforces the template settings singleton', function () {
@@ -57,13 +64,13 @@ test('sync registers a valid deployed template and preserves transactional safet
         ->and(CmsTemplate::query()->where('identifier', 'broken')->exists())->toBeFalse();
 });
 
-test('sync rejects a standard presentation without its required template UI catalog', function () {
+test('sync permits a template presentation without its own UI catalog', function () {
     writeTemplate($this->templateRoot, 'Acme', 'acme');
     unlink($this->templateRoot.DIRECTORY_SEPARATOR.'Acme'.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'lang'.DIRECTORY_SEPARATOR.'en.json');
 
-    expect(fn () => $this->templates->sync())
-        ->toThrow(CatalogValidationException::class)
-        ->and(CmsTemplate::query()->where('identifier', 'acme')->exists())->toBeFalse();
+    $this->templates->sync();
+
+    expect(CmsTemplate::query()->where('identifier', 'acme')->exists())->toBeTrue();
 });
 
 test('activation and default selection reject a changed manifest identity', function () {
@@ -138,7 +145,59 @@ test('template commands expose deterministic operations without manifest content
         ->assertFailed();
 });
 
-function writeTemplate(string $root, string $directory, string $identifier, array $presentations = ['public.page.standard']): void
+test('presentation resolution accepts only its closed contract and prefers the effective template before Base', function () {
+    writeTemplate($this->templateRoot, 'Acme', 'acme', ['public.navigation.menu']);
+    $this->templates->sync();
+    $acme = CmsTemplate::query()->where('identifier', 'acme')->sole();
+
+    $page = $this->presentations->resolve(CmsPresentation::PublicPageStandard, $acme);
+    $navigation = $this->presentations->resolve(CmsPresentation::PublicNavigationMenu, $acme);
+
+    expect(CmsPresentation::cases())->toHaveCount(2)
+        ->and($page->presentationTemplate->identifier)->toBe('base')
+        ->and($navigation->presentationTemplate->identifier)->toBe('acme');
+});
+
+test('an additional valid manifest presentation cannot be rendered through the Core contract', function () {
+    writeTemplate($this->templateRoot, 'Acme', 'acme', ['public.page.standard', 'public.extra.preview']);
+    $this->templates->sync();
+    $acme = CmsTemplate::query()->where('identifier', 'acme')->sole();
+
+    expect(fn () => $this->presentations->resolve('public.extra.preview', $acme))
+        ->toThrow(TypeError::class)
+        ->and(CmsPresentation::cases())->toHaveCount(2);
+});
+
+test('presentation resolution rejects a changed manifest hash before reading a Blade', function () {
+    $base = CmsTemplate::query()->where('identifier', 'base')->sole();
+    file_put_contents($this->templateRoot.DIRECTORY_SEPARATOR.'Base'.DIRECTORY_SEPARATOR.'template.json', "\n", FILE_APPEND);
+
+    expect(fn () => $this->presentations->resolve(CmsPresentation::PublicPageStandard, $base))
+        ->toThrow(TemplateOperationException::class, 'configuration is unavailable');
+});
+
+test('a custom catalog can override a Base presentation and omit catalogs entirely', function () {
+    writeTemplate($this->templateRoot, 'Acme', 'acme', ['public.navigation.menu']);
+    file_put_contents($this->templateRoot.DIRECTORY_SEPARATOR.'Acme'.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'lang'.DIRECTORY_SEPARATOR.'en.json', json_encode([
+        'acme::page.home.under-construction.heading' => 'Custom heading',
+    ], JSON_THROW_ON_ERROR));
+    $this->templates->sync();
+    $acme = CmsTemplate::query()->where('identifier', 'acme')->sole();
+    $base = CmsTemplate::query()->where('identifier', 'base')->sole();
+    $catalogs = new TemplateUiCatalogs($this->templateRoot, new NullLogger);
+
+    config(['core.ui_catalog_fallback_mode' => 'base']);
+
+    expect($catalogs->text($acme, $base, 'page.home.under-construction.heading', 'es_ES'))->toBe('Custom heading')
+        ->and($catalogs->text($acme, $base, 'page.home.under-construction.message', 'es_ES'))->toBe('This site is being prepared.');
+
+    removeTemplateTree($this->templateRoot.DIRECTORY_SEPARATOR.'Acme'.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'lang');
+    config(['core.ui_catalog_fallback_mode' => 'key']);
+
+    expect($catalogs->text($acme, $base, 'page.home.under-construction.heading', 'es_ES'))->toBe('page.home.under-construction.heading');
+});
+
+function writeTemplate(string $root, string $directory, string $identifier, array $presentations = ['public.page.standard', 'public.navigation.menu']): void
 {
     $path = $root.DIRECTORY_SEPARATOR.$directory;
     $views = $path.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'public'.DIRECTORY_SEPARATOR.'page';
@@ -156,6 +215,7 @@ function writeTemplate(string $root, string $directory, string $identifier, arra
     file_put_contents($catalog.DIRECTORY_SEPARATOR.'en.json', json_encode([
         $identifier.'::page.home.under-construction.heading' => 'Under construction',
         $identifier.'::page.home.under-construction.message' => 'This site is being prepared.',
+        $identifier.'::navigation.menu.label' => 'Navigation',
     ], JSON_THROW_ON_ERROR));
 
     foreach ($presentations as $presentation) {

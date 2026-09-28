@@ -10,10 +10,26 @@ class TemplateManifestValidator
 {
     private const MAX_MANIFEST_BYTES = 65_536;
 
+    private const REQUIRED_BASE_UI_KEYS = [
+        'public.page.standard' => [
+            'page.home.under-construction.heading',
+            'page.home.under-construction.message',
+        ],
+        'public.navigation.menu' => ['navigation.menu.label'],
+    ];
+
     public function __construct(private readonly string $root) {}
 
     /** @return array{directory: string, directory_key: string, identifier: string, name: string, manifest_hash: string} */
     public function inspect(string $directory): array
+    {
+        $snapshot = $this->presentationSnapshot($directory);
+
+        return array_diff_key($snapshot, array_flip(['presentations', 'views_path']));
+    }
+
+    /** @return array{directory: string, directory_key: string, identifier: string, name: string, manifest_hash: string, presentations: array<int, string>, views_path: string} */
+    public function presentationSnapshot(string $directory): array
     {
         if (! preg_match('/^[A-Za-z][A-Za-z0-9]{0,99}$/D', $directory)) {
             throw new TemplateOperationException('Template directory is invalid.');
@@ -90,14 +106,16 @@ class TemplateManifestValidator
             }
         }
 
-        if (in_array('public.page.standard', $manifest['presentations'], true)) {
+        if ($directory === 'Base') {
             $catalog = (new UiCatalogRepository(
                 $resolvedPath.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'lang',
                 $manifest['identifier'],
             ))->snapshot('en');
-            foreach (['page.home.under-construction.heading', 'page.home.under-construction.message'] as $key) {
-                if (! array_key_exists($manifest['identifier'].'::'.$key, $catalog->lines)) {
-                    throw new TemplateOperationException("Template [$directory] is missing required UI key [$key].");
+            foreach ($manifest['presentations'] as $presentation) {
+                foreach (self::REQUIRED_BASE_UI_KEYS[$presentation] ?? [] as $key) {
+                    if (! array_key_exists($manifest['identifier'].'::'.$key, $catalog->lines)) {
+                        throw new TemplateOperationException("Template [$directory] is missing required UI key [$key].");
+                    }
                 }
             }
         }
@@ -108,6 +126,8 @@ class TemplateManifestValidator
             'identifier' => $manifest['identifier'],
             'name' => $manifest['name'],
             'manifest_hash' => hash('sha256', $bytes),
+            'presentations' => $manifest['presentations'],
+            'views_path' => $resolvedViewsPath,
         ];
     }
 

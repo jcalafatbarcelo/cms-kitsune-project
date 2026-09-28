@@ -75,7 +75,11 @@ class TemplateManager
                 if (CmsTemplate::query()->where('identifier', $snapshot['identifier'])->exists()) {
                     throw new TemplateOperationException("Template identifier [{$snapshot['identifier']}] collides.");
                 }
-                CmsTemplate::query()->create([...$snapshot, 'is_active' => false, 'registered_at' => now()]);
+                CmsTemplate::query()->create([
+                    ...array_diff_key($snapshot, array_flip(['presentations', 'views_path'])),
+                    'is_active' => false,
+                    'registered_at' => now(),
+                ]);
             }
         }, attempts: 5);
     }

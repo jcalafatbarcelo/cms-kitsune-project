@@ -55,7 +55,7 @@ class PublicPageResolver
         }
 
         try {
-            ['translation' => $translation, 'template' => $template] = $this->pages->resolve($language->locale, $slugs);
+            ['translation' => $translation, 'presentation' => $presentation] = $this->pages->resolve($language->locale, $slugs);
         } catch (PageOperationException) {
             abort(404);
         } catch (CatalogValidationException|TemplateOperationException) {
@@ -65,9 +65,15 @@ class PublicPageResolver
         $locale = $language->locale;
         $templateUi = app(TemplateUiCatalogs::class);
 
-        return view()->file(
-            base_path('Templates/'.$template->directory.'/Resources/views/public/page/standard.blade.php'),
-            compact('translation', 'template', 'templateUi', 'locale'),
+        return view(
+            $presentation->viewName,
+            [
+                'translation' => $translation,
+                'effectiveTemplate' => $presentation->effectiveTemplate,
+                'presentationTemplate' => $presentation->presentationTemplate,
+                'templateUi' => $templateUi,
+                'locale' => $locale,
+            ],
         );
     }
 
