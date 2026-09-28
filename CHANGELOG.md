@@ -132,4 +132,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-09-27 01:09 UTC
+Fecha de última modificación: 2026-09-28 10:10 UTC
