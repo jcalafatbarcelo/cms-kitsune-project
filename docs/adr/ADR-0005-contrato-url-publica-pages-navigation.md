@@ -1,7 +1,7 @@
 # ADR-0005: Contrato de URL pública entre Pages y Navigation
 
-- **Fecha:** 2026-09-28 01:08 UTC
-- **Última actualización:** 2026-09-28 01:08 UTC
+- **Fecha:** 2026-09-27 01:08 UTC
+- **Última actualización:** 2026-09-27 01:08 UTC
 - **Estado:** Propuesto
 - **Autores:** Responsable del proyecto y OpenCode (asistencia de redacción)
 - **Reemplaza a:** No aplica
