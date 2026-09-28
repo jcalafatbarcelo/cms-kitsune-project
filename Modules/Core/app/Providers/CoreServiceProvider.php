@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Providers;
 
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Modules\Core\Language\Console\ActivateLanguageCommand;
 use Modules\Core\Language\Console\DisableLanguageCommand;
@@ -20,7 +21,9 @@ use Modules\Core\Template\Console\SetDefaultTemplateCommand;
 use Modules\Core\Template\Console\TemplateListCommand;
 use Modules\Core\Template\Console\TemplateSyncCommand;
 use Modules\Core\Template\Services\TemplateManager;
+use Modules\Core\Template\Services\TemplatePresentationResolver;
 use Modules\Core\Template\Services\TemplateUiCatalogs;
+use Modules\Core\View\Components\CmsNavigation;
 use Psr\Log\LoggerInterface;
 
 class CoreServiceProvider extends ServiceProvider
@@ -52,6 +55,7 @@ class CoreServiceProvider extends ServiceProvider
             fn ($app) => new LanguageManager($app->make(UiCatalogRepository::class)),
         );
         $this->app->singleton(TemplateManager::class, fn () => new TemplateManager(base_path('Templates')));
+        $this->app->singleton(TemplatePresentationResolver::class, fn () => new TemplatePresentationResolver(base_path('Templates')));
         $this->app->singleton(TemplateUiCatalogs::class, fn ($app) => new TemplateUiCatalogs(
             base_path('Templates'),
             $app->make(LoggerInterface::class),
@@ -61,6 +65,8 @@ class CoreServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->app->make(UiCatalogResolver::class);
+        $this->loadViewsFrom(base_path('Templates/Base/Resources/views'), 'base');
+        Blade::component(CmsNavigation::class, 'cms-navigation');
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->commands([
             LanguageListCommand::class,

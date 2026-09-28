@@ -6,8 +6,8 @@
 </head>
 <body>
 <main>
-    <h1>{{ $templateUi->text($template, 'page.home.under-construction.heading', $locale) }}</h1>
-    <p>{{ $templateUi->text($template, 'page.home.under-construction.message', $locale) }}</p>
+    <h1>{{ $templateUi->text($effectiveTemplate, $presentationTemplate, 'page.home.under-construction.heading', $locale) }}</h1>
+    <p>{{ $templateUi->text($effectiveTemplate, $presentationTemplate, 'page.home.under-construction.message', $locale) }}</p>
 </main>
 </body>
 </html>

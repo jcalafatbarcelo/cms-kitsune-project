@@ -1,6 +1,6 @@
 # SPEC: Fundación de resolución de presentaciones de CMS Templates
 
-- **Estado:** Borrador
+- **Estado:** Revisión
 - **Perfil:** feature
 - **Origen de la planificación:** Evolución aprobada durante la planificación de
   Navigation, backoffice y PageBuilder para que el CMS Template efectivo controle
@@ -80,6 +80,12 @@ explícito a Base.
   tras aprobar su schema, persistencia, validación y renderizado.
 - Assets, hojas de estilo y componentes Vue propios de cada presentación se
   retomarán solo al existir una necesidad comprobable y un contrato de carga.
+- El contrato de extensión pública de CMS Templates evaluará un manifiesto
+  declarativo y no ejecutable para describir presentaciones, textos UI y sus
+  requisitos. JSON es un candidato por coherencia con los manifiestos actuales;
+  no se adopta formato, schema ni mecanismo de instalación en este incremento.
+  Se retomará al definir instalación pública de templates, validación, hashes,
+  compatibilidad y experiencia de autoría en una Spec independiente.
 
 ## 4. *Clash check*
 

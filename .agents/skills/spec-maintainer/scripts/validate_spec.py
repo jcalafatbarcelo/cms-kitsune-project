@@ -14,6 +14,7 @@ VALID_STATES = {
     "Borrador",
     "Propuesta",
     "Aprobada",
+    "Revisión",
     "Completada",
     "Rechazada",
     "Reemplazada",

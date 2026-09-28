@@ -71,6 +71,10 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
   destinos según la disponibilidad pública de Pages.
 - Contrato `PublicPageUrlResolver` de Pages para ofrecer URLs canónicas
   localizadas a Navigation sin acoplarlo a las traducciones o rutas HTTP.
+- Resolución de presentaciones de CMS Templates en revisión: claves cerradas,
+  fallback desde Base, comprobación del hash de manifiesto y menú público
+  tematizable; no se declara completada hasta que pasen todos los criterios de
+  aceptación.
 
 ### Modificado
 
@@ -132,4 +136,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-09-27 01:09 UTC
+Fecha de última modificación: 2026-09-28 19:57 UTC

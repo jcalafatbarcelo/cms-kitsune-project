@@ -5,6 +5,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Mockery;
+use Modules\Core\Template\Models\CmsTemplate;
+use Modules\Core\Template\Services\TemplateManager;
+use Modules\Core\Template\Services\TemplatePresentationResolver;
+use Modules\Core\Template\Services\TemplateUiCatalogs;
 use Modules\Navigation\Exceptions\NavigationOperationException;
 use Modules\Navigation\Models\Menu;
 use Modules\Navigation\Models\MenuItem;
@@ -14,6 +18,23 @@ use Modules\Pages\Services\PageManager;
 use Modules\Pages\Services\PublicPageUrlResolver;
 
 uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    $this->templateRoot = storage_path('framework/testing/navigation-templates-'.bin2hex(random_bytes(6)));
+    copyNavigationTemplateTree(base_path('Templates/Base'), $this->templateRoot.DIRECTORY_SEPARATOR.'Base');
+    $this->app->instance(TemplateManager::class, new TemplateManager($this->templateRoot));
+    $this->app->instance(TemplatePresentationResolver::class, new TemplatePresentationResolver($this->templateRoot));
+    $this->app->instance(TemplateUiCatalogs::class, new TemplateUiCatalogs($this->templateRoot, app('log')));
+    $this->app->forgetInstance(PageManager::class);
+});
+
+afterEach(function () {
+    removeNavigationTemplateTree($this->templateRoot);
+    $this->app->forgetInstance(TemplateManager::class);
+    $this->app->forgetInstance(TemplatePresentationResolver::class);
+    $this->app->forgetInstance(TemplateUiCatalogs::class);
+    $this->app->forgetInstance(PageManager::class);
+});
 
 function navigationLanguage(string $locale, string $prefix, bool $active = true): void
 {
@@ -126,7 +147,9 @@ test('the public resolver consumes Pages canonical URLs and filters unavailable 
     ])
         ->and(fn () => app(PublicMenuResolver::class)->forMenu('main-menu', 'missing'))->toThrow(NavigationOperationException::class);
 
-    expect(Blade::render('<x-navigation-menu identifier="main-menu" locale="en" />'))->toContain('Home')
+    $template = CmsTemplate::query()->where('identifier', 'base')->sole();
+
+    expect(Blade::render('<x-cms-navigation identifier="main-menu" locale="en" :effective-template="$template" />', compact('template')))->toContain('Home')
         ->not->toContain('Draft')
         ->not->toContain('Hidden child');
 });
@@ -177,3 +200,99 @@ test('the public resolver rejects inactive languages without exposing menu items
     expect(fn () => app(PublicMenuResolver::class)->forMenu('main-menu', 'fr_FR'))
         ->toThrow(NavigationOperationException::class, 'not active');
 });
+
+test('the Core component renders a custom navigation presentation with the localized tree', function () {
+    $menus = app(MenuManager::class);
+    $menus->create('main-menu');
+    $page = navigationPage();
+    app(PageManager::class)->publish($page, 'en');
+    $menus->createItem('main-menu', 'en', $page, 'About');
+    $path = $this->templateRoot.DIRECTORY_SEPARATOR.'Acme';
+    mkdir($path.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'public'.DIRECTORY_SEPARATOR.'navigation', recursive: true);
+    mkdir($path.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'private', recursive: true);
+    file_put_contents($path.DIRECTORY_SEPARATOR.'template.json', json_encode([
+        'schema_version' => 1,
+        'identifier' => 'acme',
+        'name' => 'Acme',
+        'presentations' => ['public.navigation.menu'],
+    ], JSON_THROW_ON_ERROR));
+    file_put_contents($path.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'public'.DIRECTORY_SEPARATOR.'navigation'.DIRECTORY_SEPARATOR.'menu.blade.php', '<nav data-template="acme">@include(\'cms-template-acme::private.header\') <x-cms-template-acme::private.marker /> @foreach ($items as $item)<a href="{{ $item[\'url\'] }}">{{ $item[\'label\'] }}</a>@endforeach</nav>');
+    file_put_contents($path.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'private'.DIRECTORY_SEPARATOR.'header.blade.php', '<span>Acme private include</span>');
+    file_put_contents($path.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'private'.DIRECTORY_SEPARATOR.'marker.blade.php', '<span>Acme private include</span>');
+
+    app(TemplateManager::class)->sync();
+    $template = CmsTemplate::query()->where('identifier', 'acme')->sole();
+
+    expect(Blade::render('<x-cms-navigation identifier="main-menu" locale="en" :effective-template="$template" />', compact('template')))
+        ->toContain('data-template="acme"')
+        ->toContain('Acme private include')
+        ->toContain('About');
+});
+
+test('the Base navigation label falls back and a custom template can override it for multiple menu identifiers', function () {
+    $menus = app(MenuManager::class);
+    $menus->create('main-menu');
+    $menus->create('footer');
+    $page = navigationPage();
+    app(PageManager::class)->publish($page, 'en');
+    $menus->createItem('main-menu', 'en', $page, 'Main');
+    $menus->createItem('footer', 'en', $page, 'Footer');
+    $base = CmsTemplate::query()->where('identifier', 'base')->sole();
+
+    expect(Blade::render('<x-cms-navigation identifier="main-menu" locale="en" :effective-template="$template" />', ['template' => $base]))
+        ->toContain('aria-label="Navigation"');
+
+    $path = $this->templateRoot.DIRECTORY_SEPARATOR.'Acme';
+    mkdir($path.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'public'.DIRECTORY_SEPARATOR.'page', recursive: true);
+    mkdir($path.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'lang', recursive: true);
+    file_put_contents($path.DIRECTORY_SEPARATOR.'template.json', json_encode([
+        'schema_version' => 1,
+        'identifier' => 'acme',
+        'name' => 'Acme',
+        'presentations' => ['public.page.standard'],
+    ], JSON_THROW_ON_ERROR));
+    file_put_contents($path.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'public'.DIRECTORY_SEPARATOR.'page'.DIRECTORY_SEPARATOR.'standard.blade.php', '<main></main>');
+    file_put_contents($path.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'lang'.DIRECTORY_SEPARATOR.'en.json', json_encode([
+        'acme::navigation.menu.label' => 'Primary navigation',
+    ], JSON_THROW_ON_ERROR));
+    app(TemplateManager::class)->sync();
+    $acme = CmsTemplate::query()->where('identifier', 'acme')->sole();
+
+    $rendered = Blade::render('<x-cms-navigation identifier="main-menu" locale="en" :effective-template="$template" /><x-cms-navigation identifier="footer" locale="en" :effective-template="$template" />', ['template' => $acme]);
+
+    expect(substr_count($rendered, 'aria-label="Primary navigation"'))->toBe(2)
+        ->and($rendered)->toContain('Main')
+        ->toContain('Footer');
+});
+
+function copyNavigationTemplateTree(string $source, string $destination): void
+{
+    mkdir($destination, recursive: true);
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($source, FilesystemIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::SELF_FIRST,
+    );
+
+    foreach ($iterator as $entry) {
+        $target = $destination.DIRECTORY_SEPARATOR.$iterator->getSubPathName();
+        $entry->isDir() ? mkdir($target) : copy($entry->getPathname(), $target);
+    }
+}
+
+function removeNavigationTemplateTree(string $path): void
+{
+    if (! is_dir($path)) {
+        return;
+    }
+
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::CHILD_FIRST,
+    );
+
+    foreach ($iterator as $entry) {
+        $entry->isDir() ? rmdir($entry->getPathname()) : unlink($entry->getPathname());
+    }
+
+    rmdir($path);
+}

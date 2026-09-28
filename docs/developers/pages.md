@@ -2,9 +2,10 @@
 
 ## Estado
 
-Pages proporciona rutas públicas jerárquicas, renderizadas por `Templates/Base`
-con la presentación `public.page.standard`. PageBuilder, navegación y contenido
-editorial siguen fuera de este incremento.
+Pages proporciona rutas públicas jerárquicas mediante la presentación
+`public.page.standard`. El CMS Template efectivo aporta el Blade o lo hereda de
+`Templates/Base`. PageBuilder y contenido editorial siguen fuera de este
+incremento.
 
 ## Home y publicación
 
@@ -27,16 +28,17 @@ guiones simples. Un slug de Page raíz no puede tener formato `xx` ni `xx-xx`,
 reservado para los prefijos de idioma; un slug hijo sí puede usar esos formatos.
 Sin `--template`, `cms:page:create` hereda el template
 predeterminado; `--template=<identifier>` selecciona un template activo que
-declare `public.page.standard`.
+declare `public.page.standard` o pueda heredarlo de Base.
 
 ## UI de templates
 
 La presentación estándar usa las claves semánticas
 `page.home.under-construction.heading` y
-`page.home.under-construction.message`. El runtime resuelve estas claves contra
-el UI catalog del template efectivo; una Page no guarda el propietario del
-catálogo ni rutas Blade. Todo template que declare la presentación estándar debe
-aportar ambas claves en su catálogo `en`.
+`page.home.under-construction.message`. El runtime consulta primero el UI catalog
+del template efectivo y después el del template que aporta el Blade. Una Page no
+guarda el propietario del catálogo ni rutas Blade. Un template sin catálogo
+propio hereda los textos de Base; si aporta claves propias, las declara en su
+catálogo `en`.
 
 ## Rutas públicas localizadas
 

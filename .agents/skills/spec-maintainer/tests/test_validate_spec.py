@@ -122,6 +122,9 @@ class SpecValidatorTests(unittest.TestCase):
             MODULE.validate(self.write_spec(valid_spec(profile="maintenance"))), []
         )
 
+    def test_review_spec_passes(self) -> None:
+        self.assertEqual(MODULE.validate(self.write_spec(valid_spec(state="Revisión"))), [])
+
     def test_rejects_unknown_profile_and_missing_section(self) -> None:
         content = valid_spec(profile="initiative").replace(
             "## 4. *Clash check*", "## 4. Revisión informal"

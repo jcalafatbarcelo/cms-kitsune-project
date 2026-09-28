@@ -5,8 +5,11 @@ namespace Modules\Pages\Services;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Language\Models\Language;
+use Modules\Core\Template\Data\PresentationResolution;
+use Modules\Core\Template\Enums\CmsPresentation;
 use Modules\Core\Template\Models\CmsTemplate;
 use Modules\Core\Template\Models\CmsTemplateSetting;
+use Modules\Core\Template\Services\TemplatePresentationResolver;
 use Modules\Core\Template\Services\TemplateUiCatalogs;
 use Modules\Pages\Exceptions\PageOperationException;
 use Modules\Pages\Models\Page;
@@ -15,7 +18,10 @@ use Modules\Pages\Models\PageTranslation;
 
 class PageManager
 {
-    public function __construct(private readonly TemplateUiCatalogs $templateUi) {}
+    public function __construct(
+        private readonly TemplateUiCatalogs $templateUi,
+        private readonly TemplatePresentationResolver $presentations,
+    ) {}
 
     public function create(string $locale, string $slug, string $title, ?int $parentId = null, ?string $templateIdentifier = null): PageTranslation
     {
@@ -117,7 +123,7 @@ class PageManager
         }, attempts: 5);
     }
 
-    /** @return array{translation: PageTranslation, template: CmsTemplate} */
+    /** @return array{translation: PageTranslation, template: CmsTemplate, presentation: PresentationResolution} */
     public function home(string $locale): array
     {
         $language = Language::query()->where('locale', $locale)->where('is_active', true)->first();
@@ -130,12 +136,13 @@ class PageManager
             throw new PageOperationException('No public home page is available.');
         }
         $template = $this->templateFor($translation->page);
-        $this->templateUi->validateStandard($template);
+        $presentation = $this->presentations->resolve(CmsPresentation::PublicPageStandard, $template);
+        $this->templateUi->validateStandard($presentation->effectiveTemplate, $presentation->presentationTemplate);
 
-        return ['translation' => $translation, 'template' => $template];
+        return ['translation' => $translation, 'template' => $presentation->effectiveTemplate, 'presentation' => $presentation];
     }
 
-    /** @return array{translation: PageTranslation, template: CmsTemplate} */
+    /** @return array{translation: PageTranslation, template: CmsTemplate, presentation: PresentationResolution} */
     public function resolve(string $locale, array $slugs): array
     {
         if ($slugs === []) {
@@ -149,9 +156,10 @@ class PageManager
             throw new PageOperationException('The requested page is unavailable.');
         }
         $template = $this->templateFor($translation->page);
-        $this->templateUi->validateStandard($template);
+        $presentation = $this->presentations->resolve(CmsPresentation::PublicPageStandard, $template);
+        $this->templateUi->validateStandard($presentation->effectiveTemplate, $presentation->presentationTemplate);
 
-        return ['translation' => $translation, 'template' => $template];
+        return ['translation' => $translation, 'template' => $presentation->effectiveTemplate, 'presentation' => $presentation];
     }
 
     private function setHomeLocked(Language $language, PageTranslation $translation): void
@@ -193,7 +201,8 @@ class PageManager
         if ($template === null) {
             throw new PageOperationException("Template [$identifier] is not active.");
         }
-        $this->templateUi->validateStandard($template);
+        $presentation = $this->presentations->resolve(CmsPresentation::PublicPageStandard, $template);
+        $this->templateUi->validateStandard($presentation->effectiveTemplate, $presentation->presentationTemplate);
 
         return $template;
     }
