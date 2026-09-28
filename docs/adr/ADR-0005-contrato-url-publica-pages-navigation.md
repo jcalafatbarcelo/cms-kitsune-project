@@ -1,7 +1,7 @@
 # ADR-0005: Contrato de URL pública entre Pages y Navigation
 
 - **Fecha:** 2026-09-27 01:08 UTC
-- **Última actualización:** 2026-09-27 01:08 UTC
+- **Última actualización:** 2026-09-27 01:09 UTC
 - **Estado:** Aceptado
 - **Autores:** Responsable del proyecto y OpenCode (asistencia de redacción)
 - **Reemplaza a:** No aplica
@@ -61,6 +61,11 @@ futuros sin convertir el resolvedor HTTP de Pages en un servicio compartido.
    `PublicPageResolver`, y no derivarán paths desde datos de Pages.
 4. El servicio no decide respuestas HTTP, no lee sesión ni headers y no devuelve
    Blade, templates, segmentos sin validar ni datos editoriales.
+5. Para consumidores que resuelven varios destinos, Pages expondrá
+   `forPages(array $pageIds, string $locale): array<int, string>`. Esta operación
+   devuelve únicamente pares `pageId => URL canónica` de destinos públicos y
+   comparte las consultas de idioma, configuración, home, traducciones y
+   ancestros. `forPage()` delega en ella para conservar un único algoritmo.
 
 ## Criterios de decisión
 
@@ -84,7 +89,8 @@ futuros sin convertir el resolvedor HTTP de Pages en un servicio compartido.
 - Pages incorpora un contrato público interno que debe conservar compatibilidad o
   versionarse mediante una decisión posterior.
 - La resolución de varios ítems puede requerir varias consultas iniciales; se
-  medirá antes de introducir una operación por lote o caché.
+  resuelve mediante la operación por lote. La caché persistente seguirá
+  requiriendo una necesidad medida e invalidación especificada.
 
 ## Alternativas consideradas
 
@@ -124,6 +130,20 @@ predeterminado y la disponibilidad en cascada.
 
 Motivo de descarte: introduce divergencias de URL y expone detalles internos de
 Pages a cada consumidor.
+
+### Cache local dentro de Navigation
+
+Descripción: Navigation memoriza resultados individuales de `forPage()` durante
+la resolución de un menú.
+
+Ventajas: reduce llamadas repetidas para el mismo `page_id` sin cambiar Pages.
+
+Desventajas: no evita la repetición para destinos distintos ni centraliza las
+consultas de idioma, home y ancestros; también desplaza una optimización de Pages
+a cada consumidor.
+
+Motivo de descarte: el lote en Pages preserva una única autoridad y mejora todos
+los consumidores sin introducir caché persistente.
 
 ## Revisión futura
 

@@ -74,6 +74,9 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 
 ### Modificado
 
+- Ampliado el contrato interno de URLs públicas de Pages con `forPages()` para
+  resolver destinos únicos de Navigation por lote sin alterar sus URLs canónicas
+  ni su disponibilidad.
 - Movidas las skills canónicas a `.agents/skills/` y regenerado su índice derivado;
   actualizadas las referencias operativas de `AGENTS.md` y la documentación.
 - Renombrado el proyecto en `composer.json` (`kitsune/cms`) y `package.json`
@@ -129,4 +132,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-09-27 00:50 UTC
+Fecha de última modificación: 2026-09-27 01:09 UTC

@@ -24,23 +24,24 @@ class PublicMenuResolver
         if ($menu === null) {
             return [];
         }
-        $items = MenuItem::query()->where('menu_id', $menu->id)->where('language_id', $language->id)->orderBy('position')->get()->groupBy('parent_id');
+        $menuItems = MenuItem::query()->where('menu_id', $menu->id)->where('language_id', $language->id)->orderBy('position')->get();
+        $urls = $this->pages->forPages($menuItems->pluck('page_id')->unique()->values()->all(), $locale);
+        $items = $menuItems->groupBy('parent_id');
 
-        return $this->children($items, null, $locale);
+        return $this->children($items, null, $urls);
     }
 
     /** @param Collection<int|string, Collection<int, MenuItem>> $items
      * @return array<int, array{id: int, label: string, url: string, children: array}>
      */
-    private function children($items, ?int $parentId, string $locale): array
+    private function children($items, ?int $parentId, array $urls): array
     {
         $resolved = [];
         foreach ($items->get($parentId, collect()) as $item) {
-            $url = $this->pages->forPage($item->page_id, $locale);
-            if ($url === null) {
+            if (! isset($urls[$item->page_id])) {
                 continue;
             }
-            $resolved[] = ['id' => $item->id, 'label' => $item->label, 'url' => $url, 'children' => $this->children($items, $item->id, $locale)];
+            $resolved[] = ['id' => $item->id, 'label' => $item->label, 'url' => $urls[$item->page_id], 'children' => $this->children($items, $item->id, $urls)];
         }
 
         return $resolved;

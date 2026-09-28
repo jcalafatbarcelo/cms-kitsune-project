@@ -48,3 +48,6 @@ El componente renderiza solo con Blade. Para cada destino, Navigation consume
 `PublicPageUrlResolver` de Pages: omite el ítem y todo su subárbol cuando la Page
 no tiene una traducción pública disponible para ese locale. Navigation no
 construye URLs ni consulta la jerarquía o traducciones internas de Pages.
+
+Navigation agrupa los `page_id` únicos del menú y solicita sus URLs en una única
+operación `forPages()` antes de recorrer el árbol.

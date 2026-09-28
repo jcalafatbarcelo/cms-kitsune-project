@@ -38,7 +38,11 @@ test('the Pages URL contract returns only canonical URLs for publicly available 
         ->and($resolver->forPage($englishHome->page_id, 'es_ES'))->toBe('/es/')
         ->and($resolver->forPage($child->page_id, 'es_ES'))->toBe('/es/inicio/equipo')
         ->and($resolver->forPage($child->page_id, 'en'))->toBeNull()
-        ->and($resolver->forPage($child->page_id, 'missing'))->toBeNull();
+        ->and($resolver->forPage($child->page_id, 'missing'))->toBeNull()
+        ->and($resolver->forPages([$englishHome->page_id, $child->page_id, 999], 'es_ES'))->toBe([
+            $englishHome->page_id => '/es/',
+            $child->page_id => '/es/inicio/equipo',
+        ]);
 
     DB::table('page_translations')->where('page_id', $englishHome->page_id)
         ->where('language_id', DB::table('languages')->where('locale', 'es_ES')->value('id'))

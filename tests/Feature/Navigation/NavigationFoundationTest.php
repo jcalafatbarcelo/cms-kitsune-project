@@ -4,12 +4,14 @@ use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
+use Mockery;
 use Modules\Navigation\Exceptions\NavigationOperationException;
 use Modules\Navigation\Models\Menu;
 use Modules\Navigation\Models\MenuItem;
 use Modules\Navigation\Services\MenuManager;
 use Modules\Navigation\Services\PublicMenuResolver;
 use Modules\Pages\Services\PageManager;
+use Modules\Pages\Services\PublicPageUrlResolver;
 
 uses(RefreshDatabase::class);
 
@@ -127,6 +129,45 @@ test('the public resolver consumes Pages canonical URLs and filters unavailable 
     expect(Blade::render('<x-navigation-menu identifier="main-menu" locale="en" />'))->toContain('Home')
         ->not->toContain('Draft')
         ->not->toContain('Hidden child');
+});
+
+test('the public resolver deduplicates destinations and requests Pages URLs once', function () {
+    $menus = app(MenuManager::class);
+    $menus->create('main-menu');
+    $pageId = DB::table('page_translations')->where('language_id', DB::table('languages')->where('locale', 'en')->value('id'))->value('page_id');
+    $parent = $menus->createItem('main-menu', 'en', $pageId, 'Parent');
+    $child = $menus->createItem('main-menu', 'en', $pageId, 'Child', $parent->id);
+    $pages = Mockery::mock(PublicPageUrlResolver::class);
+    $pages->shouldReceive('forPages')->once()->with([$pageId], 'en')->andReturn([$pageId => '/']);
+
+    expect((new PublicMenuResolver($pages))->forMenu('main-menu', 'en'))->toBe([
+        ['id' => $parent->id, 'label' => 'Parent', 'url' => '/', 'children' => [
+            ['id' => $child->id, 'label' => 'Child', 'url' => '/', 'children' => []],
+        ]],
+    ]);
+});
+
+test('adding same-depth distinct menu targets does not add Pages resolution queries per item', function () {
+    $menus = app(MenuManager::class);
+    $menus->create('main-menu');
+    $home = DB::table('page_translations')->where('language_id', DB::table('languages')->where('locale', 'en')->value('id'))->sole();
+    $menus->createItem('main-menu', 'en', $home->page_id, 'Home');
+    $resolver = app(PublicMenuResolver::class);
+
+    DB::flushQueryLog();
+    DB::enableQueryLog();
+    $resolver->forMenu('main-menu', 'en');
+    $oneTargetQueries = count(DB::getQueryLog());
+
+    foreach (['about', 'team', 'contact'] as $slug) {
+        $menus->createItem('main-menu', 'en', navigationPage($slug), ucfirst($slug));
+    }
+    DB::flushQueryLog();
+    $resolver->forMenu('main-menu', 'en');
+    $manyTargetQueries = count(DB::getQueryLog());
+    DB::disableQueryLog();
+
+    expect($manyTargetQueries)->toBe($oneTargetQueries);
 });
 
 test('the public resolver rejects inactive languages without exposing menu items', function () {
