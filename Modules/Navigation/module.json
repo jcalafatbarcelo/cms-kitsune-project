@@ -1,0 +1,9 @@
+{
+    "name": "Navigation",
+    "alias": "navigation",
+    "description": "Localized visual navigation trees for public Pages.",
+    "keywords": ["navigation", "menus"],
+    "priority": 20,
+    "providers": ["Modules\\Navigation\\Providers\\NavigationServiceProvider"],
+    "files": []
+}

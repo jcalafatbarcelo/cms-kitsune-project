@@ -66,6 +66,11 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Rutas públicas localizadas: prefijos URL, alias de familia, idioma general,
   rutas jerárquicas de Pages, negociación inicial por navegador y sesión de
   Laravel sin cookie persistente.
+- Fundación de Navigation: menús e ítems localizados con árbol visual,
+  operaciones Artisan atómicas, componente Blade explícito y filtrado de
+  destinos según la disponibilidad pública de Pages.
+- Contrato `PublicPageUrlResolver` de Pages para ofrecer URLs canónicas
+  localizadas a Navigation sin acoplarlo a las traducciones o rutas HTTP.
 
 ### Modificado
 
@@ -124,4 +129,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-09-26 23:57 UTC
+Fecha de última modificación: 2026-09-27 00:50 UTC

@@ -53,7 +53,7 @@ documentación técnica empleará siempre `UI catalog`.
 | LOC-03 | Auditoría administrativa | Pendiente | Antes del primer backoffice mutable | Historial durable independiente de logs operativos |
 | LOC-04 | Backoffice de idiomas y overrides | Pendiente | LOC-01, LOC-02 y garantías de LOC-03 | Gestión autorizada, protegida y auditable |
 | LOC-05 | Selección temporal y negociación HTTP | Completado parcialmente | Registro de idiomas estable | Sesión y primera visita por navegador; cookie consentida diferida |
-| LOC-06 | URL amigables, idioma e items de menú | Completado parcialmente | Modelo de páginas y menús especificado | Rutas canónicas y precedencia URL/locale; Navigation e items de menú diferidos |
+| LOC-06 | URL amigables, idioma e items de menú | Completado | Modelo de páginas y menús especificado | Rutas canónicas, precedencia URL/locale y árboles de Navigation localizados |
 | LOC-07 | Contenido y PageBuilder traducibles | Pendiente | Entidades y schemas aprobados | Valores por locale e instancia, separados de la UI |
 | LOC-08 | Paquetes dinámicos de idioma | Fuera del MVP/TFM | Distribución real y auditoría disponibles | Instalación segura sin ejecutar código del paquete |
 
@@ -214,11 +214,14 @@ deberá resolver redirecciones, caché HTTP, SEO, privacidad y consentimiento.
 ### LOC-06 y LOC-07: URL y contenido
 
 `SPEC-public-localized-routes` completó las rutas jerárquicas de Pages y sus
-prefijos canónicos. Navigation e items de menú no forman parte de esa entrega y
-requerirán su propio incremento.
+prefijos canónicos. `SPEC-navigation-foundation` completó los árboles visuales
+localizados, sin fallbacks editoriales y sin permitir que Navigation construya
+URLs o decida el locale HTTP.
 
-La localización de frontend se especificará con URL amigables e items de menú.
-No se fijará ahora si el locale predeterminado lleva prefijo.
+La localización de frontend usa URLs amigables e items de menú. El idioma
+predeterminado de frontend no lleva prefijo y los idiomas secundarios usan sus
+prefijos canónicos, según la
+[SPEC-public-localized-routes](../specs/SPEC-public-localized-routes.md).
 
 El contenido de páginas y PageBuilder se mantendrá separado de los `UI catalogs`.
 Una plantilla del PageBuilder define claves de campos; cada instancia mantiene

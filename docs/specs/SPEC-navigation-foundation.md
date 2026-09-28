@@ -1,6 +1,6 @@
 # SPEC: Fundación de Navigation
 
-- **Estado:** Aprobada
+- **Estado:** Completada
 - **Perfil:** feature
 - **Origen de la planificación:** Cuarto incremento del
   [roadmap de contenido, templates y navegación](../architecture/content-delivery-roadmap.md).
