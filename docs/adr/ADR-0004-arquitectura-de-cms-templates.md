@@ -1,7 +1,7 @@
 # ADR-0004: Arquitectura de CMS Templates
 
 - **Fecha:** 2026-09-20 21:37 UTC
-- **Última actualización:** 2026-09-20 22:37 UTC
+- **Última actualización:** 2026-09-28 11:31 UTC
 - **Estado:** Aceptado
 - **Autores:** Responsable del proyecto y OpenCode (asistencia de redacción)
 - **Reemplaza a:** No aplica
@@ -82,11 +82,14 @@ el contenido público esencial, con Vue solo donde sea necesario.
    concreto. `Default` es el modo de herencia, no el identificador de un
    template. Cambiar el predeterminado afecta intencionadamente a las páginas que
    heredan; no afecta a las que fijan un template.
-5. Rechazar la asignación de una Page cuando el CMS Template efectivo no declare
-   la clave de presentación solicitada. Si un template explícito está referenciado
-   por páginas, no podrá dejar de estar disponible sin una reasignación explícita
-   y atómica; no habrá fallback silencioso. La herencia al predeterminado es el
-   único fallback de selección permitido.
+5. La exigencia de que el CMS Template efectivo declare la clave de presentación
+   solicitada queda sustituida parcialmente por
+   [ADR-0006](ADR-0006-resolucion-presentaciones-cms-templates.md): una
+   presentación puede resolverse desde Base cuando el template efectivo la omite.
+   Se conserva que un template explícito referenciado por Pages no podrá dejar de
+   estar disponible sin una reasignación explícita y atómica. La herencia al
+   predeterminado sigue siendo el único fallback de selección de template; la
+   precedencia de presentación se rige por ADR-0006.
 6. Conservar las fronteras funcionales: Pages posee identidad, jerarquía, URL,
    publicación y contenido editorial; cada módulo conserva sus rutas, acciones y
    autorización. El CMS Template implementa solamente la apariencia de una
