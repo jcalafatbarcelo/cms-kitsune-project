@@ -33,7 +33,7 @@ Fuentes relacionadas:
 | 1 | Fundación de CMS Templates | Completado | ADR-0004 aceptado | Base, manifiesto, ciclo de vida local y predeterminado gestionados por Core |
 | 2 | Fundación de Pages | Completado | Fundación de CMS Templates completada | `Page`/`PageTranslation`, jerarquía, publicación en cascada y primera página Base renderizada en Blade |
 | 3 | Rutas públicas localizadas | Completado | Pages especificado y registro de idiomas estable | Locale de petición, URL canónica, resolución a traducción y redirecciones |
-| 4 | Fundación de Navigation | Previsto | Pages y rutas públicas localizadas completadas | Menús independientes, ítems traducibles y visibilidad según disponibilidad pública |
+| 4 | Fundación de Navigation | Completado | Pages y rutas públicas localizadas completadas | Menús independientes, ítems traducibles y visibilidad según disponibilidad pública |
 | 5 | Fundación de PageBuilder | Previsto | Pages y contrato de presentación estables | Bloques declarativos, valores por instancia y locale, validación y renderizado Blade |
 | 6 | Extensiones de CMS Templates | Previsto | PageBuilder o una necesidad de presentación comprobable | UI catalogs propios, configuración, assets, presentaciones y bloques aportados por templates |
 | 7 | Tematización de vistas de sistema | Previsto | Módulo funcional y contrato de cada vista disponibles | Apariencia intercambiable de login, recuperación o backoffice sin alterar sus rutas, autorización o lógica |
@@ -50,6 +50,10 @@ efectivo, sin persistir prefijos como `base::` en Pages.
 `SPEC-public-localized-routes` está completada. Las URLs canónicas derivan los
 slugs y ancestros de cada traducción, sin persistir paths completos ni acoplar
 Navigation a la resolución de Pages.
+
+`SPEC-navigation-foundation` está completada. Navigation mantiene árboles
+visuales localizados y Blade obtiene sus destinos exclusivamente mediante el
+contrato de URL pública de Pages.
 
 ## Dependencias de localización
 

@@ -10,6 +10,7 @@ use Modules\Pages\Console\TranslatePageCommand;
 use Modules\Pages\Console\UnpublishPageCommand;
 use Modules\Pages\Services\PageManager;
 use Modules\Pages\Services\PublicPageResolver;
+use Modules\Pages\Services\PublicPageUrlResolver;
 
 class PagesServiceProvider extends ServiceProvider
 {
@@ -17,6 +18,7 @@ class PagesServiceProvider extends ServiceProvider
     {
         $this->app->singleton(PageManager::class);
         $this->app->singleton(PublicPageResolver::class);
+        $this->app->singleton(PublicPageUrlResolver::class);
     }
 
     public function boot(): void

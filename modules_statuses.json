@@ -1,4 +1,5 @@
 {
     "Core": true,
-    "Pages": true
+    "Pages": true,
+    "Navigation": true
 }

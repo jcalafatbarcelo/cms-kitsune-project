@@ -1,0 +1,10 @@
+{
+    "name": "kitsune/navigation",
+    "description": "Localized visual navigation trees for CMS Pages.",
+    "type": "laravel-module",
+    "autoload": {
+        "psr-4": {
+            "Modules\\Navigation\\": "app/"
+        }
+    }
+}
