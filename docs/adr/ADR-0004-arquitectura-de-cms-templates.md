@@ -1,7 +1,7 @@
 # ADR-0004: Arquitectura de CMS Templates
 
 - **Fecha:** 2026-09-20 21:37 UTC
-- **Última actualización:** 2026-09-28 11:31 UTC
+- **Última actualización:** 2026-09-28 19:57 UTC
 - **Estado:** Aceptado
 - **Autores:** Responsable del proyecto y OpenCode (asistencia de redacción)
 - **Reemplaza a:** No aplica
@@ -139,8 +139,9 @@ el contenido público esencial, con Vue solo donde sea necesario.
 - Un template es código ejecutable desplegado, a diferencia de un UI catalog
   JSON. La instalación dinámica no se habilita hasta que exista una cadena de
   suministro, autorización y auditoría especificadas.
-- Un template que no implemente una presentación necesaria no puede asignarse a
-  esa página; la validación anticipada evita una página pública rota.
+- Un template solo puede asignarse a una Page cuando él o Base aporten una
+  implementación válida de la presentación necesaria; la validación anticipada
+  evita una página pública rota cuando ninguno de los dos la proporciona.
 
 ## Alternativas consideradas
 
