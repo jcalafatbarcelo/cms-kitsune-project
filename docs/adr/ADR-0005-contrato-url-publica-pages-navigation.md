@@ -2,7 +2,7 @@
 
 - **Fecha:** 2026-09-27 01:08 UTC
 - **Última actualización:** 2026-09-27 01:08 UTC
-- **Estado:** Propuesto
+- **Estado:** Aceptado
 - **Autores:** Responsable del proyecto y OpenCode (asistencia de redacción)
 - **Reemplaza a:** No aplica
 - **Reemplazado por:** No aplica

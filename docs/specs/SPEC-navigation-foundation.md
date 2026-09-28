@@ -1,6 +1,6 @@
 # SPEC: Fundación de Navigation
 
-- **Estado:** Propuesta
+- **Estado:** Aprobada
 - **Perfil:** feature
 - **Origen de la planificación:** Cuarto incremento del
   [roadmap de contenido, templates y navegación](../architecture/content-delivery-roadmap.md).
@@ -14,8 +14,9 @@ menús como árboles visuales independientes de la jerarquía de Pages, con íte
 localizados que solo ofrezcan destinos de Page públicamente disponibles en el
 idioma efectivo.
 
-La Spec no autoriza implementación hasta que sea aprobada explícitamente y el
-ADR que gobierna el contrato entre Pages y Navigation esté aceptado.
+Esta Spec aprobada autoriza exclusivamente la implementación del incremento de
+fundación de Navigation descrito en su alcance. ADR-0005 gobierna el contrato
+entre Pages y Navigation.
 
 ## 2. Contexto y evidencia
 
@@ -296,6 +297,5 @@ como deuda implícita.
 
 ## 10. Decisiones abiertas
 
-No hay decisiones funcionales abiertas. ADR-0005 permanece `Propuesto`; su
-aceptación y la aprobación explícita de esta Spec son condiciones previas a la
-implementación.
+No aplica. ADR-0005 está aceptado y esta Spec está aprobada para el alcance
+descrito.
