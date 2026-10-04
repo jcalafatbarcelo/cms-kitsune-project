@@ -149,6 +149,8 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
   variantes regionales generales.
 - El detalle de errores de diagnóstico reconoce `production` sin distinguir
   mayúsculas y minúsculas.
+- Las peticiones `api/*` conservan la respuesta JSON configurada aunque el modo
+  diagnóstico esté activo.
 - El login del backoffice iguala el trabajo de verificación de contraseña para
   cuentas existentes y desconocidas, de modo que el tiempo de respuesta no revela
   si un email está registrado.
@@ -162,4 +164,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-10-02 08:47 UTC
+Fecha de última modificación: 2026-10-04 15:18 UTC

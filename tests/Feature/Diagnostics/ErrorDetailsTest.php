@@ -50,6 +50,17 @@ test('the production guard ignores environment case variants', function (string 
         ->assertDontSee('Case marker');
 })->with(['Production', 'PRODUCTION', 'production']);
 
+test('api requests keep the configured JSON error format', function () {
+    config(['diagnostics.error_details' => true]);
+    Route::post('/api/boom', fn () => throw new RuntimeException('Api marker 42'));
+
+    $response = $this->post('/api/boom');
+
+    $response->assertStatus(500);
+    expect($response->headers->get('Content-Type'))->toContain('application/json')
+        ->and($response->getContent())->not->toContain('<!DOCTYPE html');
+});
+
 test('the diagnostics page does not expose environment values or call arguments', function () {
     config(['diagnostics.error_details' => true, 'app.key' => 'base64:LEAK_MARKER_KEY']);
     Route::post('/__diag/secret', function () {

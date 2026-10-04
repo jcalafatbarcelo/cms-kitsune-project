@@ -96,5 +96,5 @@ Consultar [Instalación](../getting-started/installation.md) y
 - Un `POST` por HTTP recibe `400` sin procesar credenciales.
 - La cookie de sesión observada en HTTPS incluye `Secure`, `HttpOnly` y
   `SameSite=Lax`.
-- La aplicación falla al arrancar si `TRUSTED_PROXIES` contiene un valor
-  inválido.
+- Un `TRUSTED_PROXIES` inválido provoca `500` en la primera petición; la
+  aplicación no valida la lista en el arranque.

@@ -20,7 +20,7 @@ revela si una cuenta existe ni si tiene privilegios.
 
 En el panel, usar la acción de cierre de sesión. La sesión se invalida por
 completo y se vuelve al formulario de acceso. El cierre requiere una petición
-protegida y no se puede provocar enlaces externos.
+protegida y no se puede provocar desde enlaces externos.
 
 ## Límite de intentos
 

@@ -30,7 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         $exceptions->render(function (Throwable $exception, Request $request) {
-            if (! ErrorDetails::enabled() || $request->expectsJson()) {
+            if (! ErrorDetails::enabled() || $request->expectsJson() || $request->is('api/*')) {
                 return null;
             }
 

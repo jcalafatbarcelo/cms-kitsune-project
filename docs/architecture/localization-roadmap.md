@@ -185,8 +185,8 @@ un outbox o handoff durable con entrega idempotente y reintentos. Una transacci�
 fallida no debe registrarse como cambio realizado.
 
 `SPEC-admin-audit-foundation` concreta el mecanismo de auditoría y lo aplica a las
-mutaciones de Pages, Menus y publicación; la cobertura de idiomas y overrides se
-completará con LOC-04.
+mutaciones de Pages, Menus y publicación; la cobertura de idiomas, overrides e
+intentos denegados se completará con LOC-04.
 
 ### LOC-05: selección temporal y navegador
 

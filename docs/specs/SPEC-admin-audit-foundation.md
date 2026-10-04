@@ -58,6 +58,7 @@ y auditoría previamente especificadas (`SPEC-pages-foundation.md:220-223`,
 - Mutaciones de Pages y Menus desde la web (serán incrementos posteriores que
   reutilizarán esta auditoría).
 - Auditoría de idiomas, overrides, usuarios, CMS Templates, Media o PageBuilder.
+- Auditoría de intentos denegados; se completará con `LOC-04`.
 - Alertas, detección de anomalías, exportación, firma o encadenado por hash.
 - Consulta pública o API del historial.
 - Cambiar las invariantes de dominio, las URLs canónicas o la publicación en
@@ -92,8 +93,10 @@ y auditoría previamente especificadas (`SPEC-pages-foundation.md:220-223`,
 - `SPEC-pages-foundation` y `SPEC-navigation-foundation`, completadas: sus
   managers pasan a escribir auditoría en la misma transacción; no cambian
   contratos públicos, invariantes ni datos de dominio.
-- Roadmap de calidad/localización: implementa la iniciativa diferida de auditoría
-  durable y cierra la condición de `LOC-03` sin adelantar `LOC-04`.
+- Roadmap de calidad/localización: implanta la base de auditoría durable
+  documentada en `LOC-03` para las mutaciones de Pages, Menus y publicación.
+  `LOC-03` permanece abierto: la cobertura de idiomas, overrides e intentos
+  denegados se completa con `LOC-04`.
 
 ## 5. Requisitos y bloques técnicos aplicables
 
