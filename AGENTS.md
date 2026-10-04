@@ -81,6 +81,28 @@ Ejemplos: `core/page-hierarchy`, `security/authorization-policy`,
 Restricciones permanentes: `nWidart/laravel-modules`, Eloquent ORM, Vue 3
 Composition API; NO parsear Blade con expresiones regulares.
 
+### Entrega delegada de Specs aprobadas
+
+- Al implementar una Spec funcional `Aprobada`, DEBE usar
+  `spec-delivery-orchestrator` y delegar construcción y revisión.
+- Antes de delegar, el agente principal DEBE verificar rama, worktree, fuentes
+  canónicas y, cuando la Spec requiera Docker, ejecutar `docker info`. Si Docker
+  no está disponible, DEBE declarar la validación pendiente y NO marcar la Spec
+  como `Completada` mientras sea exigible.
+- Constructor y auditor DEBEN regirse por las mismas reglas de alcance,
+  arquitectura, seguridad, secretos, calidad y entrega que el agente principal.
+  Preferir sesiones aisladas; si la plataforma no las soporta, usar tareas o
+  subagentes independientes y declarar el límite.
+- El auditor se ejecuta SOLO después del constructor, es de solo lectura y DEBE
+  contrastar Spec, código, pruebas, documentación, roadmaps y changelog. Cuando
+  aplique, DEBE usar `security-audit`.
+- El auditor DEBE enumerar todos los hallazgos corregibles. El agente principal
+  DEBE devolverlos a la misma sesión o tarea del constructor para su corrección;
+  después DEBE solicitar una auditoría nueva e independiente sobre el diff
+  resultante. Repetir hasta no tener hallazgos `confirmed` pendientes.
+- La delegación NO sustituye las validaciones configuradas ni autoriza commits,
+  pushes, cambios ajenos o ampliaciones de alcance.
+
 ### Diseno
 
 - Elegir solucion idiomatica mas simple que preserve cohesion, bajo acoplamiento,
