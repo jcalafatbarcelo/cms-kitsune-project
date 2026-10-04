@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AuditController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\SessionController;
 use App\Http\Middleware\RequireSuperAdmin;
@@ -11,5 +12,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('login', [SessionController::class, 'store'])->name('login.store');
     });
     Route::get('/', DashboardController::class)->middleware(RequireSuperAdmin::class)->name('dashboard');
+    Route::get('audit', AuditController::class)->middleware(RequireSuperAdmin::class)->name('audit');
     Route::post('logout', [SessionController::class, 'destroy'])->middleware('auth:web')->name('logout');
 });

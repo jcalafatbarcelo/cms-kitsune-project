@@ -16,7 +16,8 @@ class AdminPresentation
 {
     public function __construct(private TemplatePresentationResolver $presentations, private TemplateUiCatalogs $catalogs) {}
 
-    public function render(CmsPresentation $key, int $status = 200): Response
+    /** @param array<string, mixed> $data */
+    public function render(CmsPresentation $key, int $status = 200, array $data = []): Response
     {
         try {
             $base = CmsTemplate::query()->where('identifier', 'base')->first();
@@ -28,7 +29,7 @@ class AdminPresentation
             $text = fn (string $key): string => $this->catalogs->text($base, $base, $key, $locale);
             $errorDetails = ErrorDetails::enabled();
 
-            return response()->view($presentation->viewName, compact('locale', 'text', 'errorDetails'), $status)
+            return response()->view($presentation->viewName, array_merge(compact('locale', 'text', 'errorDetails'), $data), $status)
                 ->header('Cache-Control', 'private, no-store');
         } catch (TemplateOperationException|CatalogValidationException) {
             abort(503);

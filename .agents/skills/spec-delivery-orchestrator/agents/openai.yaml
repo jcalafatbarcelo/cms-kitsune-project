@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec delivery orchestrator"
+  short_description: "Coordinar constructor y auditor de Specs aprobadas"
+  default_prompt: "Usa $spec-delivery-orchestrator para entregar esta Spec aprobada con construcción y auditoría aisladas."

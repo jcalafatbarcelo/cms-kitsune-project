@@ -2,6 +2,7 @@
 
 namespace Modules\Pages\Services;
 
+use App\Services\Admin\AdminAuditLogger;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Language\Models\Language;
@@ -21,6 +22,7 @@ class PageManager
     public function __construct(
         private readonly TemplateUiCatalogs $templateUi,
         private readonly TemplatePresentationResolver $presentations,
+        private readonly AdminAuditLogger $audit,
     ) {}
 
     public function create(string $locale, string $slug, string $title, ?int $parentId = null, ?string $templateIdentifier = null): PageTranslation
@@ -52,6 +54,7 @@ class PageManager
                 if ($home === null) {
                     $this->setHomeLocked($language, $translation);
                 }
+                $this->audit->record('page.create', 'page', $page->id, null, $this->pageState($page, $translation));
 
                 return $translation;
             }, attempts: 5);
@@ -80,6 +83,7 @@ class PageManager
                     $page->update(['is_published' => true]);
                     $this->setHomeLocked($language, $translation);
                 }
+                $this->audit->record('page.translate', 'page_translation', $translation->id, null, $this->pageState($page, $translation));
 
                 return $translation;
             }, attempts: 5);
@@ -92,8 +96,18 @@ class PageManager
     {
         DB::transaction(function () use ($pageId, $locale) {
             $translation = $this->translation($pageId, $locale);
-            $translation->page->update(['is_published' => true]);
-            $translation->update(['is_published' => true]);
+            $page = $translation->page;
+            $before = $this->pageState($page, $translation);
+            if (! $page->is_published) {
+                $page->update(['is_published' => true]);
+            }
+            if (! $translation->is_published) {
+                $translation->update(['is_published' => true]);
+            }
+            $after = $this->pageState($page->fresh(), $translation->fresh());
+            if ($before !== $after) {
+                $this->audit->record('page.publish', 'page_translation', $translation->id, $before, $after);
+            }
         }, attempts: 5);
     }
 
@@ -107,7 +121,11 @@ class PageManager
             if ($homeTranslation !== null && $this->isAncestorOf($translation->page_id, $homeTranslation->page)) {
                 throw new PageOperationException('The home page cannot be unpublished without a replacement.');
             }
-            $translation->update(['is_published' => false]);
+            $before = $this->pageState($translation->page, $translation);
+            if ($translation->is_published) {
+                $translation->update(['is_published' => false]);
+                $this->audit->record('page.unpublish', 'page_translation', $translation->id, $before, $this->pageState($translation->page->fresh(), $translation->fresh()));
+            }
         }, attempts: 5);
     }
 
@@ -119,7 +137,12 @@ class PageManager
             if (! $language->is_active) {
                 throw new PageOperationException('The home page must be publicly available.');
             }
+            $before = PageLanguageHome::query()->find($language->id);
             $this->setHomeLocked($language, $translation);
+            $after = PageLanguageHome::query()->findOrFail($language->id);
+            if ($before?->page_translation_id !== $after->page_translation_id) {
+                $this->audit->record('page.set_home', 'page_language_home', $language->id, $this->homeState($before), $this->homeState($after));
+            }
         }, attempts: 5);
     }
 
@@ -286,5 +309,32 @@ class PageManager
             || $title === '' || mb_strlen($title, 'UTF-8') > 255 || preg_match('/[\x00-\x1F\x7F]/', $title)) {
             throw new PageOperationException('The page title or slug is invalid.');
         }
+    }
+
+    /** @return array<string, int|string|bool|null> */
+    private function pageState(Page $page, PageTranslation $translation): array
+    {
+        return [
+            'page_id' => $page->id,
+            'parent_id' => $page->parent_id,
+            'uses_explicit_template' => $page->uses_explicit_template,
+            'explicit_template_id' => $page->explicit_template_id,
+            'presentation_key' => $page->presentation_key,
+            'page_is_published' => $page->is_published,
+            'translation_id' => $translation->id,
+            'language_id' => $translation->language_id,
+            'slug' => $translation->slug,
+            'title' => $translation->title,
+            'is_published' => $translation->is_published,
+        ];
+    }
+
+    /** @return array<string, int>|null */
+    private function homeState(?PageLanguageHome $home): ?array
+    {
+        return $home === null ? null : [
+            'language_id' => $home->language_id,
+            'page_translation_id' => $home->page_translation_id,
+        ];
     }
 }

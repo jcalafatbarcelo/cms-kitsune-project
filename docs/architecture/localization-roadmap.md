@@ -50,7 +50,7 @@ documentación técnica empleará siempre `UI catalog`.
 | LOC-00 | Planificación y decisión de `UI catalogs` | Completado | Fundación modular disponible | ADR aceptado, vocabulario y secuencia documentados |
 | LOC-01 | Fundación de idiomas estáticos | Completado | LOC-00 completado y Spec aprobada | Core, `en`, registro, predeterminados, JSON, fallback y Artisan |
 | LOC-02 | Overrides | Pendiente | LOC-01 completado | Sustituciones y traducciones locales validadas, con actor y caché |
-| LOC-03 | Auditoría administrativa | Pendiente | Antes del primer backoffice mutable | Historial durable independiente de logs operativos |
+| LOC-03 | Auditoría administrativa | En curso: fundación de Pages y Navigation completada | Antes del primer backoffice mutable | Historial durable independiente de logs operativos |
 | LOC-04 | Backoffice de idiomas y overrides | Pendiente | LOC-01, LOC-02 y garantías de LOC-03 | Gestión autorizada, protegida y auditable |
 | LOC-05 | Selección temporal y negociación HTTP | Completado parcialmente | Registro de idiomas estable | Sesión y primera visita por navegador; cookie consentida diferida |
 | LOC-06 | URL amigables, idioma e items de menú | Completado | Modelo de páginas y menús especificado | Rutas canónicas, precedencia URL/locale y árboles de Navigation localizados |

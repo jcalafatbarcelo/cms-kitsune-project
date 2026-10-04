@@ -153,7 +153,7 @@ test('presentation resolution accepts only its closed contract and prefers the e
     $page = $this->presentations->resolve(CmsPresentation::PublicPageStandard, $acme);
     $navigation = $this->presentations->resolve(CmsPresentation::PublicNavigationMenu, $acme);
 
-    expect(CmsPresentation::cases())->toHaveCount(4)
+    expect(CmsPresentation::cases())->toHaveCount(5)
         ->and($page->presentationTemplate->identifier)->toBe('base')
         ->and($navigation->presentationTemplate->identifier)->toBe('acme');
 });
@@ -165,7 +165,7 @@ test('an additional valid manifest presentation cannot be rendered through the C
 
     expect(fn () => $this->presentations->resolve('public.extra.preview', $acme))
         ->toThrow(TypeError::class)
-        ->and(CmsPresentation::cases())->toHaveCount(4);
+        ->and(CmsPresentation::cases())->toHaveCount(5);
 });
 
 test('presentation resolution rejects a changed manifest hash before reading a Blade', function () {

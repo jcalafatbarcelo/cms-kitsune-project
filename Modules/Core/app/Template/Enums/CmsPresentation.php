@@ -8,4 +8,5 @@ enum CmsPresentation: string
     case PublicNavigationMenu = 'public.navigation.menu';
     case SystemAuthLogin = 'system.auth.login';
     case SystemAdminDashboard = 'system.admin.dashboard';
+    case SystemAdminAudit = 'system.admin.audit';
 }
