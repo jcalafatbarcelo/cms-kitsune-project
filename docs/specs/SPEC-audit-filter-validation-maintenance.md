@@ -125,7 +125,8 @@ fundación ya implementada de las capacidades de auditoría que siguen pendiente
 - Prueba HTTP autenticada como superadministrador para un filtro inválido que
   establezca `/admin/audit` como URL previa y compruebe la redirección de Laravel,
   `role="alert"`, la lista de mensajes y el mensaje de validación al volver a la
-  pantalla.
+  pantalla; debe enviar también `entity_type=page` y comprobar que ese valor se
+  restaura en el formulario mediante `old()`.
 - Mantener la comprobación existente de que el error pertenece a `operation`.
 - Ejecutar la prueba enfocada, la suite afectada y el formateo configurado.
 
@@ -146,7 +147,8 @@ No aplica.
   validación correspondiente.
 - **CA-02:** La prueba HTTP establece `/admin/audit` como URL previa, verifica la
   redirección, CA-01 y que el error de `operation` está asociado a la validación
-  del filtro.
+  del filtro; al enviar también `entity_type=page`, comprueba que el formulario
+  restaurado contiene ese valor.
 - **CA-03:** El roadmap de calidad describe la fundación de auditoría como
   implementada para Pages, Menus y publicación, y conserva como diferidas bajo
   `LOC-04` la cobertura de idiomas, overrides e intentos denegados.
@@ -156,15 +158,15 @@ No aplica.
 | Criterio | Riesgo cubierto | Nivel de prueba | Evidencia esperada | Impacto documental |
 | :--- | :--- | :--- | :--- | :--- |
 | CA-01 | Error previsible invisible o redirección no determinista | HTTP | Redirección a auditoría, `role="alert"`, lista y mensaje mostrado | No aplica: la interfaz conserva su contrato |
-| CA-02 | Regresión de la comunicación estándar del validador | HTTP | URL previa, error de `operation` en sesión y contenido mostrado | No aplica: prueba interna de regresión |
+| CA-02 | Regresión de la comunicación estándar del validador o pérdida de filtros enviados | HTTP | URL previa, error de `operation` en sesión, contenido mostrado y `entity_type=page` restaurado | No aplica: prueba interna de regresión |
 | CA-03 | Roadmap que anuncia una capacidad ya entregada | Documentación | Fundación y diferidos de LOC-04 alineados | `docs/architecture/quality-roadmap.md` |
 
 ## 9. Plan de implementación
 
 1. Ampliar la prueba HTTP de filtro inválido con URL previa hasta comprobar la
-   redirección, la alerta, la lista y el mensaje de validación; adaptar la vista
-   Blade mediante la bolsa de errores y `old()` de Laravel para satisfacer CA-01
-   y CA-02.
+   redirección, la alerta, la lista, el mensaje de validación y la restauración
+   de `entity_type=page`; adaptar la vista Blade mediante la bolsa de errores y
+   `old()` de Laravel para satisfacer CA-01 y CA-02.
 2. Corregir el párrafo desfasado del roadmap hasta CA-03 y ejecutar las
    validaciones configuradas.
 
