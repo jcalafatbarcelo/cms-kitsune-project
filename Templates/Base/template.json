@@ -4,6 +4,8 @@
     "name": "Base",
     "presentations": [
         "public.page.standard",
-        "public.navigation.menu"
+        "public.navigation.menu",
+        "system.auth.login",
+        "system.admin.dashboard"
     ]
 }

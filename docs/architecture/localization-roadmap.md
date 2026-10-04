@@ -184,6 +184,10 @@ la auditoría reside en otro almacenamiento, la transacción de negocio persisti
 un outbox o handoff durable con entrega idempotente y reintentos. Una transacción
 fallida no debe registrarse como cambio realizado.
 
+`SPEC-admin-audit-foundation` concreta el mecanismo de auditoría y lo aplica a las
+mutaciones de Pages, Menus y publicación; la cobertura de idiomas, overrides e
+intentos denegados se completará con LOC-04.
+
 ### LOC-05: selección temporal y navegador
 
 `SPEC-public-localized-routes` completó la selección por sesión y la negociación

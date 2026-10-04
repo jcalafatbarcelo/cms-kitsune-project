@@ -34,9 +34,13 @@ Fuentes relacionadas:
 | 2 | Fundación de Pages | Completado | Fundación de CMS Templates completada | `Page`/`PageTranslation`, jerarquía, publicación en cascada y primera página Base renderizada en Blade |
 | 3 | Rutas públicas localizadas | Completado | Pages especificado y registro de idiomas estable | Locale de petición, URL canónica, resolución a traducción y redirecciones |
 | 4 | Fundación de Navigation | Completado | Pages y rutas públicas localizadas completadas | Menús independientes, ítems traducibles y visibilidad según disponibilidad pública |
-| 5 | Fundación de PageBuilder | Previsto | Pages y contrato de presentación estables | Bloques declarativos, valores por instancia y locale, validación y renderizado Blade |
-| 6 | Extensiones de CMS Templates | Previsto | PageBuilder o una necesidad de presentación comprobable | UI catalogs propios, configuración, assets, presentaciones y bloques aportados por templates |
-| 7 | Tematización de vistas de sistema | Previsto | Módulo funcional y contrato de cada vista disponibles | Apariencia intercambiable de login, recuperación o backoffice sin alterar sus rutas, autorización o lógica |
+| 5 | Backoffice mínimo | Completado | Contrato de presentaciones estable | Acceso de superadministrador por sesión, shell Blade y base segura para los flujos editoriales posteriores |
+| 6 | Auditoría administrativa durable | Previsto | Backoffice mínimo completado y primer flujo mutable planificado | Eventos inmutables y transaccionales de Pages, Menus y publicación, consultables por el superadministrador |
+| 7 | Backoffice de Pages | Previsto | Auditoría durable y fundación de Pages | Gestión web de páginas, traducciones, jerarquía, publicación y asignación de template |
+| 8 | Backoffice de Menus | Previsto | Auditoría durable y fundación de Navigation | Gestión web de menús e ítems con referencia a Pages y aislamiento por idioma |
+| 9 | Fundación de PageBuilder | Previsto | Backoffice de Pages y Menus y contrato de presentación estables | Bloques declarativos, valores por instancia y locale, validación y renderizado Blade desde el backoffice |
+| 10 | Extensiones de CMS Templates | Previsto | PageBuilder o una necesidad de presentación comprobable | UI catalogs propios, configuración, assets, presentaciones y bloques aportados por templates |
+| 11 | Tematización de vistas de sistema | Previsto | Módulo funcional y contrato de cada vista disponibles | Apariencia intercambiable de login, recuperación o backoffice sin alterar sus rutas, autorización o lógica |
 
 El primer paso está implementado mediante `SPEC-template-foundation` y su matriz
 SQLite, MySQL y MariaDB está verificada. La finalización no autoriza
@@ -55,10 +59,25 @@ Navigation a la resolución de Pages.
 visuales localizados y Blade obtiene sus destinos exclusivamente mediante el
 contrato de URL pública de Pages.
 
-`SPEC-template-presentation-resolution-foundation` está en `Revisión`. Core
+`SPEC-template-presentation-resolution-foundation` está completada. Core
 resuelve las presentaciones públicas de Pages y Navigation desde el template
 efectivo o Base, sin permitir que datos editables seleccionen Blades o rutas;
-no se considera completada hasta verificar todos sus criterios de aceptación.
+sus criterios de aceptación, pruebas y quality gates han sido verificados.
+
+`SPEC-minimal-admin-panel` está completada. Core incorpora el único
+superadministrador, acceso por sesión, panel Blade y política HTTPS global, sin
+introducir mutaciones administrativas. El backoffice sigue siendo el prerrequisito
+operativo de PageBuilder: el editor no se iniciará como una superficie aislada ni
+sin un entorno administrativo protegido que pueda alojarlo. La edición de
+contenido, la gestión de idiomas y cualquier otra mutación administrativa
+requieren sus propias Specs y, cuando corresponda, auditoría administrativa
+durable.
+
+`SPEC-admin-audit-foundation` está en `Borrador`. Habilita el historial durable de
+las mutaciones de Pages, Menus y publicación como requisito previo a exponerlas
+desde la web. Los backoffice de Pages y Menus se planifican después de la auditoría
+y antes de PageBuilder, porque los bloques editoriales necesitan páginas y
+ubicaciones navegables ya gestionables.
 
 ## Dependencias de localización
 

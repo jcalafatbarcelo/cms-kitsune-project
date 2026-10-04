@@ -1,5 +1,14 @@
 {
     "base::page.home.under-construction.heading": "Under construction",
     "base::page.home.under-construction.message": "This site is being prepared.",
-    "base::navigation.menu.label": "Navigation"
+    "base::navigation.menu.label": "Navigation",
+    "base::admin.login.title": "Administrator sign in",
+    "base::admin.login.email": "Email",
+    "base::admin.login.password": "Password",
+    "base::admin.login.submit": "Sign in",
+    "base::admin.login.failed": "Unable to sign in with these credentials.",
+    "base::admin.login.throttled": "Too many attempts. Please try again later.",
+    "base::admin.dashboard.title": "Administration",
+    "base::admin.dashboard.logout": "Sign out",
+    "base::admin.diagnostics.warning": "Diagnostic mode is active: 5XX error details are shown to visitors."
 }
