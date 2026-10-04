@@ -1,7 +1,7 @@
 {
-    "base::page.home.under-construction.heading": "En construccion",
+    "base::page.home.under-construction.heading": "En construcción",
     "base::page.home.under-construction.message": "Este sitio se esta preparando.",
-    "base::navigation.menu.label": "Navegacion",
+    "base::navigation.menu.label": "Navegación",
     "base::admin.login.title": "Acceso de administración",
     "base::admin.login.email": "Correo electrónico",
     "base::admin.login.password": "Contraseña",
