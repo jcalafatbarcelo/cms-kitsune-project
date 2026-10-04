@@ -1,6 +1,6 @@
 # SPEC: Fundación de auditoría administrativa durable
 
-- **Estado:** Borrador
+- **Estado:** Aprobada
 - **Perfil:** feature
 - **Origen de la planificación:** Decisión del responsable de dotar al backoffice
   de auditoría durable antes de gestionar Pages y Menus desde la web, y de
@@ -35,7 +35,7 @@ y auditoría previamente especificadas (`SPEC-pages-foundation.md:220-223`,
 ## 3. Alcance
 
 - Crear un almacén de eventos de auditoría insert-only con operación, entidad
-  (tipo e id sin clave foránea), actor histórico, instante, origen mínimo y
+  (tipo e id sin clave foránea), actor histórico, instante, canal de origen y
   representación anterior/posterior de los campos auditables.
 - Impedir la modificación y el borrado de eventos mediante restricciones de
   aplicación y triggers equivalentes para SQLite, MySQL y MariaDB.
@@ -66,8 +66,6 @@ y auditoría previamente especificadas (`SPEC-pages-foundation.md:220-223`,
 
 ### Alcance diferido
 
-- La retención y el tratamiento del actor eliminado deben fijarse antes de
-  aprobar; se describen como decisiones abiertas.
 - La auditoría de idiomas, overrides y publicación global se retomará con `LOC-04`.
 - Exportación, búsqueda avanzada y retención automatizada se retomarán cuando
   exista un volumen o una exigencia legal comprobables.
@@ -104,10 +102,11 @@ y auditoría previamente especificadas (`SPEC-pages-foundation.md:220-223`,
 
 - Tabla `admin_audit_events` insert-only con: identificador; `occurred_at`
   indexado; `operation`; `entity_type`; `entity_id` sin clave foránea;
-  `actor_type` (`user`, `console`, `system`); `actor_id` y etiqueta de actor
-  opcionales y sin clave foránea; `origin` opcional de mínimo privilegio;
-  representación anterior y posterior de los campos auditables; y marca de versión
-  del esquema de auditoría.
+  `actor_type` (`user`, `console`, `system`); `actor_id` opcional y etiqueta
+  histórica no reutilizable sin datos personales; `origin` obligatorio con los
+  valores cerrados `web`, `console` o `system`, sin IP ni cabeceras;
+  representación anterior y posterior de los campos auditables; y marca de
+  versión del esquema de auditoría.
 - Las entidades y usuarios referenciados no usan claves foráneas, para no perder
   trazabilidad ni bloquear borrados.
 - Restricciones: `operation`, `entity_type` y `actor_type` con listas admitidas
@@ -137,10 +136,15 @@ y auditoría previamente especificadas (`SPEC-pages-foundation.md:220-223`,
 - El actor se resuelve desde el contexto: superadministrador autenticado cuando la
   mutación procede de la web; `console` cuando procede de Artisan; `system` cuando
   no existe actor humano.
+- Para un actor `user`, se conserva su `actor_id` y la etiqueta histórica
+  `user:<actor_id>`; no se conserva nombre, email ni otro dato personal. Los
+  actores `console` y `system` usan sus etiquetas literales y no tienen
+  `actor_id`.
 - La identidad del actor es histórica y no depende de que el usuario siga
-  existiendo.
-- El origen (por ejemplo, dirección o etiqueta de canal) se registra con el mínimo
-  necesario; su inclusión exacta se fija con la decisión de retención.
+  existiendo; la ausencia de clave foránea permite eliminarlo sin alterar el
+  historial.
+- El origen registra exclusivamente el canal `web`, `console` o `system`. No se
+  almacenan dirección IP, cabeceras ni otro identificador de red.
 
 ### Consulta en el backoffice
 
@@ -175,6 +179,7 @@ externas. La consulta es Blade server-side.
   comienza en la fecha de despliegue.
 - Los despliegues existentes deben ejecutar `php artisan migrate` antes de mutar
   Pages o Menus con auditoría activa.
+- La retención es indefinida en este incremento y no hay purga automática.
 - No hay cambio de contrato público ni de rutas públicas localizadas.
 
 ## 6. Calidad, seguridad y deuda
@@ -198,8 +203,9 @@ externas. La consulta es Blade server-side.
 
 ### Riesgos aceptados
 
-- El historial crecerá con cada mutación; se acepta sin retención automatizada en
-  este incremento, con volumen reducido por el uso previsto.
+- El historial crecerá con cada mutación; se acepta la retención indefinida sin
+  purga automatizada por el volumen reducido previsto. Una necesidad legal o de
+  capacidad requerirá una Spec posterior que defina su depuración segura.
 
 ### Deuda técnica
 
@@ -248,7 +254,14 @@ de aprobar.
 
 ## 10. Decisiones abiertas
 
-- Retención del historial (indefinida o plazo concreto) y criterio de purga.
-- Tratamiento del actor eliminado: qué identificador y qué etiqueta histórica se
-  conservan sin retener datos personales innecesarios.
-- Inclusión del origen (IP u otro canal) y su nivel de detalle.
+No aplica: las decisiones necesarias para este incremento están resueltas.
+
+### Decisiones resueltas
+
+- El historial se retiene indefinidamente y este incremento no incorpora purga
+  automática.
+- Un actor `user` conserva `actor_id` y la etiqueta pseudónima no reutilizable
+  `user:<actor_id>`; no se retienen datos personales. Los actores `console` y
+  `system` no conservan identificador numérico.
+- El origen se limita al canal cerrado `web`, `console` o `system`; no se
+  almacenan direcciones IP ni cabeceras.
