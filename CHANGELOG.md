@@ -156,6 +156,10 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
   si un email está registrado.
 - Precisado que un `TRUSTED_PROXIES` inválido responde `500` en la primera
   petición y no durante el arranque.
+- Incluido el catálogo `es_ES` de Base para que el backoffice use de forma
+  reproducible el idioma configurado.
+- Actualizado `league/commonmark` a `2.10.2` para corregir los advisories
+  `GHSA-97jj-33gv-5xf9` y `GHSA-3q6v-r5mr-hxv8`.
 
 ### Eliminado
 
@@ -164,4 +168,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-10-04 15:18 UTC
+Fecha de última modificación: 2026-10-04 16:25 UTC

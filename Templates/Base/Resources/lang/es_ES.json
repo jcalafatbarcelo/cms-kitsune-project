@@ -1,0 +1,14 @@
+{
+    "base::page.home.under-construction.heading": "En construccion",
+    "base::page.home.under-construction.message": "Este sitio se esta preparando.",
+    "base::navigation.menu.label": "Navegacion",
+    "base::admin.login.title": "Acceso de administración",
+    "base::admin.login.email": "Correo electrónico",
+    "base::admin.login.password": "Contraseña",
+    "base::admin.login.submit": "Iniciar sesión",
+    "base::admin.login.failed": "No se puede iniciar sesión con estas credenciales.",
+    "base::admin.login.throttled": "Demasiados intentos. Vuelve a intentarlo más tarde.",
+    "base::admin.dashboard.title": "Administración",
+    "base::admin.dashboard.logout": "Cerrar sesión",
+    "base::admin.diagnostics.warning": "Modo diagnóstico activo: los detalles de error 5XX se muestran a los visitantes."
+}
