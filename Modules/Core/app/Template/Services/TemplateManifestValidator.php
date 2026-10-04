@@ -16,6 +16,8 @@ class TemplateManifestValidator
             'page.home.under-construction.message',
         ],
         'public.navigation.menu' => ['navigation.menu.label'],
+        'system.auth.login' => ['admin.login.title', 'admin.login.email', 'admin.login.password', 'admin.login.submit', 'admin.login.failed', 'admin.login.throttled'],
+        'system.admin.dashboard' => ['admin.dashboard.title', 'admin.dashboard.logout', 'admin.diagnostics.warning'],
     ];
 
     public function __construct(private readonly string $root) {}

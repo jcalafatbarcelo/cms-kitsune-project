@@ -103,18 +103,22 @@ baseline del
 Cada entrada consultará la versión efectiva del motor y fallará si no cumple la
 baseline. La matriz ejecutará las migraciones y las pruebas de integridad
 dependientes del motor, incluido el rechazo real de un segundo registro de
-`language_settings` con `id = 2`. Inspeccionar el SQL generado no sustituye esa
-ejecución. Los servicios fijarán la versión exacta y el digest de imagen cuando
-aplique; actualizar un patch requerirá la revisión reproducible de dependencias,
-no una etiqueta flotante.
+`language_settings` con `id = 2`, la integridad del singleton de
+`administration_access` y las restricciones del superadministrador. Inspeccionar
+el SQL generado no sustituye esa ejecución. Los servicios fijarán la versión
+exacta y el digest de imagen cuando aplique; actualizar un patch requerirá la
+revisión reproducible de dependencias, no una etiqueta flotante.
 
 SQLite se ejecuta directamente en el runner. Las otras entradas inician
-contenedores efímeros con base, usuario y contraseñas ficticias de testing. Solo
-la prueba `tests/Feature/Core/LanguageInstallationTest.php` se repite en los tres
-motores; la suite completa no se triplica. La entrada MySQL habilita
-`log_bin_trust_function_creators` solo dentro de su contenedor efímero para poder
-crear y verificar los triggers de integridad con el usuario de testing; no es una
-configuración de producción.
+contenedores efímeros con base, usuario y contraseñas ficticias de testing. La
+prueba `tests/Feature/Core/LanguageInstallationTest.php` y el directorio
+`tests/Feature/Admin` se repiten en los tres motores; la suite completa no se
+triplica. La prueba `AdminConcurrencyTest` usa conexiones independientes para
+demostrar la contención del bootstrap y del límite de intentos; en SQLite
+comparte un archivo temporal para que la escritura sea serializable. La entrada
+MySQL habilita `log_bin_trust_function_creators` solo dentro de su contenedor
+efímero para poder crear y verificar los triggers de integridad con el usuario de
+testing; no es una configuración de producción.
 
 Para reproducir MySQL o MariaDB en local se necesita un contenedor de la misma
 imagen, una base vacía y las variables `DB_CONNECTION`, `DB_HOST`, `DB_PORT`,

@@ -1,6 +1,6 @@
 # SPEC: Fundación de resolución de presentaciones de CMS Templates
 
-- **Estado:** Revisión
+- **Estado:** Completada
 - **Perfil:** feature
 - **Origen de la planificación:** Evolución aprobada durante la planificación de
   Navigation, backoffice y PageBuilder para que el CMS Template efectivo controle

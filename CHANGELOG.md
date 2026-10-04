@@ -71,10 +71,22 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
   destinos según la disponibilidad pública de Pages.
 - Contrato `PublicPageUrlResolver` de Pages para ofrecer URLs canónicas
   localizadas a Navigation sin acoplarlo a las traducciones o rutas HTTP.
-- Resolución de presentaciones de CMS Templates en revisión: claves cerradas,
-  fallback desde Base, comprobación del hash de manifiesto y menú público
-  tematizable; no se declara completada hasta que pasen todos los criterios de
-  aceptación.
+- Resolución de presentaciones de CMS Templates: claves cerradas, fallback desde
+  Base, comprobación del hash de manifiesto y menú público tematizable.
+- Backoffice mínimo con un único superadministrador: comando Artisan
+  interactivo, tabla singleton `administration_access` con triggers de
+  integridad, autenticación por sesión, panel Blade y presentaciones de sistema
+  `system.auth.login` y `system.admin.dashboard` en Base.
+- Política HTTPS global: redirección `308` de `GET`/`HEAD` a HTTPS y rechazo
+  `400` de los métodos con cuerpo fuera de `local` y `testing`, con cookies de
+  sesión `Secure`, `HttpOnly` y `SameSite=Lax` y proxies explícitos mediante
+  `TRUSTED_PROXIES`.
+- Guías de operación del primer superadministrador, despliegue seguro y acceso al
+  backoffice.
+- Modo de diagnóstico de errores 5XX mediante `CMS_ERROR_DETAILS`, con vista
+  propia sin secretos ni argumentos de traza, aviso persistente en el panel y
+  guard que lo ignora en producción registrando una advertencia como máximo una
+  vez por hora.
 
 ### Modificado
 
@@ -122,12 +134,26 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
   MySQL 8.4.11 y MariaDB 11.4.13.
 - Elevado el requisito mínimo del CMS a PHP 8.4 para alinear la configuración
   TLS de MySQL y MariaDB con la API `Pdo\Mysql` utilizada.
+- Ampliado el contrato cerrado de presentaciones con las claves de sistema y
+  excluido el prefijo `/admin` de la ruta pública catch-all de Pages.
+- Simplificada la matriz CI para repetir los directorios `tests/Feature/Admin` y
+  `tests/Feature/Diagnostics` además de la prueba de instalación de idiomas en
+  los tres motores.
+- Documentada la re-sincronización `php artisan cms:template:sync` como paso
+  obligatorio tras modificar el manifiesto de un template desplegado.
 
 ### Fijado
 
 - Restaurada la redirección temporal al idioma predeterminado, preservada la ruta
   de salud de Laravel y reforzada la activación de prefijos cortos junto a
   variantes regionales generales.
+- El detalle de errores de diagnóstico reconoce `production` sin distinguir
+  mayúsculas y minúsculas.
+- El login del backoffice iguala el trabajo de verificación de contraseña para
+  cuentas existentes y desconocidas, de modo que el tiempo de respuesta no revela
+  si un email está registrado.
+- Precisado que un `TRUSTED_PROXIES` inválido responde `500` en la primera
+  petición y no durante el arranque.
 
 ### Eliminado
 
@@ -136,4 +162,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-09-28 19:57 UTC
+Fecha de última modificación: 2026-10-02 08:47 UTC

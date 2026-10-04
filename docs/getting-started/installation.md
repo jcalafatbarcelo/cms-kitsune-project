@@ -65,10 +65,42 @@ Antes de servir tráfico, ejecutar:
 
 ```shell
 php artisan migrate --force
+php artisan cms:admin:create
 php artisan cms:language:validate
 php artisan config:cache
 ```
 
+`cms:admin:create` es interactivo y crea el único superadministrador del
+backoffice. No admite credenciales por argumentos y solo debe ejecutarse en una
+consola autorizada. Véase
+[Primer superadministrador](../administration/first-superadministrator.md) y
+[Despliegue seguro](../administration/secure-deployment.md) para HTTPS, cookies y
+proxies de confianza.
+
 La validación de `UI catalogs` debe repetirse en cada despliegue que cambie un
-catálogo. La administración web, los prefijos de URL y los overrides todavía no
-están disponibles.
+catálogo. La gestión web de contenido, la administración de usuarios, los
+prefijos de URL y los overrides todavía no están disponibles.
+
+## Actualizar un template desplegado
+
+Los templates registrados guardan el hash de su `template.json`. Si se modifica
+ese manifiesto, un despliegue o una actualización, hay que re-sincronizar antes
+de servir tráfico:
+
+```shell
+php artisan cms:template:sync
+```
+
+Sin este paso, la resolución de presentaciones falla y el sitio responde `503`.
+
+## Diagnóstico de errores
+
+Para localizar errores 5XX en desarrollo o pruebas se puede activar el detalle de
+excepciones, nunca en producción:
+
+```dotenv
+CMS_ERROR_DETAILS=true
+```
+
+Mientras esté activo, el panel de administración lo recuerda. Véase
+[Detalle de errores de diagnóstico](../administration/diagnostic-error-details.md).
