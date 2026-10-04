@@ -87,6 +87,9 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
   propia sin secretos ni argumentos de traza, aviso persistente en el panel y
   guard que lo ignora en producción registrando una advertencia como máximo una
   vez por hora.
+- Auditoría administrativa durable e inmutable para las mutaciones de Pages y
+  Navigation, con actor histórico minimizado, origen cerrado, consulta Blade
+  autorizada y presentación `system.admin.audit` de Base.
 
 ### Modificado
 
@@ -168,4 +171,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-10-04 16:25 UTC
+Fecha de última modificación: 2026-10-04 21:16 UTC

@@ -10,5 +10,17 @@
     "base::admin.login.throttled": "Too many attempts. Please try again later.",
     "base::admin.dashboard.title": "Administration",
     "base::admin.dashboard.logout": "Sign out",
-    "base::admin.diagnostics.warning": "Diagnostic mode is active: 5XX error details are shown to visitors."
+    "base::admin.diagnostics.warning": "Diagnostic mode is active: 5XX error details are shown to visitors.",
+    "base::admin.audit.title": "Audit history",
+    "base::admin.audit.empty": "No audit events match these filters.",
+    "base::admin.audit.operation": "Operation",
+    "base::admin.audit.entity": "Entity",
+    "base::admin.audit.from": "From",
+    "base::admin.audit.until": "Until",
+    "base::admin.audit.filter": "Filter",
+    "base::admin.audit.occurred-at": "Occurred at",
+    "base::admin.audit.actor": "Actor",
+    "base::admin.audit.origin": "Origin",
+    "base::admin.audit.before": "Before",
+    "base::admin.audit.after": "After"
 }

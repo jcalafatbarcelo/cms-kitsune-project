@@ -45,7 +45,7 @@ es arquitectónica, transversal y duradera.
 | Cabeceras HTTP y Content Security Policy (CSP) para Laravel | Reducir exposición a ejecución, framing, filtrado de información y transporte inseguro | Alta | Primer endpoint HTTP; endurecimiento antes de staging | Candidata |
 | Observabilidad con Sentry | Detectar y diagnosticar errores de Laravel y Vue por entorno y release | Media/Alta | Integración básica tras el bootstrap; completar antes de staging | Candidata |
 | Validación runtime con Zod | Validar datos no confiables en las fronteras de Vue y del PageBuilder | Media | Primer contrato frontend o schema de bloque complejo | Candidata |
-| Auditoría administrativa durable | Conservar actor, origen y operación de cambios sensibles sin depender de logs rotatorios ni FK borrables | Alta | Antes del primer backoffice que modifique idiomas, overrides, usuarios, publicación o configuración | Planificada en el [roadmap de localización](localization-roadmap.md#loc-03-auditoría-administrativa) |
+| Auditoría administrativa durable | Conservar actor, origen y operación de cambios sensibles sin depender de logs rotatorios ni FK borrables | Alta | Antes del primer backoffice que modifique idiomas, overrides, usuarios, publicación o configuración | En curso: [SPEC-admin-audit-foundation](../specs/SPEC-admin-audit-foundation.md) cubre Pages y Navigation; quedan idiomas, overrides e intentos denegados |
 
 Las prioridades son relativas a estas iniciativas y no alteran el alcance MoSCoW
 del producto definido en el SDD inicial.

@@ -18,6 +18,7 @@ class TemplateManifestValidator
         'public.navigation.menu' => ['navigation.menu.label'],
         'system.auth.login' => ['admin.login.title', 'admin.login.email', 'admin.login.password', 'admin.login.submit', 'admin.login.failed', 'admin.login.throttled'],
         'system.admin.dashboard' => ['admin.dashboard.title', 'admin.dashboard.logout', 'admin.diagnostics.warning'],
+        'system.admin.audit' => ['admin.audit.title', 'admin.audit.empty', 'admin.audit.operation', 'admin.audit.entity', 'admin.audit.from', 'admin.audit.until', 'admin.audit.filter', 'admin.audit.occurred-at', 'admin.audit.actor', 'admin.audit.origin', 'admin.audit.before', 'admin.audit.after'],
     ];
 
     public function __construct(private readonly string $root) {}

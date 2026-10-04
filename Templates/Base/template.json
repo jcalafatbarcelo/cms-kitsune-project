@@ -6,6 +6,7 @@
         "public.page.standard",
         "public.navigation.menu",
         "system.auth.login",
-        "system.admin.dashboard"
+        "system.admin.dashboard",
+        "system.admin.audit"
     ]
 }

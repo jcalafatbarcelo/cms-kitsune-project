@@ -2,6 +2,7 @@
 
 namespace Modules\Navigation\Services;
 
+use App\Services\Admin\AdminAuditLogger;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -12,6 +13,8 @@ use Modules\Navigation\Models\MenuItem;
 
 class MenuManager
 {
+    public function __construct(private readonly AdminAuditLogger $audit) {}
+
     public function create(string $identifier): Menu
     {
         if (preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/D', $identifier) !== 1 || strlen($identifier) > 100) {
@@ -19,7 +22,12 @@ class MenuManager
         }
 
         try {
-            return Menu::query()->create(['identifier' => $identifier]);
+            return DB::transaction(function () use ($identifier) {
+                $menu = Menu::query()->create(['identifier' => $identifier]);
+                $this->audit->record('menu.create', 'menu', $menu->id, null, $this->menuState($menu));
+
+                return $menu;
+            }, attempts: 5);
         } catch (QueryException $exception) {
             if (str_starts_with((string) $exception->getCode(), '23')) {
                 throw new NavigationOperationException("Menu [$identifier] already exists.", previous: $exception);
@@ -41,7 +49,7 @@ class MenuManager
             $this->validateLabel($label);
             $this->makeRoom($siblings, $position);
 
-            return MenuItem::query()->create([
+            $item = MenuItem::query()->create([
                 'menu_id' => $menu->id,
                 'language_id' => $language->id,
                 'parent_id' => $parent?->id,
@@ -49,6 +57,9 @@ class MenuManager
                 'label' => $label,
                 'position' => $position,
             ]);
+            $this->audit->record('menu.item.create', 'menu_item', $item->id, null, $this->itemState($item));
+
+            return $item;
         });
     }
 
@@ -58,7 +69,11 @@ class MenuManager
             $item = $this->item($itemId);
             $this->lockMenu($item->menu_id);
             $this->validateLabel($label);
-            $item->update(['page_id' => $pageId, 'label' => $label]);
+            $before = $this->itemState($item);
+            if ($item->page_id !== $pageId || $item->label !== $label) {
+                $item->update(['page_id' => $pageId, 'label' => $label]);
+                $this->audit->record('menu.item.update', 'menu_item', $item->id, $before, $this->itemState($item->fresh()));
+            }
 
             return $item;
         });
@@ -80,9 +95,13 @@ class MenuManager
                 ? $origin
                 : $this->siblings($menu->id, $language->id, $parent?->id);
             $this->validatePosition($position, $destination->count() + 1);
+            $before = $this->itemState($item);
             $this->closeGap($origin);
             $this->makeRoom($destination, $position);
-            $item->update(['parent_id' => $parent?->id, 'position' => $position]);
+            if ($item->parent_id !== $parent?->id || $item->position !== $position) {
+                $item->update(['parent_id' => $parent?->id, 'position' => $position]);
+                $this->audit->record('menu.item.move', 'menu_item', $item->id, $before, $this->itemState($item->fresh()));
+            }
 
             return $item;
         });
@@ -97,8 +116,10 @@ class MenuManager
                 throw new NavigationOperationException('A menu item with children cannot be removed.');
             }
             $siblings = $this->siblings($item->menu_id, $item->language_id, $item->parent_id)->reject(fn (MenuItem $sibling) => $sibling->id === $item->id)->values();
+            $before = $this->itemState($item);
             $item->delete();
             $this->closeGap($siblings);
+            $this->audit->record('menu.item.remove', 'menu_item', $item->id, $before, null);
         });
     }
 
@@ -212,5 +233,25 @@ class MenuManager
         }
 
         return false;
+    }
+
+    /** @return array<string, int|string> */
+    private function menuState(Menu $menu): array
+    {
+        return ['menu_id' => $menu->id, 'identifier' => $menu->identifier];
+    }
+
+    /** @return array<string, int|string|null> */
+    private function itemState(MenuItem $item): array
+    {
+        return [
+            'menu_item_id' => $item->id,
+            'menu_id' => $item->menu_id,
+            'language_id' => $item->language_id,
+            'parent_id' => $item->parent_id,
+            'page_id' => $item->page_id,
+            'label' => $item->label,
+            'position' => $item->position,
+        ];
     }
 }

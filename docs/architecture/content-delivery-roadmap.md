@@ -35,7 +35,7 @@ Fuentes relacionadas:
 | 3 | Rutas públicas localizadas | Completado | Pages especificado y registro de idiomas estable | Locale de petición, URL canónica, resolución a traducción y redirecciones |
 | 4 | Fundación de Navigation | Completado | Pages y rutas públicas localizadas completadas | Menús independientes, ítems traducibles y visibilidad según disponibilidad pública |
 | 5 | Backoffice mínimo | Completado | Contrato de presentaciones estable | Acceso de superadministrador por sesión, shell Blade y base segura para los flujos editoriales posteriores |
-| 6 | Auditoría administrativa durable | Previsto | Backoffice mínimo completado y primer flujo mutable planificado | Eventos inmutables y transaccionales de Pages, Menus y publicación, consultables por el superadministrador |
+| 6 | Auditoría administrativa durable | Completado | Backoffice mínimo completado y primer flujo mutable planificado | Eventos inmutables y transaccionales de Pages, Menus y publicación, consultables por el superadministrador |
 | 7 | Backoffice de Pages | Previsto | Auditoría durable y fundación de Pages | Gestión web de páginas, traducciones, jerarquía, publicación y asignación de template |
 | 8 | Backoffice de Menus | Previsto | Auditoría durable y fundación de Navigation | Gestión web de menús e ítems con referencia a Pages y aislamiento por idioma |
 | 9 | Fundación de PageBuilder | Previsto | Backoffice de Pages y Menus y contrato de presentación estables | Bloques declarativos, valores por instancia y locale, validación y renderizado Blade desde el backoffice |
@@ -73,7 +73,7 @@ contenido, la gestión de idiomas y cualquier otra mutación administrativa
 requieren sus propias Specs y, cuando corresponda, auditoría administrativa
 durable.
 
-`SPEC-admin-audit-foundation` está en `Borrador`. Habilita el historial durable de
+`SPEC-admin-audit-foundation` está completada. Habilita el historial durable de
 las mutaciones de Pages, Menus y publicación como requisito previo a exponerlas
 desde la web. Los backoffice de Pages y Menus se planifican después de la auditoría
 y antes de PageBuilder, porque los bloques editoriales necesitan páginas y

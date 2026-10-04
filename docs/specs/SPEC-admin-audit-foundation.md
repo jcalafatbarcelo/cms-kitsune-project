@@ -1,6 +1,6 @@
 # SPEC: Fundación de auditoría administrativa durable
 
-- **Estado:** Aprobada
+- **Estado:** Completada
 - **Perfil:** feature
 - **Origen de la planificación:** Decisión del responsable de dotar al backoffice
   de auditoría durable antes de gestionar Pages y Menus desde la web, y de

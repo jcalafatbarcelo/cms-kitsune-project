@@ -10,5 +10,17 @@
     "base::admin.login.throttled": "Demasiados intentos. Vuelve a intentarlo más tarde.",
     "base::admin.dashboard.title": "Administración",
     "base::admin.dashboard.logout": "Cerrar sesión",
-    "base::admin.diagnostics.warning": "Modo diagnóstico activo: los detalles de error 5XX se muestran a los visitantes."
+    "base::admin.diagnostics.warning": "Modo diagnóstico activo: los detalles de error 5XX se muestran a los visitantes.",
+    "base::admin.audit.title": "Historial de auditoría",
+    "base::admin.audit.empty": "No hay eventos de auditoría para estos filtros.",
+    "base::admin.audit.operation": "Operación",
+    "base::admin.audit.entity": "Entidad",
+    "base::admin.audit.from": "Desde",
+    "base::admin.audit.until": "Hasta",
+    "base::admin.audit.filter": "Filtrar",
+    "base::admin.audit.occurred-at": "Fecha",
+    "base::admin.audit.actor": "Actor",
+    "base::admin.audit.origin": "Origen",
+    "base::admin.audit.before": "Antes",
+    "base::admin.audit.after": "Después"
 }
