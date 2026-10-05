@@ -8,11 +8,20 @@
 <body>
 <main>
     <h1>{{ $text('admin.audit.title') }}</h1>
+    @if ($errors->any())
+        <div role="alert">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
     <form method="GET" action="{{ route('admin.audit') }}">
-        <label>{{ $text('admin.audit.operation') }} <input name="operation" value="{{ $filters['operation'] ?? '' }}"></label>
-        <label>{{ $text('admin.audit.entity') }} <input name="entity_type" value="{{ $filters['entity_type'] ?? '' }}"></label>
-        <label>{{ $text('admin.audit.from') }} <input type="datetime-local" name="from" value="{{ $filters['from'] ?? '' }}"></label>
-        <label>{{ $text('admin.audit.until') }} <input type="datetime-local" name="until" value="{{ $filters['until'] ?? '' }}"></label>
+        <label>{{ $text('admin.audit.operation') }} <input name="operation" value="{{ old('operation', $filters['operation'] ?? '') }}"></label>
+        <label>{{ $text('admin.audit.entity') }} <input name="entity_type" value="{{ old('entity_type', $filters['entity_type'] ?? '') }}"></label>
+        <label>{{ $text('admin.audit.from') }} <input type="datetime-local" name="from" value="{{ old('from', $filters['from'] ?? '') }}"></label>
+        <label>{{ $text('admin.audit.until') }} <input type="datetime-local" name="until" value="{{ old('until', $filters['until'] ?? '') }}"></label>
         <button type="submit">{{ $text('admin.audit.filter') }}</button>
     </form>
     @if ($events->isEmpty())
