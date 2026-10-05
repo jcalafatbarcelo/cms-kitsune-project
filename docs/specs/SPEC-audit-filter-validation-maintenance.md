@@ -1,6 +1,6 @@
 # SPEC: Mantenimiento de validación de filtros de auditoría
 
-- **Estado:** Borrador
+- **Estado:** Completada
 - **Perfil:** maintenance
 - **Origen de la planificación:** Hallazgos de CodeRabbit tras completar la
   fundación de auditoría administrativa.
@@ -23,6 +23,12 @@ sesión para `operation=invalid`. Sin embargo,
 bolsa de errores, por lo que el superadministrador no recibe una explicación
 visible ni accesible.
 
+El proyecto no dispone de un catálogo de mensajes de validación para su locale
+predeterminado `en`. Por ello, Laravel resuelve el error de la regla `in` como la
+clave técnica `validation.in`, que no es una explicación útil para el
+superadministrador. El locale `es_ES` del backoffice se utiliza para probar la
+presentación multiidioma y no altera el locale de validación de Laravel.
+
 **Fuente del comportamiento esperado:**
 `SPEC-admin-audit-foundation.md`, CA-05 y sus requisitos de filtros validados;
 la prueba HTTP existente que verifica el error de `operation`; y el flujo de
@@ -43,8 +49,9 @@ en sesión, pero la pantalla no lo muestra; el roadmap describe la fundación
 entregada como trabajo futuro.
 
 **Resultado esperado:** Laravel redirige de vuelta a `/admin/audit` y la pantalla
-muestra los errores de filtro en una alerta accesible; el roadmap distingue la
-fundación ya implementada de las capacidades de auditoría que siguen pendientes.
+muestra los errores de filtro con mensajes legibles en una alerta accesible; el
+roadmap distingue la fundación ya implementada de las capacidades de auditoría
+que siguen pendientes.
 
 ## 3. Alcance
 
@@ -53,6 +60,9 @@ fundación ya implementada de las capacidades de auditoría que siguen pendiente
   la bolsa de errores predeterminadas de Laravel.
 - Conservar los valores de filtro enviados mediante el mecanismo `old()` de
   Laravel al volver desde un error de validación.
+- Registrar el mensaje de la regla de validación `in` para el locale
+  predeterminado `en` mediante el catálogo de Laravel, para que la alerta no
+  muestre `validation.in`.
 - Añadir una prueba HTTP de regresión que compruebe la presencia de la alerta y
   del mensaje de validación ante un filtro inválido.
 - Actualizar el estado narrativo de la auditoría administrativa en el roadmap de
@@ -62,8 +72,11 @@ fundación ya implementada de las capacidades de auditoría que siguen pendiente
 
 - Cambiar las reglas de validación, filtros disponibles, paginación, datos
   auditados, retención o autorización de `GET /admin/audit`.
-- Añadir traducciones, API JSON, Vue, PageBuilder, auditoría de intentos
-  denegados o mutaciones administrativas nuevas.
+- Añadir traducciones de interfaz ajenas al mensaje Laravel de la regla `in`, API
+  JSON, Vue, PageBuilder, auditoría de intentos denegados o mutaciones
+  administrativas nuevas.
+- Cambiar el locale de Laravel según la presentación del backoffice o añadir
+  catálogos de validación para locales de prueba, incluido `es_ES`.
 - Modificar el contenido histórico de los eventos de auditoría.
 
 ### Alcance diferido
@@ -93,6 +106,9 @@ fundación ya implementada de las capacidades de auditoría que siguen pendiente
   elemento con `role="alert"` y una lista semántica de mensajes.
 - La alerta debe mostrar todos los mensajes suministrados por el validador con el
   escape Blade por defecto, sin interpolar HTML no confiable.
+- El catálogo Laravel del locale predeterminado `en` debe resolver la regla `in` con un
+  mensaje legible que incluya el atributo validado; la alerta no puede mostrar la
+  clave técnica `validation.in`.
 - Los campos del formulario deben preferir los valores de `old()` y usar los
   filtros validados existentes solo cuando no haya entrada previa.
 - La reparación no modifica el controlador: conserva `Request::validate()` y la
@@ -106,6 +122,9 @@ fundación ya implementada de las capacidades de auditoría que siguen pendiente
   escape Blade por defecto.
 - No cambian las reglas, el modelo de datos ni el contrato público; tampoco hay
   migración, rutas, permisos, secretos ni datos persistidos nuevos.
+- La adición al catálogo Laravel `en` no modifica los catálogos de UI del CMS ni
+  introduce contenido editorial traducible; el locale de presentación
+  multiidioma permanece independiente.
 - Vue 3, PageBuilder, módulos, asincronía e integraciones externas no aplican:
   la reparación es una vista Blade server-side y documentación de estado.
 
@@ -127,6 +146,8 @@ fundación ya implementada de las capacidades de auditoría que siguen pendiente
   `role="alert"`, la lista de mensajes y el mensaje de validación al volver a la
   pantalla; debe enviar también `entity_type=page` y comprobar que ese valor se
   restaura en el formulario mediante `old()`.
+- La prueba HTTP debe comprobar que la alerta muestra el mensaje legible de la
+  regla `in` y no la clave `validation.in`.
 - Mantener la comprobación existente de que el error pertenece a `operation`.
 - Ejecutar la prueba enfocada, la suite afectada y el formateo configurado.
 
@@ -144,11 +165,11 @@ No aplica.
 - **CA-01:** Al enviar desde `/admin/audit` un filtro inválido, el
   superadministrador vuelve mediante la redirección estándar de Laravel a esa
   pantalla y ve una lista de errores con `role="alert"` y el mensaje de
-  validación correspondiente.
+  validación correspondiente, legible y distinto de `validation.in`.
 - **CA-02:** La prueba HTTP establece `/admin/audit` como URL previa, verifica la
   redirección, CA-01 y que el error de `operation` está asociado a la validación
   del filtro; al enviar también `entity_type=page`, comprueba que el formulario
-  restaurado contiene ese valor.
+  restaurado contiene ese valor y que la alerta no contiene `validation.in`.
 - **CA-03:** El roadmap de calidad describe la fundación de auditoría como
   implementada para Pages, Menus y publicación, y conserva como diferidas bajo
   `LOC-04` la cobertura de idiomas, overrides e intentos denegados.
@@ -157,16 +178,16 @@ No aplica.
 
 | Criterio | Riesgo cubierto | Nivel de prueba | Evidencia esperada | Impacto documental |
 | :--- | :--- | :--- | :--- | :--- |
-| CA-01 | Error previsible invisible o redirección no determinista | HTTP | Redirección a auditoría, `role="alert"`, lista y mensaje mostrado | No aplica: la interfaz conserva su contrato |
-| CA-02 | Regresión de la comunicación estándar del validador o pérdida de filtros enviados | HTTP | URL previa, error de `operation` en sesión, contenido mostrado y `entity_type=page` restaurado | No aplica: prueba interna de regresión |
+| CA-01 | Error previsible invisible, técnico o redirección no determinista | HTTP | Redirección a auditoría, `role="alert"`, lista y mensaje legible mostrado | Catálogo Laravel de validación `en` |
+| CA-02 | Regresión de la comunicación estándar del validador o pérdida de filtros enviados | HTTP | URL previa, error de `operation` en sesión, mensaje sin `validation.in` y `entity_type=page` restaurado | No aplica: prueba interna de regresión |
 | CA-03 | Roadmap que anuncia una capacidad ya entregada | Documentación | Fundación y diferidos de LOC-04 alineados | `docs/architecture/quality-roadmap.md` |
 
 ## 9. Plan de implementación
 
 1. Ampliar la prueba HTTP de filtro inválido con URL previa hasta comprobar la
    redirección, la alerta, la lista, el mensaje de validación y la restauración
-   de `entity_type=page`; adaptar la vista Blade mediante la bolsa de errores y
-   `old()` de Laravel para satisfacer CA-01 y CA-02.
+   de `entity_type=page`; registrar el mensaje Laravel de `in` y adaptar la vista
+   Blade mediante la bolsa de errores y `old()` para satisfacer CA-01 y CA-02.
 2. Corregir el párrafo desfasado del roadmap hasta CA-03 y ejecutar las
    validaciones configuradas.
 

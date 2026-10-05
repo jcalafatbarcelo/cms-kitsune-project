@@ -122,6 +122,10 @@ test('only the superadministrator can page and filter audit history', function (
         'occurred_at' => now()->subDay(), 'operation' => 'menu.create', 'entity_type' => 'menu', 'entity_id' => 2,
         'actor_type' => 'console', 'actor_label' => 'console', 'origin' => 'console', 'after_state' => ['identifier' => 'main-menu'], 'schema_version' => 1,
     ]);
+    app()->setLocale('en');
+    $validationMessage = __('validation.in', ['attribute' => 'operation']);
+
+    expect($validationMessage)->toBe('The selected operation is invalid.');
 
     $this->get('/admin/audit')->assertRedirect('/admin/login');
     $this->actingAs(User::factory()->create())->get('/admin/audit')->assertForbidden();
@@ -129,5 +133,18 @@ test('only the superadministrator can page and filter audit history', function (
         ->assertOk()->assertSee('Audit history')->assertSee('page.create')->assertDontSee('menu.create');
     $this->actingAs($admin)->get('/admin/audit?from='.now()->subMinute()->format('Y-m-d\TH:i'))
         ->assertOk()->assertSee('page.create')->assertDontSee('menu.create');
-    $this->actingAs($admin)->get('/admin/audit?operation=invalid')->assertSessionHasErrors('operation');
+    $this->actingAs($admin)
+        ->from('/admin/audit')
+        ->get('/admin/audit?operation=invalid&entity_type=page')
+        ->assertRedirect('/admin/audit')
+        ->assertSessionHasErrors('operation');
+    $this->followingRedirects()
+        ->from('/admin/audit')
+        ->get('/admin/audit?operation=invalid&entity_type=page')
+        ->assertOk()
+        ->assertSee('role="alert"', false)
+        ->assertSee('<ul', false)
+        ->assertSee($validationMessage)
+        ->assertDontSee('validation.in')
+        ->assertSee('name="entity_type" value="page"', false);
 });
