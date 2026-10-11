@@ -62,6 +62,35 @@ test('failed login attempts share a normalized rate limit without retaining pass
     expect(session()->getOldInput('password'))->toBeNull();
 });
 
+test('only authentication failures consume the login rate limit', function () {
+    $user = app(SuperAdminBootstrap::class)->create('Administrator', 'admin@example.test', 'Safe-Test-Password9!');
+    for ($i = 0; $i < 5; $i++) {
+        $this->post('/admin/login', ['email' => 'not-an-email', 'password' => 'short'])->assertSessionHasErrors('email');
+    }
+    $this->post('/admin/login', ['email' => $user->email, 'password' => 'Wrong-Test-Password9!'])->assertSessionHasErrors('email');
+    $this->post('/admin/login', ['email' => $user->email, 'password' => 'Safe-Test-Password9!'])->assertRedirect('/admin');
+    $this->post('/admin/logout')->assertRedirect('/admin/login');
+    for ($i = 0; $i < 4; $i++) {
+        $this->post('/admin/login', ['email' => $user->email, 'password' => 'Wrong-Test-Password9!'])->assertSessionHasErrors('email');
+    }
+    $this->post('/admin/login', ['email' => $user->email, 'password' => 'Wrong-Test-Password9!'])
+        ->assertStatus(429)
+        ->assertHeader('Retry-After');
+});
+
+test('unknown accounts and users without administrative access consume login attempts', function () {
+    $ordinary = User::factory()->create(['email' => 'ordinary@example.test', 'password' => 'Safe-Test-Password9!']);
+    foreach ([
+        ['email' => 'unknown@example.test', 'password' => 'Wrong-Test-Password9!'],
+        ['email' => $ordinary->email, 'password' => 'Safe-Test-Password9!'],
+    ] as $credentials) {
+        for ($i = 0; $i < 5; $i++) {
+            $this->post('/admin/login', $credentials)->assertSessionHasErrors('email');
+        }
+        $this->post('/admin/login', $credentials)->assertStatus(429)->assertHeader('Retry-After');
+    }
+});
+
 test('authentication posts enforce CSRF outside the test bypass', function () {
     $this->app->instance('env', 'local');
     $this->post('/admin/login', ['email' => 'admin@example.test', 'password' => 'Safe-Test-Password9!'])->assertStatus(419);

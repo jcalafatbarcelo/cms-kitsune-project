@@ -8,6 +8,11 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 
 ### Añadido
 
+- Protección del acceso administrativo frente a fuerza bruta: cinco fallos de
+  autenticación por minuto por email normalizado e IP efectiva, con exclusión
+  mutua mediante locks de caché y rechazo de CIDR universales en proxies.
+- Comando `admin:verify-login-rate-limit-lock` y preflight operativo de dos
+  procesos para comprobar los locks compartidos antes de abrir el backoffice.
 - Fundación de monolito modular con `nwidart/laravel-modules` 13, incluyendo
   descubrimiento Laravel y autoload preparado para módulos futuros.
 - ADR-0001 aceptado para la arquitectura prevista: Blade como base y Vue
@@ -171,4 +176,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-10-04 21:16 UTC
+Fecha de última modificación: 2026-10-11 14:55 UTC

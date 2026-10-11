@@ -1,6 +1,6 @@
 # SPEC: Mantenimiento simple del límite de inicio de sesión
 
-- **Estado:** Aprobada
+- **Estado:** Revisión
 - **Perfil:** feature
 - **Origen de la planificación:** Simplificación aprobada de la protección de
   acceso administrativo para mantener compatibilidad con hosting compartido.
@@ -118,7 +118,11 @@ compatibilidad y despliegue.
 
 ### Compatibilidad y despliegue
 
-- No cambia la configuración de hosting, base de datos, caché, proxy ni correo.
+- No añade configuración de aplicación, base de datos, caché, proxy ni correo.
+- En producción, el proceso PHP que atiende el login debe tener un
+  `max_execution_time` finito; el lock de admisión se concede por ese límite más
+  cinco segundos, con un mínimo de 60 segundos. La aplicación rechaza procesar
+  el login si el límite es ilimitado, sin afectar a comandos Artisan.
 - El límite usa el store de caché Laravel ya configurado. En producción este
   store debe compartir locks atómicos entre los procesos PHP que sirven el
   backoffice; `array`, `null` y `session` solo son admisibles en local o testing.
