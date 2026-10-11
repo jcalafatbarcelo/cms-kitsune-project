@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Services\Admin\AdminCredentials;
 use App\Services\Admin\AdminPresentation;
 use App\Services\Admin\SuperAdminBootstrap;
 use Illuminate\Auth\EloquentUserProvider;
@@ -32,7 +33,7 @@ echo "READY\n";
 flush();
 try {
     if (($input['operation'] ?? null) === 'reset-login') {
-        RateLimiter::clear('admin-login:'.hash('sha256', $input['email']).'|192.0.2.1');
+        RateLimiter::clear('admin-login:'.hash('sha256', AdminCredentials::email($input['email'])).'|192.0.2.1');
 
         exit(0);
     }

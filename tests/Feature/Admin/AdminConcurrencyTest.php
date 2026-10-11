@@ -102,7 +102,7 @@ test('concurrent bootstraps contend on one singleton and create no orphan users'
         $reset->setInput(json_encode([
             'connection' => config('database.connections.'.$connection),
             'operation' => 'reset-login',
-            'email' => $adminEmail,
+            'email' => '  '.mb_strtoupper($adminEmail, 'UTF-8').'  ',
         ], JSON_THROW_ON_ERROR));
         expect($reset->run())->toBe(0);
 
@@ -137,6 +137,8 @@ test('concurrent bootstraps contend on one singleton and create no orphan users'
         ], JSON_THROW_ON_ERROR));
         $second->start();
         expect($first->wait())->toBe(0)->and($second->wait())->toBe(0);
+        expect($first->getOutput())->toContain('STATUS:302')
+            ->and($second->getOutput())->toContain('STATUS:302');
         $events = array_map(fn (string $line): array => explode(':', $line), file($slowLog, FILE_IGNORE_NEW_LINES));
         $starts = [];
         $ends = [];
