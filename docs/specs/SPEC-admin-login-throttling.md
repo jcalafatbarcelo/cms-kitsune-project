@@ -101,6 +101,8 @@ no consume ni restablece los fallos previos.
 - Cuando ya existen cinco fallos activos, no se intenta autenticar y se responde
   con el estado `429`, la cabecera `Retry-After` de Laravel y el mensaje genérico
   de throttling existente.
+- Si no se adquiere el lock de admisión, no se verifican credenciales y se
+  responde `503` genérico sin `Retry-After`; no se presenta como cuota agotada.
 - `TRUSTED_PROXIES` debe contener exclusivamente direcciones o rangos de proxies
   concretos; se rechazan los rangos universales IPv4 e IPv6 para que una conexión
   directa no pueda falsear la IP efectiva con cabeceras reenviadas.
@@ -113,8 +115,10 @@ asíncronas, proveedores externos ni configuración nueva.
 No se añaden reglas de negocio, modelo de datos, rutas ni payloads HTTP. Este
 incremento corrige la contabilidad observable de la cuota para restaurar el
 contrato de fallos ya prescrito por el panel mínimo y la documentación operativa.
-El único contrato nuevo es el comando Artisan de verificación descrito en
-compatibilidad y despliegue.
+La contención del lock incorpora un estado HTTP `503` controlado, genérico y sin
+`Retry-After`, sin añadir rutas ni payloads. El comando Artisan de verificación
+descrito en compatibilidad y despliegue constituye un contrato operativo
+adicional.
 
 ### Compatibilidad y despliegue
 
@@ -146,8 +150,10 @@ compatibilidad y despliegue.
 
 ### Garantías obligatorias
 
-- Pruebas HTTP para formato inválido, cinco fallos, sexto intento `429`, acceso
-  correcto y usuario sin privilegios.
+- Pruebas HTTP para formato inválido con el mismo email, cinco fallos, sexto
+  intento `429`, acceso correcto y usuario sin privilegios.
+- Prueba de contención del lock con respuesta `503` genérica, sin verificar
+  credenciales ni emitir `Retry-After`.
 - Prueba de regresión que demuestre que un acceso correcto no consume cuota y que
   una variante de email equivalente no crea otro presupuesto cuando el motor la
   considera equivalente.
@@ -191,6 +197,8 @@ deuda de implementación.
   caché de producción admisible y correctamente desplegado. Antes de abrir el
   backoffice, la comprobación Artisan de dos procesos evidencia adicionalmente
   que el backend comparte locks.
+- **CA-06:** La contención del lock de admisión no verifica credenciales ni se
+  presenta como throttling: devuelve `503` genérico sin `Retry-After`.
 
 ## 8. Trazabilidad de pruebas y documentación
 
@@ -201,6 +209,7 @@ deuda de implementación.
 | CA-03 | Enumeración o evasión por tipo de cuenta | HTTP | Mismo resultado y consumo | Guía de acceso ya alineada |
 | CA-04 | Evasión por alias o cabecera falseada | Integración/HTTP | Clave compartida y rango universal rechazado | Despliegue seguro existente |
 | CA-05 | Superar la cuota mediante concurrencia | Integración/configuración/Artisan | Prueba de login con máximo de cinco verificaciones, drivers inseguros rechazados y preflight de lock en dos procesos | Despliegue seguro |
+| CA-06 | Error interno o enumeración durante contención | HTTP | `503` genérico sin autenticación ni `Retry-After` | No aplica: fallo transitorio interno |
 
 ## 9. Plan de implementación
 

@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\Admin\AdminCredentials;
 use App\Services\Admin\AdminPresentation;
 use App\Services\Admin\LoginRateLimit;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -36,15 +37,19 @@ class SessionController extends Controller
             return redirect()->route('admin.login')->withErrors(['email' => 'admin.login.failed'])->withInput(['email' => $email]);
         }
         $authenticated = false;
-        $retryAfter = $limiter->attempt($email, (string) $request->ip(), function () use (&$authenticated, $credentials): bool {
-            $authenticated = Auth::guard('web')->attemptWhen($credentials, fn ($user) => AdministrationAccess::permits($user));
-            if (! $authenticated && ! User::query()->where('email', $credentials['email'])->exists()) {
-                // Burn one bcrypt operation within the admission lock for unknown accounts.
-                Hash::driver('bcrypt')->make((string) $credentials['password']);
-            }
+        try {
+            $retryAfter = $limiter->attempt($email, (string) $request->ip(), function () use (&$authenticated, $credentials): bool {
+                $authenticated = Auth::guard('web')->attemptWhen($credentials, fn ($user) => AdministrationAccess::permits($user));
+                if (! $authenticated && ! User::query()->where('email', $credentials['email'])->exists()) {
+                    // Burn one bcrypt operation within the admission lock for unknown accounts.
+                    Hash::driver('bcrypt')->make((string) $credentials['password']);
+                }
 
-            return $authenticated;
-        });
+                return $authenticated;
+            });
+        } catch (LockTimeoutException) {
+            return response('', 503);
+        }
         if ($retryAfter > 0) {
             $request->session()->flash('login_throttled', true);
 

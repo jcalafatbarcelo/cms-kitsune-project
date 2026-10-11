@@ -1,8 +1,8 @@
 <?php
 
 use App\Models\User;
-use App\Services\Admin\AdminCredentials;
 use App\Services\Admin\AdminPresentation;
+use App\Services\Admin\LoginRateLimit;
 use App\Services\Admin\SuperAdminBootstrap;
 use Illuminate\Auth\EloquentUserProvider;
 use Illuminate\Contracts\Auth\Authenticatable as UserContract;
@@ -33,19 +33,17 @@ echo "READY\n";
 flush();
 try {
     if (($input['operation'] ?? null) === 'reset-login') {
-        RateLimiter::clear('admin-login:'.hash('sha256', AdminCredentials::email($input['email'])).'|192.0.2.1');
+        RateLimiter::clear(LoginRateLimit::quotaKey($input['email'], '192.0.2.1'));
 
         exit(0);
     }
-    if (in_array($input['operation'] ?? 'bootstrap', ['login', 'slow-login', 'csrf-invalid'], true)) {
-        if (in_array($input['operation'] ?? null, ['login', 'slow-login'], true)) {
-            $log = $input['log'] ?? null;
-            $label = $input['label'] ?? null;
+    if (in_array($input['operation'] ?? 'bootstrap', ['login', 'csrf-invalid'], true)) {
+        if (($input['operation'] ?? null) === 'login') {
             $verificationLog = $input['verification_log'] ?? null;
-            Auth::provider('instrumented-eloquent', function () use ($app, $log, $label, $verificationLog, $input): EloquentUserProvider {
-                return new class($app['hash'], User::class, $log, $label, $verificationLog, ($input['operation'] ?? null) === 'slow-login') extends EloquentUserProvider
+            Auth::provider('instrumented-eloquent', function () use ($app, $verificationLog): EloquentUserProvider {
+                return new class($app['hash'], User::class, $verificationLog) extends EloquentUserProvider
                 {
-                    public function __construct($hasher, string $model, private ?string $log, private ?string $label, private ?string $verificationLog, private bool $slow)
+                    public function __construct($hasher, string $model, private ?string $verificationLog)
                     {
                         parent::__construct($hasher, $model);
                     }
@@ -54,13 +52,6 @@ try {
                     {
                         if ($this->verificationLog !== null) {
                             file_put_contents($this->verificationLog, "verified\n", FILE_APPEND | LOCK_EX);
-                        }
-                        if ($this->slow) {
-                            file_put_contents($this->log, $this->label.':starts:'.microtime(true).PHP_EOL, FILE_APPEND | LOCK_EX);
-                            echo "VERIFYING\n";
-                            flush();
-                            sleep(11);
-                            file_put_contents($this->log, $this->label.':ends:'.microtime(true).PHP_EOL, FILE_APPEND | LOCK_EX);
                         }
 
                         return parent::validateCredentials($user, $credentials);
@@ -95,7 +86,11 @@ try {
         $request->cookies->set(config('session.cookie'), $sessionCookie->getValue());
         if (isset($input['barrier'])) {
             file_put_contents($input['barrier'], "ready\n", FILE_APPEND | LOCK_EX);
-            while (trim((string) file_get_contents($input['barrier'])) !== 'release') {
+            while (true) {
+                $state = @file_get_contents($input['barrier']);
+                if (is_string($state) && trim($state) === 'release') {
+                    break;
+                }
                 usleep(1000);
             }
         }

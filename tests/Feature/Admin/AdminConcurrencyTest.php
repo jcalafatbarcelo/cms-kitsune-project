@@ -11,7 +11,6 @@ test('concurrent bootstraps contend on one singleton and create no orphan users'
     $workers = [];
     $verificationLog = null;
     $barrier = null;
-    $slowLog = null;
     if ($original['driver'] === 'sqlite') {
         $file = tempnam(sys_get_temp_dir(), 'kitsune-admin-');
         config(['database.connections.'.$connection.'.database' => $file, 'database.connections.'.$connection.'.busy_timeout' => 5000]);
@@ -79,14 +78,25 @@ test('concurrent bootstraps contend on one singleton and create no orphan users'
             $worker->start();
             $workers[] = $worker;
         }
+        $readyCount = function () use ($barrier): int {
+            for ($attempt = 0; $attempt < 20; $attempt++) {
+                $contents = @file_get_contents($barrier);
+                if ($contents !== false) {
+                    return substr_count($contents, "ready\n");
+                }
+                usleep(5000);
+            }
+
+            return 0;
+        };
         $deadline = microtime(true) + 10;
         do {
-            if (substr_count((string) file_get_contents($barrier), "ready\n") === 10) {
+            if ($readyCount() === 10) {
                 break;
             }
             usleep(20000);
         } while (microtime(true) < $deadline);
-        expect(substr_count((string) file_get_contents($barrier), "ready\n"))->toBe(10);
+        expect($readyCount())->toBe(10);
         file_put_contents($barrier, 'release');
         $admitted = 0;
         $throttled = 0;
@@ -106,46 +116,6 @@ test('concurrent bootstraps contend on one singleton and create no orphan users'
         ], JSON_THROW_ON_ERROR));
         expect($reset->run())->toBe(0);
 
-        $slowLog = tempnam(sys_get_temp_dir(), 'kitsune-login-slow-');
-        $first = new Process([PHP_BINARY, base_path('tests/Fixtures/admin-concurrency-worker.php')], base_path(), ['APP_ENV' => 'testing'], timeout: 30);
-        $first->setInput(json_encode([
-            'connection' => config('database.connections.'.$connection),
-            'operation' => 'slow-login',
-            'email' => $adminEmail,
-            'password' => 'Wrong-Test-Password9!',
-            'log' => $slowLog,
-            'label' => 'first',
-        ], JSON_THROW_ON_ERROR));
-        $first->start();
-        $deadline = microtime(true) + 5;
-        do {
-            if (str_contains($first->getOutput(), 'VERIFYING')) {
-                break;
-            }
-            usleep(20000);
-        } while (microtime(true) < $deadline);
-        expect($first->getOutput())->toContain('VERIFYING');
-        usleep(10500000);
-        $second = new Process([PHP_BINARY, base_path('tests/Fixtures/admin-concurrency-worker.php')], base_path(), ['APP_ENV' => 'testing'], timeout: 30);
-        $second->setInput(json_encode([
-            'connection' => config('database.connections.'.$connection),
-            'operation' => 'slow-login',
-            'email' => $adminEmail,
-            'password' => 'Wrong-Test-Password9!',
-            'log' => $slowLog,
-            'label' => 'second',
-        ], JSON_THROW_ON_ERROR));
-        $second->start();
-        expect($first->wait())->toBe(0)->and($second->wait())->toBe(0);
-        expect($first->getOutput())->toContain('STATUS:302')
-            ->and($second->getOutput())->toContain('STATUS:302');
-        $events = array_map(fn (string $line): array => explode(':', $line), file($slowLog, FILE_IGNORE_NEW_LINES));
-        $starts = [];
-        $ends = [];
-        foreach ($events as [$label, $event, $time]) {
-            ${$event}[$label] = (float) $time;
-        }
-        expect($starts['second'])->toBeGreaterThanOrEqual($ends['first']);
         $migration = require database_path('migrations/2026_10_02_000000_create_administration_access_table.php');
         $migration->down();
         expect(DB::getSchemaBuilder()->hasTable('administration_access'))->toBeFalse()->and(DB::table('users')->count())->toBe(1);
@@ -168,7 +138,7 @@ test('concurrent bootstraps contend on one singleton and create no orphan users'
                 }
             }
         }
-        foreach ([$verificationLog, $barrier, $slowLog] as $path) {
+        foreach ([$verificationLog, $barrier] as $path) {
             if (is_string($path) && is_file($path)) {
                 unlink($path);
             }

@@ -2,10 +2,11 @@
 
 use App\Models\User;
 use App\Providers\AppServiceProvider;
-use App\Services\Admin\AdminCredentials;
 use App\Services\Admin\LoginRateLimit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
 use Symfony\Component\Process\Process;
 
 uses(RefreshDatabase::class);
@@ -55,19 +56,45 @@ test('production requires a finite PHP execution limit for login locks', functio
 });
 
 test('admission lock contention is not reported as a rate limit throttle', function () {
+    $existingEmail = 'admin@example.test';
+    User::factory()->create(['email' => $existingEmail]);
+    $hasher = app('hash');
+    foreach ([[$existingEmail, 'check'], ['unknown@example.test', 'driver']] as [$email, $hashMethod]) {
+        $lock = Cache::lock(LoginRateLimit::admissionKey($email, '127.0.0.1'), 10);
+        expect($lock->get())->toBeTrue();
+        try {
+            Hash::spy();
+            $response = $this->post('/admin/login', ['email' => $email, 'password' => 'Wrong-Test-Password9!']);
+            $response
+                ->assertStatus(503)
+                ->assertHeaderMissing('Retry-After')
+                ->assertContent('');
+            Hash::shouldNotHaveReceived($hashMethod);
+        } finally {
+            Hash::swap($hasher);
+            Auth::forgetGuards();
+            $lock->release();
+        }
+    }
+    $this->post('/admin/login', ['email' => $existingEmail, 'password' => 'Wrong-Test-Password9!'])->assertSessionHasErrors('email');
+});
+
+test('admission lock contention returns an empty unavailable response', function () {
     $email = 'admin@example.test';
-    User::factory()->create(['email' => $email]);
-    $key = 'admin-login:'.hash('sha256', AdminCredentials::email($email)).'|127.0.0.1:admission';
-    $lock = Cache::lock($key, 10);
+    $lock = Cache::lock(LoginRateLimit::admissionKey($email, '127.0.0.1'), 10);
     expect($lock->get())->toBeTrue();
+
     try {
-        $this->post('/admin/login', ['email' => $email, 'password' => 'Wrong-Test-Password9!'])
-            ->assertStatus(500)
-            ->assertHeaderMissing('Retry-After');
+        $response = $this->post('/admin/login', ['email' => $email, 'password' => 'Wrong-Test-Password9!']);
+
+        $response
+            ->assertStatus(503)
+            ->assertHeaderMissing('Retry-After')
+            ->assertContent('');
+        $this->assertGuest('web');
     } finally {
         $lock->release();
     }
-    $this->post('/admin/login', ['email' => $email, 'password' => 'Wrong-Test-Password9!'])->assertSessionHasErrors('email');
 });
 
 test('login lock verification command reports contention between independent processes', function () {

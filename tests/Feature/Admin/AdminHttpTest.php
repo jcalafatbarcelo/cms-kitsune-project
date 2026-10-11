@@ -65,14 +65,29 @@ test('failed login attempts share a normalized rate limit without retaining pass
 test('only authentication failures consume the login rate limit', function () {
     $user = app(SuperAdminBootstrap::class)->create('Administrator', 'admin@example.test', 'Safe-Test-Password9!');
     for ($i = 0; $i < 5; $i++) {
-        $this->post('/admin/login', ['email' => 'not-an-email', 'password' => 'short'])->assertSessionHasErrors('email');
+        $this->post('/admin/login', ['email' => $user->email, 'password' => 'short'])->assertSessionHasErrors('email');
     }
-    $this->post('/admin/login', ['email' => $user->email, 'password' => 'Wrong-Test-Password9!'])->assertSessionHasErrors('email');
+    for ($i = 0; $i < 2; $i++) {
+        $this->post('/admin/login', ['email' => 'not-an-email', 'password' => 'Wrong-Test-Password9!'])->assertSessionHasErrors('email');
+    }
     $this->post('/admin/login', ['email' => $user->email, 'password' => 'Safe-Test-Password9!'])->assertRedirect('/admin');
     $this->post('/admin/logout')->assertRedirect('/admin/login');
+    for ($i = 0; $i < 5; $i++) {
+        $this->post('/admin/login', ['email' => $user->email, 'password' => 'Wrong-Test-Password9!'])->assertSessionHasErrors('email');
+    }
+    $this->post('/admin/login', ['email' => $user->email, 'password' => 'Wrong-Test-Password9!'])
+        ->assertStatus(429)
+        ->assertHeader('Retry-After');
+});
+
+test('a successful login does not reset the previous failure quota', function () {
+    $user = app(SuperAdminBootstrap::class)->create('Administrator', 'admin@example.test', 'Safe-Test-Password9!');
     for ($i = 0; $i < 4; $i++) {
         $this->post('/admin/login', ['email' => $user->email, 'password' => 'Wrong-Test-Password9!'])->assertSessionHasErrors('email');
     }
+    $this->post('/admin/login', ['email' => $user->email, 'password' => 'Safe-Test-Password9!'])->assertRedirect('/admin');
+    $this->post('/admin/logout')->assertRedirect('/admin/login');
+    $this->post('/admin/login', ['email' => $user->email, 'password' => 'Wrong-Test-Password9!'])->assertSessionHasErrors('email');
     $this->post('/admin/login', ['email' => $user->email, 'password' => 'Wrong-Test-Password9!'])
         ->assertStatus(429)
         ->assertHeader('Retry-After');
