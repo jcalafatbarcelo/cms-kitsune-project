@@ -1,0 +1,4 @@
+interface:
+  display_name: "Local serve readiness"
+  short_description: "Dejar un entorno local o de pruebas listo para servir el CMS"
+  default_prompt: "Usa $local-serve-readiness para ejecutar este flujo de forma validada."
