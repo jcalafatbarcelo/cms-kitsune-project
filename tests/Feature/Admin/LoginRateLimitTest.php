@@ -23,7 +23,7 @@ test('collation equivalent emails cannot obtain independent authentication budge
 })->group('database-integration');
 
 test('production rejects cache stores that cannot share login locks', function () {
-    foreach (['array', 'null', 'session'] as $driver) {
+    foreach (['array', 'null', 'session', 'failover'] as $driver) {
         $this->app->instance('env', 'production');
         config(['cache.default' => 'unsafe', 'cache.stores.unsafe' => ['driver' => $driver]]);
         expect(fn () => (new AppServiceProvider($this->app))->boot())
@@ -33,7 +33,7 @@ test('production rejects cache stores that cannot share login locks', function (
     expect(fn () => (new AppServiceProvider($this->app))->boot())->not->toThrow(LogicException::class);
 
     foreach (['local', 'testing'] as $environment) {
-        foreach (['array', 'null', 'session'] as $driver) {
+        foreach (['array', 'null', 'session', 'failover'] as $driver) {
             $this->app->instance('env', $environment);
             config(['cache.default' => 'unsafe', 'cache.stores.unsafe' => ['driver' => $driver]]);
             expect(fn () => (new AppServiceProvider($this->app))->boot())->not->toThrow(LogicException::class);

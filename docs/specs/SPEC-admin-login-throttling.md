@@ -1,6 +1,6 @@
 # SPEC: Mantenimiento simple del límite de inicio de sesión
 
-- **Estado:** Revisión
+- **Estado:** Completada
 - **Perfil:** feature
 - **Origen de la planificación:** Simplificación aprobada de la protección de
   acceso administrativo para mantener compatibilidad con hosting compartido.
@@ -129,7 +129,9 @@ adicional.
   el login si el límite es ilimitado, sin afectar a comandos Artisan.
 - El límite usa el store de caché Laravel ya configurado. En producción este
   store debe compartir locks atómicos entre los procesos PHP que sirven el
-  backoffice; `array`, `null` y `session` solo son admisibles en local o testing.
+  backoffice; `array`, `null`, `session` y `failover` solo son admisibles en local
+  o testing. `failover` se rechaza porque puede degradar a un store local. Se
+  conservan `database` y `file`, compatibles con hosting común de un solo host.
 - La aplicación valida esa restricción de driver en producción. La topología de
   un único host o de almacenamiento compartido es un requisito de despliegue;
   este incremento no añade ni administra infraestructura distribuida.
@@ -145,6 +147,11 @@ adicional.
 - Esta comprobación solo acredita que el backend configurado comparte locks entre
   dos procesos. No sustituye la prueba de integración concurrente del flujo de
   login, que acredita el máximo de cinco verificaciones de credenciales.
+- El preflight de dos procesos, la coherencia real del store entre instancias y el
+  saneamiento de `X-Forwarded-*` por el proxy son gates de despliegue que se
+  ejecutan y registran al instalar. No son verificables desde el repositorio y no
+  bloquean la implementación del incremento, igual que los requisitos de HTTPS,
+  cookies y proxies del panel mínimo.
 
 ## 6. Calidad, seguridad y deuda
 

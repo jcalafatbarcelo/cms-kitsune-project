@@ -26,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
 
         $store = (string) config('cache.default');
         $driver = config('cache.stores.'.$store.'.driver');
-        if (in_array($driver, ['array', 'null', 'session'], true)) {
+        if (in_array($driver, ['array', 'null', 'session', 'failover'], true)) {
             throw new LogicException('The production cache store must share atomic locks between backoffice processes.');
         }
     }

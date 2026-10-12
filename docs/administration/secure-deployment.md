@@ -85,9 +85,11 @@ la validación de catálogos si el despliegue cambia textos estáticos.
 
 El límite de cinco fallos de acceso por minuto usa locks atómicos del store de
 caché configurado. En `production`, `CACHE_STORE` no puede usar los drivers
-`array`, `null` ni `session`; el store debe compartir locks entre todos los
-procesos PHP que sirven el backoffice. La topología de un solo host o el
-almacenamiento compartido corresponde al despliegue.
+`array`, `null`, `session` ni `failover`; el store debe compartir locks entre
+todos los procesos PHP que sirven el backoffice. `failover` se rechaza porque su
+respaldo puede degradar a un store local y dejar de compartir locks. `database` y
+`file` siguen siendo válidos en hosting común de un solo host. La topología de un
+solo host o el almacenamiento compartido corresponde al despliegue.
 
 El lock de admisión dura al menos 60 segundos y se amplía cinco segundos sobre
 el límite finito `max_execution_time` de PHP cuando este es mayor. El responsable
