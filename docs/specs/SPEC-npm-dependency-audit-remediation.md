@@ -1,6 +1,6 @@
 # SPEC: Remediación del audit de dependencias npm
 
-- **Estado:** Revisión
+- **Estado:** Completada
 - **Perfil:** maintenance
 - **Origen de la planificación:** Petición `/build` para corregir el fallo del job `Audit npm dependencies` de GitHub Actions.
 - **Spec relacionada:** No aplica.
