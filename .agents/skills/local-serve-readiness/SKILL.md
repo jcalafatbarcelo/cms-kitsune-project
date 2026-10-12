@@ -37,14 +37,17 @@ de templates y las comprobaciones de instalación vigentes.
 7. Comprobar instalación: `php artisan cms:language:list`,
    `php artisan cms:language:validate` y `php artisan cms:template:list`.
 8. Superadministrador: comprobarlo con
-   `php artisan tinker --execute="echo \App\Models\AdministrationAccess::sole()->super_admin_user_id ?? 'null';"`.
-   Si devuelve `null`, ejecutar `php artisan cms:admin:create` (interactivo); si
-   ya hay identificador, omitirlo.
+   `php artisan tinker --execute="echo \App\Models\AdministrationAccess::first()?->super_admin_user_id ?? 'null';"`
+   (`first()` evita el `ModelNotFoundException` de `sole()` en una base recién
+   migrada sin fila). Si no existe fila o devuelve `null`, **pedir al usuario que
+   ejecute** `php artisan cms:admin:create` (interactivo) y esperar su entrada;
+   nunca inventar nombre, email ni contraseña. Si ya hay identificador, omitirlo.
 9. Assets: si no se usará `vite` en modo desarrollo y falta `public/build`,
    instalar dependencias con `npm install` (si falta `node_modules`) y compilar
    con `npm run build`.
-10. Verificación final: arrancar `php artisan serve` y comprobar que `GET /` y
-    `GET /admin/login` responden `200` y no `503`.
+10. Verificación final: arrancar `php artisan serve` **en segundo plano** (no
+    bloquear el shell), sondear `GET /` y `GET /admin/login`, confirmar `200` y
+    no `503`, y **detener el proceso** al terminar.
 
 ## Detección y mantenimiento
 
