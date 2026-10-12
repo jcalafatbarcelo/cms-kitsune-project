@@ -9,6 +9,8 @@ test('concurrent bootstraps contend on one singleton and create no orphan users'
     $original = config('database.connections.'.$connection);
     $file = null;
     $workers = [];
+    $verificationLog = null;
+    $barrier = null;
     if ($original['driver'] === 'sqlite') {
         $file = tempnam(sys_get_temp_dir(), 'kitsune-admin-');
         config(['database.connections.'.$connection.'.database' => $file, 'database.connections.'.$connection.'.busy_timeout' => 5000]);
@@ -47,20 +49,73 @@ test('concurrent bootstraps contend on one singleton and create no orphan users'
         expect($results)->toBe(['CREATED', 'EXISTS'])
             ->and(DB::table('users')->count())->toBe(1)
             ->and(DB::table('administration_access')->sole()->super_admin_user_id)->not->toBeNull();
+        $adminEmail = DB::table('administration_access')
+            ->join('users', 'users.id', '=', 'administration_access.super_admin_user_id')
+            ->value('users.email');
+
+        $verificationLog = tempnam(sys_get_temp_dir(), 'kitsune-login-verifications-');
+        $barrier = tempnam(sys_get_temp_dir(), 'kitsune-login-barrier-');
+        $csrf = new Process([PHP_BINARY, base_path('tests/Fixtures/admin-concurrency-worker.php')], base_path(), ['APP_ENV' => 'testing'], timeout: 30);
+        $csrf->setInput(json_encode([
+            'connection' => config('database.connections.'.$connection),
+            'operation' => 'csrf-invalid',
+            'email' => $adminEmail,
+            'password' => 'Wrong-Test-Password9!',
+        ], JSON_THROW_ON_ERROR));
+        expect($csrf->run())->toBe(0)->and($csrf->getOutput())->toContain('STATUS:419');
 
         $workers = [];
-        for ($i = 0; $i < 3; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             $worker = new Process([PHP_BINARY, base_path('tests/Fixtures/admin-concurrency-worker.php')], base_path(), ['APP_ENV' => 'testing'], timeout: 30);
-            $worker->setInput(json_encode(['connection' => config('database.connections.'.$connection), 'operation' => 'login'], JSON_THROW_ON_ERROR));
+            $worker->setInput(json_encode([
+                'connection' => config('database.connections.'.$connection),
+                'operation' => 'login',
+                'email' => $adminEmail,
+                'password' => 'Wrong-Test-Password9!',
+                'barrier' => $barrier,
+                'verification_log' => $verificationLog,
+            ], JSON_THROW_ON_ERROR));
             $worker->start();
             $workers[] = $worker;
         }
+        $readyCount = function () use ($barrier): int {
+            for ($attempt = 0; $attempt < 20; $attempt++) {
+                $contents = @file_get_contents($barrier);
+                if ($contents !== false) {
+                    return substr_count($contents, "ready\n");
+                }
+                usleep(5000);
+            }
+
+            return 0;
+        };
+        $deadline = microtime(true) + 10;
+        do {
+            if ($readyCount() === 10) {
+                break;
+            }
+            usleep(20000);
+        } while (microtime(true) < $deadline);
+        expect($readyCount())->toBe(10);
+        file_put_contents($barrier, 'release');
         $admitted = 0;
+        $throttled = 0;
         foreach ($workers as $worker) {
             expect($worker->wait())->toBe(0);
-            $admitted += substr_count($worker->getOutput(), 'ADMITTED');
+            $admitted += substr_count($worker->getOutput(), 'STATUS:302');
+            $throttled += substr_count($worker->getOutput(), 'STATUS:429');
         }
-        expect($admitted)->toBe(5);
+        expect($admitted)->toBe(5)
+            ->and($throttled)->toBe(5)
+            ->and(count(file($verificationLog, FILE_IGNORE_NEW_LINES)))->toBe(5);
+        $reset = new Process([PHP_BINARY, base_path('tests/Fixtures/admin-concurrency-worker.php')], base_path(), ['APP_ENV' => 'testing'], timeout: 30);
+        $reset->setInput(json_encode([
+            'connection' => config('database.connections.'.$connection),
+            'operation' => 'reset-login',
+            'email' => '  '.mb_strtoupper($adminEmail, 'UTF-8').'  ',
+        ], JSON_THROW_ON_ERROR));
+        expect($reset->run())->toBe(0);
+
         $migration = require database_path('migrations/2026_10_02_000000_create_administration_access_table.php');
         $migration->down();
         expect(DB::getSchemaBuilder()->hasTable('administration_access'))->toBeFalse()->and(DB::table('users')->count())->toBe(1);
@@ -81,6 +136,11 @@ test('concurrent bootstraps contend on one singleton and create no orphan users'
                 if (is_file($path)) {
                     unlink($path);
                 }
+            }
+        }
+        foreach ([$verificationLog, $barrier] as $path) {
+            if (is_string($path) && is_file($path)) {
+                unlink($path);
             }
         }
     }

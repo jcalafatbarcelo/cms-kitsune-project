@@ -38,6 +38,12 @@ test('only configured proxies may supply the client scheme and address', functio
     expect(request()->ip())->toBe('198.51.100.5');
 });
 
+test('universal proxy CIDR ranges are rejected', function (string $proxy) {
+    config(['security.trusted_proxies' => [$proxy]]);
+
+    $this->get('http://localhost/admin/login')->assertStatus(500);
+})->with(['0.0.0.0/0', '::/0']);
+
 test('local and testing permit cleartext development', function (string $environment) {
     $this->app->instance('env', $environment);
     $this->get('http://localhost/admin/login')->assertOk();

@@ -14,7 +14,7 @@ class TrustConfiguredProxies extends TrustProxies
         foreach ($proxies as $proxy) {
             [$address, $prefix] = array_pad(explode('/', $proxy, 2), 2, null);
             $max = filter_var($address, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) ? 32 : 128;
-            if (! filter_var($address, FILTER_VALIDATE_IP) || ($prefix !== null && (! ctype_digit($prefix) || (int) $prefix > $max))) {
+            if (! filter_var($address, FILTER_VALIDATE_IP) || ($prefix !== null && (! ctype_digit($prefix) || (int) $prefix > $max || (int) $prefix === 0))) {
                 throw new LogicException('TRUSTED_PROXIES must contain explicit IP addresses or CIDR ranges.');
             }
         }
