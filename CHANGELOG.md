@@ -175,6 +175,11 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Actualizado `league/commonmark` a `2.10.2` para corregir los advisories
   `GHSA-97jj-33gv-5xf9` y `GHSA-3q6v-r5mr-hxv8`.
 
+### Seguridad
+
+- Actualizado `symfony/http-foundation` a `8.1.9` para corregir
+  `CVE-2026-108082` en el procesamiento de cabeceras `Cache-Control`.
+
 ### Eliminado
 
 - Skills genéricas instaladas por Boost que no aportaban una ventaja neta frente
@@ -182,4 +187,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-10-17 09:56 UTC
+Fecha de última modificación: 2026-10-17 10:17 UTC
