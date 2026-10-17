@@ -8,6 +8,9 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 
 ### Añadido
 
+- Skill `metodologia-css` y flujo obligatorio para aplicar BEM + OOCSS,
+  responsive mobile-first y WCAG AA al crear o revisar estilos y marcado con
+  clases.
 - Protección del acceso administrativo frente a fuerza bruta: cinco fallos de
   autenticación por minuto por email normalizado e IP efectiva, con exclusión
   mutua mediante locks de caché y rechazo de CIDR universales en proxies.
@@ -152,6 +155,9 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 
 ### Fijado
 
+- Corregidas las rutas de descubrimiento, enlaces internos, nombres Unicode y
+  ejemplos de animación, media queries y cascada de `metodologia-css`; retiradas
+  guías heredadas y referencias ajenas al CMS.
 - Restaurada la redirección temporal al idioma predeterminado, preservada la ruta
   de salud de Laravel y reforzada la activación de prefijos cortos junto a
   variantes regionales generales.
@@ -176,4 +182,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-10-11 14:55 UTC
+Fecha de última modificación: 2026-10-17 09:56 UTC

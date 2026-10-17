@@ -96,6 +96,8 @@ el formato de almacenamiento de su contenido.
   quality gate de CI, comandos locales y validación de workflows.
 - [`docs/architecture/dependency-security.md`](docs/architecture/dependency-security.md):
   auditorías de dependencias, SBOM, Dependency Review y protección de `main`.
+- [`docs/developers/frontend-styling.md`](docs/developers/frontend-styling.md):
+  convención obligatoria de estilos y uso de la skill `metodologia-css`.
 - [`docs/specs/`](docs/specs/): Specs que concretan el comportamiento y los
   criterios de aceptación.
 - [`docs/adr/`](docs/adr/): decisiones arquitectónicas; incluye el

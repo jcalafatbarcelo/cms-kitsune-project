@@ -1,8 +1,6 @@
-﻿# Índice | Metodología CSS (openROOM)
+﻿# Índice | Metodología CSS
 
 Fuente de la verdad: las notas numeradas de esta wiki (`01.*`–`08.*`).
-`documentacion_metodologia_css.md` es un resumen previo **no autoritativo**: ante
-cualquier discrepancia, mandan estas notas.
 
 ## Rutas rápidas
 - [[01.2 - Fast-Track|Fast Track (6 pasos)]]
@@ -12,7 +10,7 @@ cualquier discrepancia, mandan estas notas.
 
 ## Estructura
 1. Introducción
-   - [[01.1 - proposito|Propósito]]
+   - [[01.1 - Propósito|Propósito]]
    - [[01.2 - Fast-Track|Fast Track]]
 2. Namespaces
    - [[02.1 - namespaces|Tabla general de prefijos]]

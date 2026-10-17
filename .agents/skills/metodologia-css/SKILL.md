@@ -33,16 +33,8 @@ o ejemplos.
 Reglas de autoridad:
 
 - **Autoritativas:** las notas numeradas `docs/01.*`–`docs/08.*`.
-- `docs/documentacion_metodologia_css.md` es un resumen previo **no
-  autoritativo**: si discrepa con las notas numeradas, ignóralo.
-
-Las secciones siguientes son el extracto operativo de esa documentación; ante
+Las secciones siguientes son el extracto operativo de las notas numeradas; ante
 detalle o duda, manda `docs/`.
-
-> La fuente original del equipo está en
-> `G:\Unidades compartidas\templateOpenWeb\extras\Documents\MetodologiaCSS`.
-> Esta copia local es independiente; re-sincronízala solo si quieres incorporar
-> cambios del equipo.
 
 ## 2. Namespaces
 
@@ -128,8 +120,12 @@ Las media queries (breakpoints) de un componente o tema se colocan
 archivo. El objetivo es que todo lo que afecta a un componente o a un tema quede
 localizado en un único punto. Ordena las media de menor a mayor (mobile-first).
 
-Esto **no altera la jerarquía ni la cascada** del CSS: el orden entre selectores
-de bloques distintos no cambia la especificidad.
+Esta organización no cambia la especificidad, pero puede cambiar el orden de
+origen y, por tanto, qué declaración gana entre reglas de igual especificidad
+que coincidan. Conserva el orden global de componentes desde los más genéricos a
+los más específicos: por ejemplo, declara la estructura reutilizable
+`c-textofoto` antes de `c-textblock`, que concreta el formato del contenido según
+el espacio disponible.
 
 ## 6. Variables CSS
 
@@ -219,7 +215,7 @@ valor literal.
 | `--bp-d2` | `-d2` | `(min-width: 1360px) and (max-width: 1599px)` | Laptop grande / 1440px |
 | `--bp-d3` | `-d3` | `(min-width: 1600px) and (max-width: 1919px)` | Desktop ancho |
 | `--bp-xl` | `-xl` | `(min-width: 1920px)` | Ultra ancho / 4K inicial |
-| `--bp-om`, `--bp-ot`, … | `-om`, `-ot`, … | `only (rango)` | Overrides exclusivos |
+| `--bp-om`, `--bp-ot`, … | `-om`, `-ot`, … | `(min-width: 1360px) and (max-width: 1599px)` | Overrides exclusivos |
 | `--bp-c-*` | `-c*` | `(custom)` | Rangos específicos por componente |
 
 ### Nomenclatura de sufijos responsive
@@ -405,17 +401,15 @@ a { color: var(--color-primario); }
 
 Antes de aplicar cambios complejos, valida:
 
-- El CSS cargado es la última versión.
-- Caché limpia (Joomla + navegador).
-- El error está localizado por dispositivo/navegador y por media query.
+- El asset CSS compilado y cargado corresponde a la última versión.
+- La caché del navegador está limpia.
+- El error está localizado por dispositivo, navegador y media query.
 - Los selectores están bien escritos y apuntan al elemento correcto (errores
   tipográficos típicos: `.c-textofoto` vs `.c-textfoto`).
 - No hay herencias inesperadas ni problemas de especificidad.
 - Si sobrescribes estilos, el selector nuevo tiene autoridad suficiente.
 
-**Caso frecuente — slider que rompe en next/prev:** suele ser un error de
-maquetación en el `media` donde falla. Comprueba que el contenedor del slider se
-muestra correctamente **incluso sin inicializar el JS** (si no, el script de
-slider no lee bien los tamaños y calcula mal las animaciones de `next`/`prev`).
-Asegura dimensiones coherentes del contenedor y de los items en el media que
-falla.
+Para un componente inicializado mediante JavaScript, comprueba primero que el
+contenedor y sus elementos se maquetan correctamente sin inicializarlo. Después,
+verifica sus dimensiones en la media query donde aparece el fallo antes de
+atribuirlo al script.
