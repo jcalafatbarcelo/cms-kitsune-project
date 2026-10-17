@@ -81,6 +81,12 @@ docs/
 La documentación ordinaria del producto se mantiene mediante la skill
 `documentation-maintainer` cuando figure en `.agents/skills/INDEX.md`.
 
+Las convenciones de estilos para contributors se definen en la skill
+[`metodologia-css`](../../.agents/skills/metodologia-css/SKILL.md). Al crear o
+revisar CSS, marcado HTML/Blade/Vue con clases, estilos de componentes,
+animaciones, variables CSS o media queries, se aplica esa skill sin duplicar sus
+reglas en documentación general.
+
 ## Versionado y publicación futura
 
 Cuando existan releases públicas, el portal deberá diferenciar como mínimo la

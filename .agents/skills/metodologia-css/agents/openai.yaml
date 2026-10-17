@@ -1,0 +1,4 @@
+interface:
+  display_name: "Metodología CSS"
+  short_description: "Aplica BEM, OOCSS y estilos responsive"
+  default_prompt: "Usa $metodologia-css para crear o revisar estilos del CMS."

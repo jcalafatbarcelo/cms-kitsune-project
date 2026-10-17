@@ -238,6 +238,12 @@ Composition API; NO parsear Blade con expresiones regulares.
 - `SKILL.md` = fuente de verdad flujo/frontmatter; indice no se edita manual.
   Nueva skill: `skill-creator` valida y regenera indice. NO anunciar/usar skill
   ausente. Crear/mantener skill requiere `/build`, no Spec, y aplicar flujo.
+- Metodologia CSS: antes de crear, modificar o revisar CSS, SCSS, estilos de
+  componentes Vue, atributos `class` en Blade/Vue/HTML, animaciones, variables
+  CSS o media queries, DEBE cargar y aplicar `metodologia-css` desde el indice.
+  DEBE respetar su nomenclatura, orden de stylesheet, enfoque mobile-first,
+  accesibilidad WCAG AA y checklist. La skill NO autoriza cambios funcionales,
+  contratos de templates ni carga de assets fuera de la Spec aplicable.
 - Rutas antiguas `skills/` en Specs historicas => `.agents/skills/` solamente;
   NO reescribir Specs ni mantener copias/symlinks.
 - MCP NO autoriza escritura `/plan` ni elude secretos/permisos/alcance. Evaluar
