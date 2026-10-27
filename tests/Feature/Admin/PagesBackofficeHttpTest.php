@@ -111,6 +111,7 @@ test('menu item optional fields remain validated when present', function () {
 
 test('saving content with invalid embed marker grammar returns a controlled error without persisting', function () {
     $admin = app(SuperAdminBootstrap::class)->create('Administrator', 'admin@example.test', 'Safe-Test-Password9!');
+    $this->withoutVite();
     $this->actingAs($admin, 'web');
     $page = app(PageManager::class)->create('en', 'about', 'About');
 
@@ -128,6 +129,7 @@ test('saving content with invalid embed marker grammar returns a controlled erro
 test('a failed page edit returns to its edit screen with input and leaves translation unchanged', function () {
     $admin = app(SuperAdminBootstrap::class)->create('Administrator', 'admin@example.test', 'Safe-Test-Password9!');
     $page = app(PageManager::class)->create('en', 'about', 'About');
+    $this->withoutVite();
 
     $this->actingAs($admin, 'web')->post('/admin/pages/'.$page->page_id, [
         'locale' => 'en',
