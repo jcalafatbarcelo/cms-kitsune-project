@@ -4,12 +4,14 @@ namespace Modules\Pages\Services;
 
 use Modules\Core\Language\Models\Language;
 use Modules\Core\Language\Models\LanguageSetting;
+use Modules\Pages\Contracts\HomePageLocator;
 use Modules\Pages\Models\Page;
-use Modules\Pages\Models\PageLanguageHome;
 use Modules\Pages\Models\PageTranslation;
 
 class PublicPageUrlResolver
 {
+    public function __construct(private readonly HomePageLocator $homes) {}
+
     public function forPage(int $pageId, string $locale): ?string
     {
         return $this->forPages([$pageId], $locale)[$pageId] ?? null;
@@ -39,7 +41,7 @@ class PublicPageUrlResolver
 
         $default = LanguageSetting::query()->with('frontendDefaultLanguage')->findOrFail(1)->frontendDefaultLanguage;
         $prefix = $language->id === $default->id ? null : $this->canonicalPrefix($language, $activeLanguages);
-        $homes = PageLanguageHome::query()->where('language_id', $language->id)->get()->keyBy('page_translation_id');
+        $homePageId = $this->homes->homePageIds()[$language->id] ?? null;
         $translations = PageTranslation::query()->whereIn('page_id', $pages->keys())->where('language_id', $language->id)->get()->keyBy('page_id');
         $urls = [];
 
@@ -48,7 +50,7 @@ class PublicPageUrlResolver
             if ($translation === null || ! $this->isPublic($pages, $translations, $translation->page_id)) {
                 continue;
             }
-            if ($homes->has($translation->id)) {
+            if ($pageId === $homePageId) {
                 $urls[$pageId] = $prefix === null ? '/' : '/'.$prefix.'/';
 
                 continue;
@@ -58,7 +60,7 @@ class PublicPageUrlResolver
             $page = $pages->get($pageId);
             while ($page !== null) {
                 $ancestorTranslation = $translations->get($page->id);
-                if ($ancestorTranslation === null) {
+                if ($ancestorTranslation === null || $ancestorTranslation->slug === null) {
                     continue 2;
                 }
                 array_unshift($slugs, $ancestorTranslation->slug);

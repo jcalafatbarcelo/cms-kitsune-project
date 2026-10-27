@@ -1,0 +1,9 @@
+{
+    "name": "RichText",
+    "alias": "richtext",
+    "description": "Editorial rich-text content type with a TinyMCE editor.",
+    "keywords": ["content", "rich-text", "editor"],
+    "priority": 15,
+    "providers": ["Modules\\RichText\\Providers\\RichTextServiceProvider"],
+    "files": []
+}

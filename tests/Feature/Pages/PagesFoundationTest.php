@@ -7,8 +7,8 @@ use Modules\Core\Template\Models\CmsTemplate;
 use Modules\Core\Template\Services\TemplateManager;
 use Modules\Core\Template\Services\TemplatePresentationResolver;
 use Modules\Core\Template\Services\TemplateUiCatalogs;
+use Modules\Navigation\Models\MenuItemHome;
 use Modules\Pages\Exceptions\PageOperationException;
-use Modules\Pages\Models\PageLanguageHome;
 use Modules\Pages\Models\PageTranslation;
 use Modules\Pages\Services\PageManager;
 use Modules\Pages\Services\PublicPageResolver;
@@ -34,13 +34,14 @@ afterEach(function () {
     $this->app->forgetInstance(PublicPageResolver::class);
 });
 
-test('a clean installation provides the published English construction home', function () {
-    $home = PageLanguageHome::query()->sole();
-    $translation = PageTranslation::query()->with('page')->findOrFail($home->page_translation_id);
+test('a clean installation provides the published English construction home via a menu item', function () {
+    $home = MenuItemHome::query()->sole();
+    $translation = PageTranslation::query()->with('page')->where('language_id', $home->language_id)->where('page_id', $home->menuItem->page_id)->sole();
 
     expect($translation->title)->toBe('Under construction')
         ->and($translation->is_published)->toBeTrue()
-        ->and($translation->page->is_published)->toBeTrue();
+        ->and($translation->page->is_published)->toBeTrue()
+        ->and($translation->page->content_type)->toBe('system.static');
 
     $this->get('/')
         ->assertOk()
@@ -48,7 +49,7 @@ test('a clean installation provides the published English construction home', fu
         ->assertSee('This site is being prepared.');
 });
 
-test('the first page translation for an installed language becomes its published home', function () {
+test('page creation produces a draft and translation stubs for every installed language', function () {
     $now = now();
     DB::table('languages')->insert([
         'locale' => 'es_ES',
@@ -62,14 +63,22 @@ test('the first page translation for an installed language becomes its published
         'updated_at' => $now,
     ]);
 
-    $translation = app(PageManager::class)->create('es_ES', 'inicio', 'En construcción');
+    $translation = app(PageManager::class)->create('es_ES', 'inicio', 'Inicio');
 
-    expect($translation->is_published)->toBeTrue()
-        ->and($translation->page->fresh()->is_published)->toBeTrue()
-        ->and(PageLanguageHome::query()->where('page_translation_id', $translation->id)->exists())->toBeTrue();
+    expect($translation->is_published)->toBeFalse()
+        ->and($translation->page->fresh()->is_published)->toBeFalse()
+        ->and(PageTranslation::query()->where('page_id', $translation->page_id)->pluck('language_id')->all())
+        ->toHaveCount(2);
+
+    $english = PageTranslation::query()->where('page_id', $translation->page_id)
+        ->where('language_id', DB::table('languages')->where('locale', 'en')->value('id'))->sole();
+
+    expect($english->title)->toBeNull()
+        ->and($english->slug)->toBeNull()
+        ->and($english->is_published)->toBeFalse();
 });
 
-test('automatic home assignment rejects a page whose ancestor is not public in its language', function () {
+test('an incomplete translation without title or slug is not publishable', function () {
     $now = now();
     DB::table('languages')->insert([
         'locale' => 'es_ES',
@@ -82,54 +91,21 @@ test('automatic home assignment rejects a page whose ancestor is not public in i
         'created_at' => $now,
         'updated_at' => $now,
     ]);
-    $pages = app(PageManager::class);
-    $root = PageTranslation::query()->sole();
-    $languageId = DB::table('languages')->where('locale', 'es_ES')->value('id');
+    $page = app(PageManager::class)->create('es_ES', 'inicio', 'Inicio');
+    $englishId = DB::table('languages')->where('locale', 'en')->value('id');
 
-    expect(fn () => $pages->create('es_ES', 'inicio', 'Inicio', $root->page_id))
-        ->toThrow(PageOperationException::class, 'The home page must be publicly available.')
-        ->and(PageLanguageHome::query()->where('language_id', $languageId)->exists())->toBeFalse()
-        ->and(PageTranslation::query()->where('slug', 'inicio')->exists())->toBeFalse();
-
-    $child = $pages->create('en', 'child', 'Child', $root->page_id);
-
-    expect(fn () => $pages->translate($child->page_id, 'es_ES', 'hijo', 'Hijo'))
-        ->toThrow(PageOperationException::class, 'The home page must be publicly available.')
-        ->and(PageLanguageHome::query()->where('language_id', $languageId)->exists())->toBeFalse()
-        ->and(PageTranslation::query()->where('slug', 'hijo')->exists())->toBeFalse();
-});
-
-test('a home page cannot be unpublished without a replacement', function () {
-    $home = PageLanguageHome::query()->sole();
-    $translation = PageTranslation::query()->findOrFail($home->page_translation_id);
-
-    expect(fn () => app(PageManager::class)->unpublish($translation->page_id, 'en'))
-        ->toThrow(PageOperationException::class);
-});
-
-test('an ancestor of the home page cannot be unpublished without a replacement', function () {
-    $pages = app(PageManager::class);
-    $root = PageTranslation::query()->sole();
-    $child = $pages->create('en', 'child', 'Child', $root->page_id);
-    $pages->publish($child->page_id, 'en');
-    $pages->setHome($child->page_id, 'en');
-
-    expect(fn () => $pages->unpublish($root->page_id, 'en'))
-        ->toThrow(PageOperationException::class)
-        ->and($root->fresh()->is_published)->toBeTrue();
+    expect(fn () => app(PageManager::class)->publish($page->page_id, 'en'))
+        ->toThrow(PageOperationException::class, 'incomplete');
 });
 
 test('page creation and translation reject invalid parent and duplicate records with domain errors', function () {
     $pages = app(PageManager::class);
-    $home = PageTranslation::query()->sole();
     $pages->create('en', 'about', 'About');
 
     expect(fn () => $pages->create('en', 'child', 'Child', 999))
         ->toThrow(PageOperationException::class, 'Parent page [999] is not available.')
         ->and(fn () => $pages->create('en', 'about', 'Another about'))
-        ->toThrow(PageOperationException::class, 'Slug [about] is already in use for this language.')
-        ->and(fn () => $pages->translate($home->page_id, 'en', 'another-home', 'Another home'))
-        ->toThrow(PageOperationException::class, "Page [{$home->page_id}] already has a translation for [en].");
+        ->toThrow(PageOperationException::class, 'Slug [about] is already in use for this language.');
 });
 
 test('page commands create deterministic draft pages after the initial home', function () {
@@ -253,10 +229,9 @@ test('a page can inherit the Base presentation while its custom template overrid
     $templates = app(TemplateManager::class);
     $templates->sync();
     $templates->activate('acme');
-    $page = app(PageManager::class)->create('en', 'custom', 'Custom', templateIdentifier: 'acme');
-    app(PageManager::class)->publish($page->page_id, 'en');
+    $templates->setDefault('acme');
 
-    $this->get('/custom')
+    $this->get('/')
         ->assertOk()
         ->assertSee('Custom construction')
         ->assertSee('This site is being prepared.');

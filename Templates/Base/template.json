@@ -5,8 +5,12 @@
     "presentations": [
         "public.page.standard",
         "public.navigation.menu",
+        "public.embed.default",
         "system.auth.login",
         "system.admin.dashboard",
-        "system.admin.audit"
+        "system.admin.audit",
+        "system.admin.pages",
+        "system.admin.pages.edit",
+        "system.admin.menus"
     ]
 }

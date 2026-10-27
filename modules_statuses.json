@@ -1,5 +1,7 @@
 {
     "Core": true,
     "Pages": true,
-    "Navigation": true
+    "Navigation": true,
+    "RichText": true,
+    "TinyMCE": true
 }

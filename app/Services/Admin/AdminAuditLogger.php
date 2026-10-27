@@ -10,11 +10,11 @@ use InvalidArgumentException;
 class AdminAuditLogger
 {
     private const OPERATIONS = [
-        'page.create', 'page.translate', 'page.publish', 'page.unpublish', 'page.set_home',
-        'menu.create', 'menu.item.create', 'menu.item.update', 'menu.item.move', 'menu.item.remove',
+        'page.create', 'page.translate', 'page.publish', 'page.unpublish', 'page.move', 'page.delete', 'page.content.save', 'page.template.change',
+        'menu.create', 'menu.item.create', 'menu.item.update', 'menu.item.move', 'menu.item.remove', 'menu.home.mark', 'menu.home.unmark',
     ];
 
-    private const ENTITY_TYPES = ['page', 'page_translation', 'page_language_home', 'menu', 'menu_item'];
+    private const ENTITY_TYPES = ['page', 'page_translation', 'page_translation_content', 'menu', 'menu_item', 'menu_item_home'];
 
     public function __construct(private readonly Auth $auth) {}
 

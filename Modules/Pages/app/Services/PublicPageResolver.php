@@ -15,7 +15,11 @@ use Modules\Pages\Exceptions\PageOperationException;
 
 class PublicPageResolver
 {
-    public function __construct(private readonly PageManager $pages) {}
+    public function __construct(
+        private readonly PageManager $pages,
+        private readonly EmbedHtmlRenderer $embeds,
+        private readonly ContentTypeRegistry $types,
+    ) {}
 
     public function handle(Request $request, string $path = ''): Response|RedirectResponse|View
     {
@@ -64,6 +68,16 @@ class PublicPageResolver
 
         $locale = $language->locale;
         $templateUi = app(TemplateUiCatalogs::class);
+        $content = null;
+        try {
+            $contentKey = $this->types->get($translation->page->content_type)->contentKey();
+        } catch (PageOperationException) {
+            abort(404);
+        }
+        if ($contentKey !== null) {
+            $content = $this->pages->content($translation->page_id, $locale, $contentKey);
+            $content = $this->embeds->render($content, $presentation->effectiveTemplate, $locale);
+        }
 
         return view(
             $presentation->viewName,
@@ -73,6 +87,7 @@ class PublicPageResolver
                 'presentationTemplate' => $presentation->presentationTemplate,
                 'templateUi' => $templateUi,
                 'locale' => $locale,
+                'content' => $content,
             ],
         );
     }

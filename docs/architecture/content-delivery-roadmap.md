@@ -36,8 +36,8 @@ Fuentes relacionadas:
 | 4 | Fundación de Navigation | Completado | Pages y rutas públicas localizadas completadas | Menús independientes, ítems traducibles y visibilidad según disponibilidad pública |
 | 5 | Backoffice mínimo | Completado | Contrato de presentaciones estable | Acceso de superadministrador por sesión, shell Blade y base segura para los flujos editoriales posteriores |
 | 6 | Auditoría administrativa durable | Completado | Backoffice mínimo completado y primer flujo mutable planificado | Eventos inmutables y transaccionales de Pages, Menus y publicación, consultables por el superadministrador |
-| 7 | Backoffice de Pages | Previsto | Auditoría durable y fundación de Pages | Gestión web de páginas, traducciones, jerarquía, publicación y asignación de template |
-| 8 | Backoffice de Menus | Previsto | Auditoría durable y fundación de Navigation | Gestión web de menús e ítems con referencia a Pages y aislamiento por idioma |
+| 7 | Backoffice de Pages | Completado | Auditoría durable y fundación de Pages | Gestión web de páginas, traducciones, jerarquía, publicación, tipos de contenido y contenido editorial |
+| 8 | Backoffice de Menus | Completado | Auditoría durable y fundación de Navigation | Gestión web de menús e ítems con referencia a Pages, selección de home por ítem y aislamiento por idioma |
 | 9 | Fundación de PageBuilder | Previsto | Backoffice de Pages y Menus y contrato de presentación estables | Bloques declarativos, valores por instancia y locale, validación y renderizado Blade desde el backoffice |
 | 10 | Extensiones de CMS Templates | Previsto | PageBuilder o una necesidad de presentación comprobable | UI catalogs propios, configuración, assets, presentaciones y bloques aportados por templates |
 | 11 | Tematización de vistas de sistema | Previsto | Módulo funcional y contrato de cada vista disponibles | Apariencia intercambiable de login, recuperación o backoffice sin alterar sus rutas, autorización o lógica |
@@ -78,6 +78,12 @@ las mutaciones de Pages, Menus y publicación como requisito previo a exponerlas
 desde la web. Los backoffice de Pages y Menus se planifican después de la auditoría
 y antes de PageBuilder, porque los bloques editoriales necesitan páginas y
 ubicaciones navegables ya gestionables.
+
+`SPEC-pages-backoffice` está completada. Combina el backoffice de Pages y el de
+Menus, traslada la selección de home a un ítem de menú y entrega el primer tipo de
+contenido editorial `rich-text` con TinyMCE, sanitización en servidor y el contrato
+de elementos insertables (embeds). La home deja de autoasignarse y ninguna Page
+creada por el usuario se publica automáticamente.
 
 ## Dependencias de localización
 

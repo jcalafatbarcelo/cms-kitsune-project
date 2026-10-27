@@ -52,3 +52,19 @@ construye URLs ni consulta la jerarquía o traducciones internas de Pages.
 
 Navigation agrupa los `page_id` únicos del menú y solicita sus URLs en una única
 operación `forPages()` antes de recorrer el árbol.
+
+## Home por ítem de menú
+
+La home de cada idioma se marca desde un ítem de menú, con una única home por
+idioma en todo el sistema y con independencia del menú al que pertenezca el ítem.
+Marcar un ítem como home exige que su Page tenga una traducción pública y
+disponible en el idioma del ítem, incluidos sus ancestros. Retirar la home de un
+idioma es una acción explícita con confirmación: la raíz de ese idioma pasa a
+responder `404` mientras no exista una home asignada.
+
+Al recibir la raíz, Pages resuelve el idioma efectivo y consulta a Navigation la
+Page marcada como home para ese idioma; Navigation busca el ítem y devuelve su
+Page de destino. Para rutas con slugs, Navigation no interviene.
+
+Despublicar la traducción de la home, despublicar un ancestro que la haga
+inaccesible o borrar la Page home se bloquea.

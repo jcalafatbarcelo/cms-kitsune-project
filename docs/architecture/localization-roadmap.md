@@ -227,6 +227,12 @@ predeterminado de frontend no lleva prefijo y los idiomas secundarios usan sus
 prefijos canónicos, según la
 [SPEC-public-localized-routes](../specs/SPEC-public-localized-routes.md).
 
+`SPEC-pages-backoffice` trasladó la selección de home a un ítem de menú (una por
+idioma) y eliminó la auto-publicación de la primera traducción. El contenido
+editorial `rich-text` aplica fallback de contenido por clave reutilizando el modo
+global de `UI catalogs` y el idioma predeterminado de frontend, sin convertir las
+claves editoriales en claves de interfaz.
+
 El contenido de páginas y PageBuilder se mantendrá separado de los `UI catalogs`.
 Una plantilla del PageBuilder define claves de campos; cada instancia mantiene
 sus propios valores por locale. Compartir una clave de campo no comparte el
