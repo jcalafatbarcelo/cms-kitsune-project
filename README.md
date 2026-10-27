@@ -7,10 +7,11 @@ el ecosistema Laravel. El proyecto persigue un producto sostenible, desacoplado
 y extensible, construido mediante **Spec Driven Development (SDD)**.
 
 > [!WARNING]
-> **Este repositorio se encuentra en desarrollo inicial.** Ya dispone de un
-> bootstrap ejecutable, el módulo Core con fundación estática de idiomas y
-> controles de calidad. Páginas, PageBuilder, medios, menús y administración web
-> siguen previstos y no deben interpretarse como disponibles.
+> **Este repositorio se encuentra en desarrollo inicial.** Ya dispone de los
+> módulos Core, Pages y Navigation, rutas públicas localizadas y un backoffice
+> protegido para gestionar Pages y Menus. PageBuilder, medios y la gestión
+> avanzada de usuarios siguen previstos y no deben interpretarse como
+> disponibles.
 
 ## Objetivos principales
 
@@ -52,10 +53,10 @@ definida en Specs concretas y aprobadas.
   Las versiones legacy y las ramas de innovación quedan fuera de soporte.
 - **Infraestructura modular disponible:** `nWidart/laravel-modules` 13 para
   descubrir y cargar módulos. Core registra idiomas, predeterminados globales y
-  `UI catalogs`; los demás módulos de dominio todavía no están implementados.
-- **Frontend previsto:** Blade como base del backoffice y del sitio público, con
-  Vue 3 y Composition API para el PageBuilder y otras islas interactivas. Vue
-  todavía no está incorporado al proyecto.
+  `UI catalogs`; Pages y Navigation gestionan contenido, rutas y menús.
+- **Frontend disponible y previsto:** Blade estructura el backoffice y el sitio
+  público. Vue 3 y Composition API quedan reservados para el PageBuilder y otras
+  islas interactivas futuras; Vue todavía no está incorporado al proyecto.
 - **Assets previstos:** Vue compartido entre módulos y cargado bajo demanda,
   con Vite para su compilación; sin SPA ni Inertia por defecto.
 
@@ -88,6 +89,12 @@ el formato de almacenamiento de su contenido.
   contenido localizado, con su estado de avance.
 - [`docs/administration/languages.md`](docs/administration/languages.md):
   operación de idiomas mediante los comandos Artisan disponibles.
+- [`docs/administration/pages-and-menus.md`](docs/administration/pages-and-menus.md):
+  gestión de Pages, Menus, publicación, home y contenido enriquecido desde el
+  backoffice.
+- [`docs/developers/pages.md`](docs/developers/pages.md) y
+  [`docs/developers/navigation.md`](docs/developers/navigation.md): contratos y
+  operación técnica de Pages y Navigation.
 - [`docs/developers/ui-catalogs.md`](docs/developers/ui-catalogs.md): contrato,
   validación y resolución de textos estáticos JSON.
 - [`docs/getting-started/installation.md`](docs/getting-started/installation.md):
@@ -170,8 +177,9 @@ GitHub Actions en Pull Requests, pushes a `main`, diariamente y bajo demanda.
 
 El repositorio contiene el bootstrap ejecutable de Laravel, configuración de
 Pest, compilación frontend con Vite, auditorías automatizadas de dependencias y
-el módulo Core con registro de idiomas, `UI catalogs`, fallback y administración
-manual mediante Artisan. Los módulos de páginas, medios, menús y PageBuilder se
+los módulos Core, Pages y Navigation. El superadministrador puede gestionar
+Pages, traducciones, contenido `rich-text`, publicación, menús e ítems desde el
+backoffice; la home se selecciona desde un ítem de menú. PageBuilder y medios se
 incorporarán mediante Specs concretas y aprobadas.
 
 La documentación canónica se mantendrá en el repositorio. La selección de un
@@ -181,4 +189,4 @@ para realizar una prueba representativa.
 
 ## Licencia
 
-Este proyecto se distribuye bajo la [licencia MIT](LICENSE).
+Este proyecto se distribuye bajo la [GNU GPL v2 o posterior](LICENSE).
