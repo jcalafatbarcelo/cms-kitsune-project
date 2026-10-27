@@ -1,0 +1,7 @@
+{
+    "name": "kitsune/tinymce-module",
+    "description": "TinyMCE editor module for CMS Kitsune.",
+    "type": "library",
+    "license": "GPL-2.0-or-later",
+    "autoload": {"psr-4": {"Modules\\TinyMCE\\": "app/"}}
+}

@@ -10,10 +10,15 @@ use Modules\Core\Language\Models\Language;
 use Modules\Navigation\Exceptions\NavigationOperationException;
 use Modules\Navigation\Models\Menu;
 use Modules\Navigation\Models\MenuItem;
+use Modules\Navigation\Models\MenuItemHome;
+use Modules\Pages\Services\PublicPageUrlResolver;
 
 class MenuManager
 {
-    public function __construct(private readonly AdminAuditLogger $audit) {}
+    public function __construct(
+        private readonly AdminAuditLogger $audit,
+        private readonly PublicPageUrlResolver $pages,
+    ) {}
 
     public function create(string $identifier): Menu
     {
@@ -115,12 +120,59 @@ class MenuManager
             if (MenuItem::query()->where('parent_id', $item->id)->lockForUpdate()->exists()) {
                 throw new NavigationOperationException('A menu item with children cannot be removed.');
             }
+            if (MenuItemHome::query()->where('menu_item_id', $item->id)->lockForUpdate()->exists()) {
+                throw new NavigationOperationException('A menu item marked as home cannot be removed.');
+            }
             $siblings = $this->siblings($item->menu_id, $item->language_id, $item->parent_id)->reject(fn (MenuItem $sibling) => $sibling->id === $item->id)->values();
             $before = $this->itemState($item);
             $item->delete();
             $this->closeGap($siblings);
             $this->audit->record('menu.item.remove', 'menu_item', $item->id, $before, null);
         });
+    }
+
+    public function markHome(int $itemId): MenuItem
+    {
+        return $this->transaction(function () use ($itemId) {
+            $item = $this->item($itemId);
+            $language = Language::query()->lockForUpdate()->findOrFail($item->language_id);
+            $this->lockMenu($item->menu_id);
+            if ($this->pages->forPage($item->page_id, $language->locale) === null) {
+                throw new NavigationOperationException('The home page must be publicly available.');
+            }
+            $before = MenuItemHome::query()->find($language->id);
+            MenuItemHome::query()->updateOrCreate(['language_id' => $language->id], ['menu_item_id' => $item->id]);
+            $after = MenuItemHome::query()->findOrFail($language->id);
+            if ($before?->menu_item_id !== $after->menu_item_id) {
+                $this->audit->record('menu.home.mark', 'menu_item_home', $language->id, $this->homeState($before), $this->homeState($after));
+            }
+
+            return $item;
+        });
+    }
+
+    public function unmarkHome(string $locale): void
+    {
+        $this->transaction(function () use ($locale) {
+            $language = $this->language($locale);
+            $before = MenuItemHome::query()->lockForUpdate()->find($language->id);
+            if ($before === null) {
+                return;
+            }
+            $before->delete();
+            $this->audit->record('menu.home.unmark', 'menu_item_home', $language->id, $this->homeState($before), null);
+        });
+    }
+
+    public function homeItem(string $locale): ?MenuItem
+    {
+        $language = Language::query()->where('locale', $locale)->first();
+        if ($language === null) {
+            return null;
+        }
+        $home = MenuItemHome::query()->find($language->id);
+
+        return $home === null ? null : MenuItem::query()->find($home->menu_item_id);
     }
 
     private function transaction(callable $operation): mixed
@@ -252,6 +304,15 @@ class MenuManager
             'page_id' => $item->page_id,
             'label' => $item->label,
             'position' => $item->position,
+        ];
+    }
+
+    /** @return array<string, int>|null */
+    private function homeState(?MenuItemHome $home): ?array
+    {
+        return $home === null ? null : [
+            'language_id' => $home->language_id,
+            'menu_item_id' => $home->menu_item_id,
         ];
     }
 }

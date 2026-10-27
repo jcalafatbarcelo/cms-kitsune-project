@@ -2,6 +2,7 @@
     "name": "kitsune/navigation",
     "description": "Localized visual navigation trees for CMS Pages.",
     "type": "laravel-module",
+    "license": "GPL-2.0-or-later",
     "autoload": {
         "psr-4": {
             "Modules\\Navigation\\": "app/"

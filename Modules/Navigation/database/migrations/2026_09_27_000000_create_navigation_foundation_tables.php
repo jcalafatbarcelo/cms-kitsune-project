@@ -26,13 +26,46 @@ return new class extends Migration
             $table->timestamps();
             $table->index(['menu_id', 'language_id', 'parent_id', 'position']);
         });
+        Schema::create('menu_item_homes', function (Blueprint $table) {
+            $table->foreignId('language_id')->primary()->constrained('languages')->restrictOnDelete();
+            $table->foreignId('menu_item_id')->unique()->constrained('menu_items')->restrictOnDelete();
+            $table->timestamps();
+        });
         $this->createPositionChecks();
+
+        $language = DB::table('languages')->where('locale', 'en')->first();
+        $translation = DB::table('page_translations')->where('language_id', $language->id)->where('slug', 'home')->first();
+        if ($translation !== null) {
+            $now = now();
+            $menuId = DB::table('menus')->insertGetId([
+                'identifier' => 'home',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+            $itemId = DB::table('menu_items')->insertGetId([
+                'menu_id' => $menuId,
+                'language_id' => $language->id,
+                'parent_id' => null,
+                'page_id' => $translation->page_id,
+                'label' => 'Home',
+                'position' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+            DB::table('menu_item_homes')->insert([
+                'language_id' => $language->id,
+                'menu_item_id' => $itemId,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+        }
     }
 
     public function down(): void
     {
         DB::statement('DROP TRIGGER IF EXISTS menu_items_position_insert');
         DB::statement('DROP TRIGGER IF EXISTS menu_items_position_update');
+        Schema::dropIfExists('menu_item_homes');
         Schema::dropIfExists('menu_items');
         Schema::dropIfExists('menus');
     }

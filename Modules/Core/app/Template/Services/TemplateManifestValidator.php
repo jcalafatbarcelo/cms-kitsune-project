@@ -16,9 +16,13 @@ class TemplateManifestValidator
             'page.home.under-construction.message',
         ],
         'public.navigation.menu' => ['navigation.menu.label'],
+        'public.embed.default' => ['embed.default.placeholder'],
         'system.auth.login' => ['admin.login.title', 'admin.login.email', 'admin.login.password', 'admin.login.submit', 'admin.login.failed', 'admin.login.throttled'],
         'system.admin.dashboard' => ['admin.dashboard.title', 'admin.dashboard.logout', 'admin.diagnostics.warning'],
         'system.admin.audit' => ['admin.audit.title', 'admin.audit.empty', 'admin.audit.operation', 'admin.audit.entity', 'admin.audit.from', 'admin.audit.until', 'admin.audit.filter', 'admin.audit.occurred-at', 'admin.audit.actor', 'admin.audit.origin', 'admin.audit.before', 'admin.audit.after'],
+        'system.admin.pages' => ['admin.pages.title', 'admin.pages.empty', 'admin.pages.create', 'admin.pages.slug', 'admin.pages.heading', 'admin.pages.parent', 'admin.pages.type', 'admin.pages.template', 'admin.pages.actions', 'admin.pages.publish', 'admin.pages.unpublish', 'admin.pages.move', 'admin.pages.delete', 'admin.pages.home', 'admin.pages.language'],
+        'system.admin.pages.edit' => ['admin.pages.edit', 'admin.pages.save', 'admin.pages.content'],
+        'system.admin.menus' => ['admin.menus.title', 'admin.menus.create', 'admin.menus.items', 'admin.menus.mark-home', 'admin.menus.unmark-home'],
     ];
 
     public function __construct(private readonly string $root) {}

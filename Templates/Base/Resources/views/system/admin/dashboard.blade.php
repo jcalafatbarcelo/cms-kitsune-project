@@ -11,7 +11,11 @@
     @if($errorDetails)
         <p role="alert">{{ $text('admin.diagnostics.warning') }}</p>
     @endif
-    <p><a href="{{ route('admin.audit') }}">{{ $text('admin.audit.title') }}</a></p>
+    <p>
+        <a href="{{ route('admin.pages.index') }}">{{ $text('admin.pages.title') }}</a> ·
+        <a href="{{ route('admin.menus.index') }}">{{ $text('admin.menus.title') }}</a> ·
+        <a href="{{ route('admin.audit') }}">{{ $text('admin.audit.title') }}</a>
+    </p>
     <form method="POST" action="{{ route('admin.logout') }}">
         @csrf
         <button type="submit">{{ $text('admin.dashboard.logout') }}</button>

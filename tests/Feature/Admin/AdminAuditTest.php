@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Mockery;
+use Modules\Core\Language\Models\Language;
 use Modules\Navigation\Services\MenuManager;
 use Modules\Pages\Models\PageTranslation;
 use Modules\Pages\Services\PageManager;
@@ -22,17 +23,21 @@ test('page and menu mutations write one scoped audit event with allowed snapshot
         'locale' => 'es_ES', 'url_prefix' => 'es-es', 'name' => 'Spanish', 'native_name' => 'Spanish',
         'text_direction' => 'ltr', 'is_active' => true, 'installed_at' => now(), 'created_at' => now(), 'updated_at' => now(),
     ]);
+    $pages->addLanguageStubs(Language::query()->where('locale', 'es_ES')->firstOrFail());
     $translation = $pages->translate($created->page_id, 'es_ES', 'acerca-de', 'Acerca de');
     $pages->publish($created->page_id, 'en');
-    $pages->setHome($created->page_id, 'en');
-    $replacement = $pages->create('en', 'contact', 'Contact');
-    $pages->publish($replacement->page_id, 'en');
-    $pages->setHome($replacement->page_id, 'en');
-    $pages->unpublish($created->page_id, 'en');
+
     $menus = app(MenuManager::class);
     $menu = $menus->create('main-menu');
-    $item = $menus->createItem('main-menu', 'en', $replacement->page_id, 'Home');
-    $menus->createItem('main-menu', 'en', $replacement->page_id, 'Second');
+    $item = $menus->createItem('main-menu', 'en', $created->page_id, 'Home');
+    $menus->markHome($item->id);
+
+    $replacement = $pages->create('en', 'contact', 'Contact');
+    $pages->publish($replacement->page_id, 'en');
+    $replacementHome = $menus->createItem('main-menu', 'en', $replacement->page_id, 'Contact');
+    $menus->markHome($replacementHome->id);
+    $pages->unpublish($created->page_id, 'en');
+
     $menus->updateItem($item->id, $created->page_id, 'About');
     $menus->moveItem($item->id, 2);
     $menus->removeItem($item->id);
@@ -40,7 +45,7 @@ test('page and menu mutations write one scoped audit event with allowed snapshot
     $events = AdminAuditEvent::query()->orderBy('id')->get();
 
     expect($events->pluck('operation')->all())->toContain(
-        'page.create', 'page.translate', 'page.publish', 'page.unpublish', 'page.set_home',
+        'page.create', 'page.translate', 'page.publish', 'page.unpublish', 'menu.home.mark',
         'menu.create', 'menu.item.create', 'menu.item.update', 'menu.item.move', 'menu.item.remove',
     )->and($events->every(fn (AdminAuditEvent $event) => $event->actor_type === 'console' && $event->origin === 'console'))
         ->toBeTrue()
@@ -50,14 +55,14 @@ test('page and menu mutations write one scoped audit event with allowed snapshot
             'title' => 'About',
             'presentation_key' => 'public.page.standard',
         ])
-        ->and($events->firstWhere('operation', 'menu.item.update')->before_state)->toMatchArray(['label' => 'Home', 'page_id' => $replacement->page_id])
+        ->and($events->firstWhere('operation', 'menu.item.update')->before_state)->toMatchArray(['label' => 'Home', 'page_id' => $created->page_id])
         ->and($events->firstWhere('operation', 'menu.item.update')->after_state)->toMatchArray(['label' => 'About', 'page_id' => $created->page_id])
         ->and($events->firstWhere('operation', 'menu.item.remove')->after_state)->toBeNull()
         ->and($events->where('operation', 'page.create'))->toHaveCount(2)
         ->and($events->where('operation', 'page.translate'))->toHaveCount(1)
         ->and($events->where('operation', 'page.publish'))->toHaveCount(2)
         ->and($events->where('operation', 'page.unpublish'))->toHaveCount(1)
-        ->and($events->where('operation', 'page.set_home'))->toHaveCount(2)
+        ->and($events->where('operation', 'menu.home.mark'))->toHaveCount(2)
         ->and($events->where('operation', 'menu.create'))->toHaveCount(1)
         ->and($events->where('operation', 'menu.item.create'))->toHaveCount(2)
         ->and($events->where('operation', 'menu.item.update'))->toHaveCount(1)

@@ -1,0 +1,1 @@
+<span data-embed-type="{{ $embed->type }}" data-embed-variant="{{ $embed->variant }}"@if($embed->degraded) data-embed-degraded="1"@endif>{{ $templateUi->text($effectiveTemplate, $presentationTemplate, 'embed.default.placeholder', $locale) }}</span>

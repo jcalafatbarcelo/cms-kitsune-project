@@ -2,9 +2,9 @@
 
 ## Alcance disponible
 
-El backoffice ofrece únicamente el acceso autenticado y un panel inicial. No
-incluye todavía edición de contenido, idiomas, overrides, Pages, Navigation,
-medios ni PageBuilder. El panel no enlaza a recursos que aún no existen.
+El backoffice ofrece el acceso autenticado, un panel inicial y la gestión de
+Pages y Menus. No incluye todavía la gestión de idiomas, overrides, medios ni
+PageBuilder. El panel enlaza a las pantallas de Pages, Menus y auditoría.
 
 ## Iniciar sesión
 
@@ -46,5 +46,6 @@ publicar. Véase
   límite de intentos.
 - **El navegador fuerza HTTPS**: es el comportamiento esperado en entornos
   publicados. Solo `local` y `testing` admiten HTTP.
-- **No veo menús de gestión**: es lo previsto en este incremento. El panel es un
-  shell sin operaciones mutables.
+- **No veo menús de gestión**: comprobar que el usuario autenticado es el
+  superadministrador. Los usuarios sin esa condición no acceden a las pantallas
+  de gestión.

@@ -98,6 +98,29 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Auditoría administrativa durable e inmutable para las mutaciones de Pages y
   Navigation, con actor histórico minimizado, origen cerrado, consulta Blade
   autorizada y presentación `system.admin.audit` de Base.
+- Backoffice de Pages y Menus con pantallas Blade protegidas para el
+  superadministrador y protección CSRF: crear, editar y organizar Pages y sus
+  traducciones, gestionar menús e ítems, publicar, despublicar, mover y borrar.
+- Selección de home por ítem de menú mediante la tabla `menu_item_homes`: una
+  única home por idioma en todo el sistema, marcada y retirada desde Navigation
+  con confirmación explícita y bloqueos de despublicación, borrado y ancestros.
+- Eliminación de la auto-publicación de la primera traducción y del modelo
+  `page_language_homes`; la única Page publicada por instalación es
+  "Under construction", sembrada mediante un menú y un ítem de home.
+- Tipos de contenido por Page (`content_type` inmutable) registrados desde
+  módulos instalados, con el tipo editorial `rich-text` y el tipo de sistema
+  `system.static` no seleccionable.
+- Contenido editorial persistido en `page_translation_contents`, con clave
+  jerárquica, unicidad por traducción y clave, columna `longtext`, límite de
+  4 MiB y fallback de contenido por clave según el modo global y el idioma
+  predeterminado de frontend.
+- Sanitización determinista de HTML en servidor con `symfony/html-sanitizer`,
+  módulo TinyMCE separado del tipo y del módulo RichText, degradación a
+  `textarea` sin sanitizador y bloqueo del guardado sin sanitizador servidor.
+- Contrato de elementos insertables (embeds) con marcador tipado `cms-embed`,
+  manifiesto declarativo, resolver de dominio y degradación controlada.
+- Assets del editor TinyMCE compilados con Vite y cargados únicamente en las
+  pantallas de edición del backoffice; la web pública no los descarga.
 
 ### Modificado
 
@@ -152,6 +175,9 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
   los tres motores.
 - Documentada la re-sincronización `php artisan cms:template:sync` como paso
   obligatorio tras modificar el manifiesto de un template desplegado.
+- Cambiada la licencia del CMS de MIT a `GPL-2.0-or-later` (GNU GPL v2 o
+  posterior) en `LICENSE`, `composer.json`, los `composer.json` de los módulos y
+  `package.json`, para permitir distribuir TinyMCE 8 sin licencia comercial.
 
 ### Fijado
 
@@ -187,4 +213,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-10-17 10:17 UTC
+Fecha de última modificación: 2026-10-25 18:35 UTC

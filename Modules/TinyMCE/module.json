@@ -1,0 +1,9 @@
+{
+    "name": "TinyMCE",
+    "alias": "tinymce",
+    "description": "TinyMCE editor with server-side HTML sanitization.",
+    "keywords": ["editor", "tinymce", "sanitization"],
+    "priority": 16,
+    "providers": ["Modules\\TinyMCE\\Providers\\TinyMCEServiceProvider"],
+    "files": []
+}

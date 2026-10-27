@@ -77,25 +77,26 @@ test('menus have immutable technical identifiers and localized trees are isolate
 test('item commands maintain contiguous positions, move subtrees, and reject invalid mutations atomically', function () {
     $home = DB::table('page_translations')->where('language_id', DB::table('languages')->where('locale', 'en')->value('id'))->sole();
     $this->artisan('cms:menu:create', ['identifier' => 'main-menu'])->assertSuccessful();
+    $menuId = DB::table('menus')->where('identifier', 'main-menu')->value('id');
     $this->artisan('cms:menu:item:create', ['menu' => 'main-menu', 'locale' => 'en', 'page' => $home->page_id, 'label' => 'One'])->assertSuccessful();
-    $first = MenuItem::query()->sole();
+    $first = MenuItem::query()->where('menu_id', $menuId)->where('label', 'One')->sole();
     $secondPage = navigationPage('second');
     $this->artisan('cms:menu:item:create', ['menu' => 'main-menu', 'locale' => 'en', 'page' => $secondPage, 'label' => 'Two', '--position' => 1])->assertSuccessful();
-    $second = MenuItem::query()->where('label', 'Two')->sole();
+    $second = MenuItem::query()->where('menu_id', $menuId)->where('label', 'Two')->sole();
     $child = app(MenuManager::class)->createItem('main-menu', 'en', $home->page_id, 'Child', $first->id);
 
     $this->artisan('cms:menu:item:move', ['item' => $first->id, 'position' => 2])->assertSuccessful();
 
-    expect(MenuItem::query()->whereNull('parent_id')->orderBy('position')->pluck('label')->all())->toBe(['Two', 'One'])
+    expect(MenuItem::query()->where('menu_id', $menuId)->whereNull('parent_id')->orderBy('position')->pluck('label')->all())->toBe(['Two', 'One'])
         ->and(fn () => app(MenuManager::class)->moveItem($first->id, 1, $child->id))->toThrow(NavigationOperationException::class)
         ->and(fn () => app(MenuManager::class)->createItem('main-menu', 'en', $home->page_id, 'Invalid', null, 4))->toThrow(NavigationOperationException::class)
-        ->and(MenuItem::query()->whereNull('parent_id')->orderBy('position')->pluck('position')->all())->toBe([1, 2]);
+        ->and(MenuItem::query()->where('menu_id', $menuId)->whereNull('parent_id')->orderBy('position')->pluck('position')->all())->toBe([1, 2]);
 
     $this->artisan('cms:menu:item:remove', ['item' => $first->id])->expectsOutputToContain('cannot be removed')->assertFailed();
     $this->artisan('cms:menu:item:move', ['item' => $child->id, 'position' => 1])->assertSuccessful();
     $this->artisan('cms:menu:item:remove', ['item' => $first->id])->assertSuccessful();
 
-    expect(MenuItem::query()->whereNull('parent_id')->orderBy('position')->pluck('label')->all())->toBe(['Child', 'Two']);
+    expect(MenuItem::query()->where('menu_id', $menuId)->whereNull('parent_id')->orderBy('position')->pluck('label')->all())->toBe(['Child', 'Two']);
 });
 
 test('item update changes its localized label and destination without changing its tree placement', function () {
@@ -129,7 +130,7 @@ test('database persistence rejects a menu item position below one', function () 
         'created_at' => now(),
         'updated_at' => now(),
     ]))->toThrow(QueryException::class)
-        ->and(MenuItem::query()->count())->toBe(0);
+        ->and(MenuItem::query()->where('menu_id', $menu->id)->count())->toBe(0);
 });
 
 test('the public resolver consumes Pages canonical URLs and filters unavailable subtrees', function () {
@@ -142,8 +143,10 @@ test('the public resolver consumes Pages canonical URLs and filters unavailable 
     $menus->createItem('main-menu', 'en', $home->page_id, 'Hidden child', $parent->id);
     $menus->createItem('main-menu', 'en', $home->page_id, 'Home');
 
+    $menuId = DB::table('menus')->where('identifier', 'main-menu')->value('id');
+
     expect(app(PublicMenuResolver::class)->forMenu('main-menu', 'en'))->toBe([
-        ['id' => MenuItem::query()->where('label', 'Home')->sole()->id, 'label' => 'Home', 'url' => '/', 'children' => []],
+        ['id' => MenuItem::query()->where('menu_id', $menuId)->where('label', 'Home')->sole()->id, 'label' => 'Home', 'url' => '/', 'children' => []],
     ])
         ->and(fn () => app(PublicMenuResolver::class)->forMenu('main-menu', 'missing'))->toThrow(NavigationOperationException::class);
 

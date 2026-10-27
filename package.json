@@ -3,6 +3,7 @@
     "name": "kitsune-cms",
     "description": "CMS modular multiidioma (TFM) construido con Laravel y Vue 3.",
     "private": true,
+    "license": "GPL-2.0-or-later",
     "type": "module",
     "scripts": {
         "build": "vite build",
@@ -17,5 +18,8 @@
     },
     "optionalDependencies": {
         "@laravel/multiplex": "^0.4.5"
+    },
+    "dependencies": {
+        "tinymce": "^8.10.0"
     }
 }

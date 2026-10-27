@@ -2,6 +2,9 @@
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Language\Models\Language;
+use Modules\Navigation\Models\Menu;
+use Modules\Navigation\Services\MenuManager;
 use Modules\Pages\Services\PageManager;
 use Modules\Pages\Services\PublicPageUrlResolver;
 
@@ -22,6 +25,15 @@ function urlResolverLanguage(string $locale, string $prefix): void
         'created_at' => $now,
         'updated_at' => $now,
     ]);
+    app(PageManager::class)->addLanguageStubs(Language::query()->where('locale', $locale)->firstOrFail());
+}
+
+function urlResolverMarkHome(string $locale, int $pageId): void
+{
+    $menus = app(MenuManager::class);
+    $menu = Menu::query()->where('identifier', 'home')->first() ?? $menus->create('home');
+    $item = $menus->createItem('home', $locale, $pageId, 'Home');
+    $menus->markHome($item->id);
 }
 
 test('the Pages URL contract returns only canonical URLs for publicly available pages', function () {
@@ -29,8 +41,10 @@ test('the Pages URL contract returns only canonical URLs for publicly available 
     $pages = app(PageManager::class);
     $englishHome = DB::table('page_translations')->where('language_id', DB::table('languages')->where('locale', 'en')->value('id'))->sole();
     $pages->translate($englishHome->page_id, 'es_ES', 'inicio', 'Inicio');
+    $pages->publish($englishHome->page_id, 'es_ES');
     $child = $pages->create('es_ES', 'equipo', 'Equipo', $englishHome->page_id);
     $pages->publish($child->page_id, 'es_ES');
+    urlResolverMarkHome('es_ES', $englishHome->page_id);
 
     $resolver = app(PublicPageUrlResolver::class);
 

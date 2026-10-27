@@ -23,6 +23,7 @@ return new class extends Migration
             $table->boolean('uses_explicit_template')->default(false);
             $table->foreignId('explicit_template_id')->nullable()->constrained('cms_templates')->restrictOnDelete();
             $table->string('presentation_key', 100)->default('public.page.standard');
+            $table->string('content_type', 100);
             $table->boolean('is_published')->default(false);
             $table->timestamps();
         });
@@ -30,32 +31,49 @@ return new class extends Migration
             $table->id();
             $table->foreignId('page_id')->constrained('pages')->restrictOnDelete();
             $table->foreignId('language_id')->constrained('languages')->restrictOnDelete();
-            $table->string('title', 255);
-            $table->string('slug', 100);
+            $table->string('title', 255)->nullable();
+            $table->string('slug', 100)->nullable();
             $table->boolean('is_published')->default(false);
             $table->timestamps();
             $table->unique(['page_id', 'language_id']);
             $table->unique(['language_id', 'slug']);
         });
-        Schema::create('page_language_homes', function (Blueprint $table) {
-            $table->foreignId('language_id')->primary()->constrained('languages')->restrictOnDelete();
-            $table->foreignId('page_translation_id')->unique()->constrained('page_translations')->restrictOnDelete();
+        Schema::create('page_translation_contents', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('page_translation_id')->constrained('page_translations')->restrictOnDelete();
+            $table->string('key', 255);
+            $table->longText('content');
             $table->timestamps();
+            $table->unique(['page_translation_id', 'key']);
         });
         $this->createTemplateSelectionTriggers();
 
         $language = DB::table('languages')->where('locale', 'en')->first();
         $now = now();
-        $pageId = DB::table('pages')->insertGetId(['uses_explicit_template' => false, 'presentation_key' => 'public.page.standard', 'is_published' => true, 'created_at' => $now, 'updated_at' => $now]);
-        $translationId = DB::table('page_translations')->insertGetId(['page_id' => $pageId, 'language_id' => $language->id, 'title' => 'Under construction', 'slug' => 'home', 'is_published' => true, 'created_at' => $now, 'updated_at' => $now]);
-        DB::table('page_language_homes')->insert(['language_id' => $language->id, 'page_translation_id' => $translationId, 'created_at' => $now, 'updated_at' => $now]);
+        $pageId = DB::table('pages')->insertGetId([
+            'uses_explicit_template' => false,
+            'presentation_key' => 'public.page.standard',
+            'content_type' => 'system.static',
+            'is_published' => true,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        DB::table('page_translations')->insert([
+            'page_id' => $pageId,
+            'language_id' => $language->id,
+            'title' => 'Under construction',
+            'slug' => 'home',
+            'is_published' => true,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
     }
 
     public function down(): void
     {
         DB::statement('DROP TRIGGER IF EXISTS pages_template_selection_insert');
         DB::statement('DROP TRIGGER IF EXISTS pages_template_selection_update');
-        Schema::dropIfExists('page_language_homes');
+        Schema::dropIfExists('page_translation_contents');
         Schema::dropIfExists('page_translations');
         Schema::dropIfExists('pages');
     }

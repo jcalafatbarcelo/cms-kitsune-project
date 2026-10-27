@@ -6,12 +6,12 @@ use Modules\Pages\Services\PageManager;
 
 class CreatePageCommand extends PageCommand
 {
-    protected $signature = 'cms:page:create {locale} {slug} {title} {--parent=} {--template=}';
+    protected $signature = 'cms:page:create {locale} {slug} {title} {--parent=} {--template=} {--type=rich-text}';
 
     public function handle(PageManager $pages): int
     {
         return $this->runSafely(function () use ($pages) {
-            $translation = $pages->create($this->argument('locale'), $this->argument('slug'), $this->argument('title'), $this->option('parent') === null ? null : (int) $this->option('parent'), $this->option('template'));
+            $translation = $pages->create($this->argument('locale'), $this->argument('slug'), $this->argument('title'), $this->option('parent') === null ? null : (int) $this->option('parent'), $this->option('template'), $this->option('type'));
             $this->components->info("Page [{$translation->page_id}] created.");
         });
     }

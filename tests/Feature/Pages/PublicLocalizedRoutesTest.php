@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Modules\Core\Language\Exceptions\LanguageOperationException;
 use Modules\Core\Language\Services\LanguageManager;
+use Modules\Navigation\Models\Menu;
+use Modules\Navigation\Services\MenuManager;
 use Modules\Pages\Exceptions\PageOperationException;
 use Modules\Pages\Services\PageManager;
 use Modules\Pages\Services\PublicPageResolver;
@@ -29,6 +31,14 @@ function addPublicLanguage(string $locale, string $prefix, bool $general = false
     ]);
 }
 
+function markLocalizedHome(string $locale, int $pageId): void
+{
+    $menus = app(MenuManager::class);
+    $menu = Menu::query()->where('identifier', 'home')->first() ?? $menus->create('home');
+    $item = $menus->createItem('home', $locale, $pageId, 'Home');
+    $menus->markHome($item->id);
+}
+
 function localizedRequest(string $uri): Request
 {
     $request = Request::create($uri, 'GET', [], [], [], ['REQUEST_URI' => $uri]);
@@ -42,6 +52,7 @@ test('localized aliases resolve hierarchical public pages and regional aliases r
     $pages = app(PageManager::class);
     $root = $pages->create('es_ES', 'inicio', 'Inicio');
     $child = $pages->create('es_ES', 'hijo', 'Hijo', $root->page_id);
+    $pages->publish($root->page_id, 'es_ES');
     $pages->publish($child->page_id, 'es_ES');
 
     $this->get('/es/inicio/hijo')->assertOk()->assertSee('Hijo');
@@ -52,7 +63,9 @@ test('localized aliases resolve hierarchical public pages and regional aliases r
 
 test('URL selection, session selection, and initial browser negotiation use canonical temporary redirects', function () {
     addPublicLanguage('es_ES', 'es-es');
-    app(PageManager::class)->create('es_ES', 'inicio', 'Inicio');
+    $page = app(PageManager::class)->create('es_ES', 'inicio', 'Inicio');
+    app(PageManager::class)->publish($page->page_id, 'es_ES');
+    markLocalizedHome('es_ES', $page->page_id);
 
     $this->get('/es')->assertRedirect('/es/')->assertStatus(301);
     expect(app(PublicPageResolver::class)->handle(localizedRequest('/es/'), 'es'))->toBeInstanceOf(View::class);
@@ -82,6 +95,8 @@ test('only localized homes retain a trailing slash', function () {
     addPublicLanguage('es_ES', 'es-es');
     $pages = app(PageManager::class);
     $root = $pages->create('es_ES', 'inicio', 'Inicio');
+    $pages->publish($root->page_id, 'es_ES');
+    markLocalizedHome('es_ES', $root->page_id);
     $pages->create('en', 'about', 'About');
 
     $this->get('/es-es')->assertRedirect('/es/')->assertStatus(302);

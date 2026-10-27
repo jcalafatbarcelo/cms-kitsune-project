@@ -5,6 +5,7 @@ namespace Modules\Core\Language\Services;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use JsonException;
+use Modules\Core\Language\Events\LanguageInstalled;
 use Modules\Core\Language\Exceptions\LanguageOperationException;
 use Modules\Core\Language\Models\Language;
 use Modules\Core\Language\Models\LanguageSetting;
@@ -37,7 +38,7 @@ class LanguageManager
                 throw new LanguageOperationException("URL prefix [{$manifest['url_prefix']}] is already installed.");
             }
 
-            return Language::query()->create([
+            $language = Language::query()->create([
                 'locale' => $manifest['locale'],
                 'url_prefix' => $manifest['url_prefix'],
                 'name' => $manifest['name'],
@@ -47,6 +48,10 @@ class LanguageManager
                 'is_url_general' => $manifest['is_url_general'],
                 'installed_at' => now(),
             ]);
+
+            LanguageInstalled::dispatch($language);
+
+            return $language;
         }, attempts: 5);
     }
 

@@ -4,23 +4,56 @@
 
 Pages proporciona rutas públicas jerárquicas mediante la presentación
 `public.page.standard`. El CMS Template efectivo aporta el Blade o lo hereda de
-`Templates/Base`. PageBuilder y contenido editorial siguen fuera de este
-incremento.
+`Templates/Base`. Pages introduce el primer tipo de contenido editorial
+`rich-text`, su contenido persistido y su gestión desde el backoffice.
+
+## Tipos de contenido
+
+Cada Page tiene un `content_type` inmutable y compartido por todas sus
+traducciones. Los tipos proceden de módulos instalados que los registran durante
+el arranque; no son una lista administrativa persistida. El tipo inicial
+editorial es `rich-text`, cuyo editor de backoffice es TinyMCE y cuya clave
+editorial es `body.content`. El tipo de sistema `system.static` no es
+seleccionable y se reserva para la Page inicial "Under construction", sin editor.
+
+Un identificador de tipo desconocido, duplicado o con un proveedor inválido
+produce un error controlado; el contenido no se reinterpreta ni se elige un tipo
+alternativo.
+
+## Contenido editorial
+
+Cada `PageTranslation` guarda cero o más contenidos identificados por clave. La
+clave usa segmentos ASCII en minúscula separados por puntos (por ejemplo
+`body.content`), sin `::`, sin segmentos vacíos y con un máximo de 255
+caracteres. En este incremento todo valor es HTML de un único editor y se
+sanitiza en el servidor antes de persistirse; el HTML original no se conserva. El
+límite de aplicación para `body.content` es 4 MiB medidos en bytes.
+
+El fallback de contenido reutiliza el modo global de `UI catalogs`: en modo
+`base`, una clave ausente o vacía resuelve el idioma predeterminado de frontend y
+después la clave literal; en modo `key`, solo la clave literal. El idioma de
+fallback sigue dinámicamente el predeterminado de frontend.
 
 ## Home y publicación
 
-Cada idioma tiene una única home. La instalación crea la home inglesa con un
-mensaje de construcción. La primera traducción creada para otro idioma se publica
-y se asigna como home en la misma operación. Una home no puede despublicarse sin
-seleccionar primero una sustituta pública para el mismo idioma.
+Cada idioma tiene como máximo una única home en todo el sistema. La instalación
+crea la home inglesa "Under construction" publicada y la asocia a un ítem de un
+menú sembrado (`home`). El resto de Pages se crean como borradores: ninguna Page
+creada por el usuario se publica automáticamente. La home se marca y retira desde
+un ítem de menú; véase [Navigation](navigation.md).
+
+Al crear una Page se generan stubs de traducción para todos los idiomas
+instalados. Una traducción sin `title` o `slug` válidos queda incompleta y no es
+publicable. Al instalar un idioma nuevo se crean stubs para las Pages existentes.
 
 ## Operación por Artisan
 
 ```shell
 php artisan cms:page:create en about "About"
+php artisan cms:page:create es_ES inicio "Inicio" --type=rich-text
 php artisan cms:page:translate 2 es_ES acerca "Acerca de"
 php artisan cms:page:publish 2 en
-php artisan cms:page:set-home 2 en
+php artisan cms:page:unpublish 2 en
 ```
 
 Los slugs son obligatorios, únicos por idioma y usan minúsculas ASCII, números y
@@ -28,7 +61,13 @@ guiones simples. Un slug de Page raíz no puede tener formato `xx` ni `xx-xx`,
 reservado para los prefijos de idioma; un slug hijo sí puede usar esos formatos.
 Sin `--template`, `cms:page:create` hereda el template
 predeterminado; `--template=<identifier>` selecciona un template activo que
-declare `public.page.standard` o pueda heredarlo de Base.
+declare `public.page.standard` o pueda heredarlo de Base. El `--type` por defecto
+es `rich-text`.
+
+El borrado de una Page es físico y atómico: elimina la Page, sus traducciones y
+sus contenidos. Se rechaza si la Page tiene descendientes, está marcada como home
+o es referenciada por un ítem de menú. No existe borrado de una traducción
+individual; la Page es la unidad de borrado.
 
 ## UI de templates
 
