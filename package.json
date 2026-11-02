@@ -20,6 +20,6 @@
         "@laravel/multiplex": "^0.4.5"
     },
     "dependencies": {
-        "tinymce": "^8.10.0"
+        "tinymce": "^8.10.1"
     }
 }
