@@ -6,6 +6,7 @@ use Modules\Pages\Http\Controllers\Admin\PageController;
 
 Route::middleware(['web', RequireSuperAdmin::class])->prefix('admin/pages')->name('admin.pages.')->group(function () {
     Route::get('/', [PageController::class, 'index'])->name('index');
+    Route::get('new', [PageController::class, 'create'])->name('create');
     Route::post('/', [PageController::class, 'store'])->name('store');
     Route::get('{page}', [PageController::class, 'edit'])->whereNumber('page')->name('edit');
     Route::post('{page}', [PageController::class, 'update'])->whereNumber('page')->name('update');

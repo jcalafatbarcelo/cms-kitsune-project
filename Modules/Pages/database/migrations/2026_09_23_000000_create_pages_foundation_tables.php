@@ -19,6 +19,12 @@ return new class extends Migration
 
         Schema::create('pages', function (Blueprint $table) {
             $table->id();
+            $table->string('name', 150);
+            $nameKey = $table->string('name_key', 600);
+            if (in_array(DB::getDriverName(), ['mysql', 'mariadb'], true)) {
+                $nameKey->collation('utf8mb4_bin');
+            }
+            $nameKey->unique();
             $table->foreignId('parent_id')->nullable()->constrained('pages')->restrictOnDelete();
             $table->boolean('uses_explicit_template')->default(false);
             $table->foreignId('explicit_template_id')->nullable()->constrained('cms_templates')->restrictOnDelete();
@@ -51,6 +57,8 @@ return new class extends Migration
         $language = DB::table('languages')->where('locale', 'en')->first();
         $now = now();
         $pageId = DB::table('pages')->insertGetId([
+            'name' => 'Under construction',
+            'name_key' => 'under construction',
             'uses_explicit_template' => false,
             'presentation_key' => 'public.page.standard',
             'content_type' => 'system.static',

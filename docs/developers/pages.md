@@ -7,6 +7,18 @@ Pages proporciona rutas públicas jerárquicas mediante la presentación
 `Templates/Base`. Pages introduce el primer tipo de contenido editorial
 `rich-text`, su contenido persistido y su gestión desde el backoffice.
 
+## Identidad interna
+
+Cada Page tiene un `name` interno obligatorio, no traducible y distinto del
+`title` y el `slug` de sus traducciones. Se recorta antes de persistirse, admite
+hasta 150 caracteres Unicode y no acepta caracteres de control ni
+`!?:.,<>=()[]{}/+*|@#~$%&\ºª€`. El servidor calcula `name_key` con NFC y
+minúsculas Unicode; el índice único de esa columna impide nombres equivalentes
+que solo difieran por mayúsculas o composición Unicode.
+
+El nombre no forma parte de las URLs, la navegación pública ni el HTML público.
+No se puede renombrar en este incremento.
+
 ## Tipos de contenido
 
 Cada Page tiene un `content_type` inmutable y compartido por todas sus
@@ -29,6 +41,18 @@ caracteres. En este incremento todo valor es HTML de un único editor y se
 sanitiza en el servidor antes de persistirse; el HTML original no se conserva. El
 límite de aplicación para `body.content` es 4 MiB medidos en bytes.
 
+La entrada Vite `resources/js/admin/page-edit.js` coordina la selección de una
+traducción y el ciclo de TinyMCE. Solo crea editores en el panel activo; antes de
+ocultar un panel sincroniza y destruye sus instancias. El módulo de TinyMCE se
+carga dinámicamente desde `resources/js/admin/tinymce.js`, por lo que no forma
+parte de la presentación pública.
+
+El coordinador serializa los cambios de idioma y descarta inicializaciones
+asíncronas obsoletas, para que ningún editor permanezca en un panel inactivo.
+La cobertura runtime se ejecuta con `npm run test:js` y simula el DOM y TinyMCE
+sin dependencias adicionales. Sigue pendiente la comprobación manual en un
+navegador real del foco, el teclado y la búsqueda nativa.
+
 El fallback de contenido reutiliza el modo global de `UI catalogs`: en modo
 `base`, una clave ausente o vacía resuelve el idioma predeterminado de frontend y
 después la clave literal; en modo `key`, solo la clave literal. El idioma de
@@ -49,8 +73,8 @@ publicable. Al instalar un idioma nuevo se crean stubs para las Pages existentes
 ## Operación por Artisan
 
 ```shell
-php artisan cms:page:create en about "About"
-php artisan cms:page:create es_ES inicio "Inicio" --type=rich-text
+php artisan cms:page:create "About page" en about "About"
+php artisan cms:page:create "Página de inicio" es_ES inicio "Inicio" --type=rich-text
 php artisan cms:page:translate 2 es_ES acerca "Acerca de"
 php artisan cms:page:publish 2 en
 php artisan cms:page:unpublish 2 en

@@ -21,7 +21,7 @@ Todos los jobs usan `ubuntu-24.04`, fijan las Actions por commit SHA, declaran
 | :--- | :--- | :--- |
 | `PHP quality` | PHP 8.5, último patch; Composer 2 | `composer install` reproducible, formato con Pint y suite de Pest. |
 | `Database integration (motor)` | PHP 8.5; SQLite 3.45+, MySQL 8.4.11 y MariaDB 11.4.13 | Versión efectiva, migración limpia y restricciones persistentes de Core. |
-| `Frontend build` | Node 24 LTS, último patch; npm incluido | `npm ci` y compilación de assets con Vite. |
+| `Frontend build` | Node 24 LTS, último patch; npm incluido | `npm ci`, pruebas JavaScript de administración y compilación de assets con Vite. |
 | `Workflow lint` | `actionlint` 1.7.12 | Validez de los workflows de `.github/workflows/`. |
 
 Se ejecutan en todos los Pull Requests, en cada push a `main` y bajo demanda
@@ -36,6 +36,7 @@ Desde la raíz del repositorio, tras instalar las dependencias:
 composer lint
 composer test
 npm ci --ignore-scripts
+npm run test:js
 npm run build
 ```
 

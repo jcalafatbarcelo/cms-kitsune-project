@@ -10,6 +10,10 @@ use Modules\Core\Template\Services\TemplatePresentationResolver;
 
 uses(RefreshDatabase::class);
 
+beforeEach(function () {
+    $this->withoutVite();
+});
+
 test('guests reach the Blade login and cannot reach the dashboard', function () {
     $this->get('/admin')->assertRedirect('/admin/login');
     $this->get('/admin/login')->assertOk()->assertSee('name="password"', false)->assertSee('name="_token"', false);

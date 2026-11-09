@@ -73,6 +73,50 @@ test('sync permits a template presentation without its own UI catalog', function
     expect(CmsTemplate::query()->where('identifier', 'acme')->exists())->toBeTrue();
 });
 
+test('sync rejects a Base admin presentation when a required direct key is absent', function () {
+    writeTemplate($this->templateRoot, 'Base', 'base', ['system.admin.menus.show']);
+    $catalog = $this->templateRoot.DIRECTORY_SEPARATOR.'Base'.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'lang'.DIRECTORY_SEPARATOR.'en.json';
+    $lines = json_decode(file_get_contents(base_path('Templates/Base/Resources/lang/en.json')), true, flags: JSON_THROW_ON_ERROR);
+    unset($lines['base::admin.menus.detail']);
+    file_put_contents($catalog, json_encode($lines, JSON_THROW_ON_ERROR));
+
+    expect(fn () => $this->templates->sync())
+        ->toThrow(TemplateOperationException::class, 'admin.menus.detail');
+});
+
+test('sync rejects the Base page edit presentation when a translation status key is absent', function () {
+    writeTemplate($this->templateRoot, 'Base', 'base', ['system.admin.pages.edit']);
+    $catalog = $this->templateRoot.DIRECTORY_SEPARATOR.'Base'.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'lang'.DIRECTORY_SEPARATOR.'en.json';
+    $lines = json_decode(file_get_contents(base_path('Templates/Base/Resources/lang/en.json')), true, flags: JSON_THROW_ON_ERROR);
+    unset($lines['base::admin.pages.published-badge']);
+    file_put_contents($catalog, json_encode($lines, JSON_THROW_ON_ERROR));
+
+    expect(fn () => $this->templates->sync())
+        ->toThrow(TemplateOperationException::class, 'admin.pages.published-badge');
+});
+
+test('sync rejects the Base Menu detail when an insertion position key is absent', function () {
+    writeTemplate($this->templateRoot, 'Base', 'base', ['system.admin.menus.show']);
+    $catalog = $this->templateRoot.DIRECTORY_SEPARATOR.'Base'.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'lang'.DIRECTORY_SEPARATOR.'en.json';
+    $lines = json_decode(file_get_contents(base_path('Templates/Base/Resources/lang/en.json')), true, flags: JSON_THROW_ON_ERROR);
+    unset($lines['base::admin.menus.position-last-after']);
+    file_put_contents($catalog, json_encode($lines, JSON_THROW_ON_ERROR));
+
+    expect(fn () => $this->templates->sync())
+        ->toThrow(TemplateOperationException::class, 'admin.menus.position-last-after');
+});
+
+test('sync rejects a Base admin presentation when a required shared key is absent', function () {
+    writeTemplate($this->templateRoot, 'Base', 'base', ['system.admin.menus.show']);
+    $catalog = $this->templateRoot.DIRECTORY_SEPARATOR.'Base'.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'lang'.DIRECTORY_SEPARATOR.'en.json';
+    $lines = json_decode(file_get_contents(base_path('Templates/Base/Resources/lang/en.json')), true, flags: JSON_THROW_ON_ERROR);
+    unset($lines['base::admin.brand']);
+    file_put_contents($catalog, json_encode($lines, JSON_THROW_ON_ERROR));
+
+    expect(fn () => $this->templates->sync())
+        ->toThrow(TemplateOperationException::class, 'admin.brand');
+});
+
 test('activation and default selection reject a changed manifest identity', function () {
     writeTemplate($this->templateRoot, 'Acme', 'acme');
     $this->templates->sync();
@@ -153,7 +197,7 @@ test('presentation resolution accepts only its closed contract and prefers the e
     $page = $this->presentations->resolve(CmsPresentation::PublicPageStandard, $acme);
     $navigation = $this->presentations->resolve(CmsPresentation::PublicNavigationMenu, $acme);
 
-    expect(CmsPresentation::cases())->toHaveCount(9)
+    expect(CmsPresentation::cases())->toHaveCount(12)
         ->and($page->presentationTemplate->identifier)->toBe('base')
         ->and($navigation->presentationTemplate->identifier)->toBe('acme');
 });
@@ -165,7 +209,7 @@ test('an additional valid manifest presentation cannot be rendered through the C
 
     expect(fn () => $this->presentations->resolve('public.extra.preview', $acme))
         ->toThrow(TypeError::class)
-        ->and(CmsPresentation::cases())->toHaveCount(9);
+        ->and(CmsPresentation::cases())->toHaveCount(12);
 });
 
 test('presentation resolution rejects a changed manifest hash before reading a Blade', function () {

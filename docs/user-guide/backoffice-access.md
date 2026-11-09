@@ -4,7 +4,9 @@
 
 El backoffice ofrece el acceso autenticado, un panel inicial y la gestión de
 Pages y Menus. No incluye todavía la gestión de idiomas, overrides, medios ni
-PageBuilder. El panel enlaza a las pantallas de Pages, Menus y auditoría.
+PageBuilder. El panel enlaza a las pantallas de Pages, Menus y auditoría. Las
+pantallas disponibles se adaptan a móvil, conservan foco visible para teclado y
+mantienen las tablas anchas dentro de un contenedor desplazable.
 
 ## Iniciar sesión
 

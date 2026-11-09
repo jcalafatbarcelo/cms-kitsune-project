@@ -2,6 +2,7 @@
 
 use App\Models\AdminAuditEvent;
 use App\Services\Admin\AdminAuditLogger;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -63,16 +64,65 @@ function domainLanguage(string $locale, string $prefix): void
 
 test('a page with descendants cannot be deleted', function () {
     $pages = app(PageManager::class);
-    $root = $pages->create('en', 'root', 'Root');
-    $pages->create('en', 'child', 'Child', $root->page_id);
+    $root = $pages->create('en', 'root', 'Root', name: 'Root');
+    $pages->create('en', 'child', 'Child', $root->page_id, name: 'Child');
 
     expect(fn () => $pages->delete($root->page_id))
         ->toThrow(PageOperationException::class, 'descendants');
 });
 
+test('an internal name is trimmed, normalized and rejects invalid or duplicate values atomically', function () {
+    $pages = app(PageManager::class);
+    $auditEvents = AdminAuditEvent::query()->count();
+    $page = $pages->create('en', 'about', 'About', name: "  Caf\u{00E9}  ");
+
+    expect($page->page->name)->toBe('Café')
+        ->and($page->page->name_key)->toBe('café')
+        ->and(fn () => $pages->create('en', 'other', 'Other', name: "CAFE\u{0301}"))
+        ->toThrow(PageOperationException::class, 'conflicts')
+        ->and(fn () => $pages->create('en', 'invalid', 'Invalid', name: "Bad\nname"))
+        ->toThrow(PageOperationException::class, 'internal page name is invalid')
+        ->and(fn () => $pages->create('en', 'missing', 'Missing'))
+        ->toThrow(PageOperationException::class, 'internal page name is required')
+        ->and(fn () => $pages->create('en', 'empty', 'Empty', name: '   '))
+        ->toThrow(PageOperationException::class, 'internal page name is invalid')
+        ->and(fn () => $pages->create('en', 'forbidden', 'Forbidden', name: 'Not/allowed'))
+        ->toThrow(PageOperationException::class, 'internal page name is invalid')
+        ->and(fn () => $pages->create('en', 'backslash', 'Backslash', name: 'Foo\\Bar'))
+        ->not->toThrow(PageOperationException::class)
+        ->and(fn () => $pages->create('en', 'too-long', 'Too long', name: str_repeat('é', 151)))
+        ->toThrow(PageOperationException::class, 'internal page name is invalid')
+        ->and(AdminAuditEvent::query()->count())->toBe($auditEvents + 2);
+});
+
+test('the database index rejects a duplicate normalized page name independently of the service', function () {
+    $pages = app(PageManager::class);
+    $pages->create('en', 'unique-page', 'Unique', name: 'Unique Name');
+
+    expect(fn () => DB::table('pages')->insert([
+        'name' => 'Unique Name',
+        'name_key' => 'unique name',
+        'content_type' => 'rich-text',
+        'presentation_key' => 'public.page.standard',
+        'is_published' => false,
+        'uses_explicit_template' => false,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]))->toThrow(QueryException::class);
+});
+
+test('internal name keys preserve distinct Unicode values that a non-binary collation could equate', function () {
+    $pages = app(PageManager::class);
+    $sharpS = $pages->create('en', 'sharp-s', 'Sharp S', name: 'Straße');
+    $doubleS = $pages->create('en', 'double-s', 'Double S', name: 'Strasse');
+
+    expect($sharpS->page->name_key)->toBe('straße')
+        ->and($doubleS->page->name_key)->toBe('strasse');
+});
+
 test('a page referenced by a menu item cannot be deleted', function () {
     $pages = app(PageManager::class);
-    $page = $pages->create('en', 'about', 'About');
+    $page = $pages->create('en', 'about', 'About', name: 'About');
     $menus = app(MenuManager::class);
     $menus->create('footer');
     $menus->createItem('footer', 'en', $page->page_id, 'About');
@@ -83,7 +133,7 @@ test('a page referenced by a menu item cannot be deleted', function () {
 
 test('a deletable page is removed atomically together with translations and contents', function () {
     $pages = app(PageManager::class);
-    $page = $pages->create('en', 'about', 'About');
+    $page = $pages->create('en', 'about', 'About', name: 'About');
     $pages->setContent($page->page_id, 'en', 'body.content', '<p>Hello</p>');
 
     $pages->delete($page->page_id);
@@ -95,7 +145,7 @@ test('a deletable page is removed atomically together with translations and cont
 
 test('the page is the only unit of deletion in the domain contract', function () {
     $pages = app(PageManager::class);
-    $page = $pages->create('en', 'about', 'About');
+    $page = $pages->create('en', 'about', 'About', name: 'About');
 
     $methods = collect((new ReflectionClass(PageManager::class))->getMethods(ReflectionMethod::IS_PUBLIC))->map->getName()->all();
 
@@ -150,7 +200,7 @@ test('content types are immutable, validated and not selectable when system', fu
 
 test('the content type belongs to the page and is shared by all its translations', function () {
     $pages = app(PageManager::class);
-    $page = $pages->create('en', 'about', 'About');
+    $page = $pages->create('en', 'about', 'About', name: 'About');
 
     expect($page->page->content_type)->toBe('rich-text')
         ->and(PageTranslation::query()->where('page_id', $page->page_id)->count())->toBeGreaterThanOrEqual(1)
@@ -160,14 +210,14 @@ test('the content type belongs to the page and is shared by all its translations
 test('the system static type cannot be used to create editorial pages', function () {
     $pages = app(PageManager::class);
 
-    expect(fn () => $pages->create('en', 'about', 'About', contentType: 'system.static'))
+    expect(fn () => $pages->create('en', 'about', 'About', contentType: 'system.static', name: 'About'))
         ->toThrow(PageOperationException::class, 'cannot be used to create editorial pages')
         ->and(Page::query()->where('content_type', 'system.static')->count())->toBe(1);
 });
 
 test('installing a language creates translation stubs for existing pages', function () {
     $pages = app(PageManager::class);
-    $page = $pages->create('en', 'about', 'About');
+    $page = $pages->create('en', 'about', 'About', name: 'About');
 
     $now = now();
     $language = Language::query()->create([
@@ -191,7 +241,7 @@ test('installing a language creates translation stubs for existing pages', funct
 
 test('content is stored sanitized with uniqueness per translation and key', function () {
     $pages = app(PageManager::class);
-    $page = $pages->create('en', 'about', 'About');
+    $page = $pages->create('en', 'about', 'About', name: 'About');
 
     $content = $pages->setContent($page->page_id, 'en', 'body.content', '<p>Hello <strong>world</strong></p>');
 
@@ -206,7 +256,7 @@ test('content is stored sanitized with uniqueness per translation and key', func
 
 test('editing a translation and its content is atomic when content auditing fails', function () {
     $pages = app(PageManager::class);
-    $page = $pages->create('en', 'about', 'About');
+    $page = $pages->create('en', 'about', 'About', name: 'About');
     $pages->setContent($page->page_id, 'en', 'body.content', '<p>Original</p>');
     $auditEvents = AdminAuditEvent::query()->count();
     $audit = Mockery::mock(AdminAuditLogger::class, [app('auth')])->makePartial();
@@ -258,7 +308,7 @@ test('an external registered type supplies its editor content key and renders wi
         }
     });
     $pages = app(PageManager::class);
-    $page = $pages->create('en', 'external', 'External', contentType: 'acme.article');
+    $page = $pages->create('en', 'external', 'External', contentType: 'acme.article', name: 'External');
 
     $pages->updateTranslationAndContent($page->page_id, 'en', 'external', 'External', '<p>External content</p>');
     $pages->publish($page->page_id, 'en');
@@ -269,7 +319,7 @@ test('an external registered type supplies its editor content key and renders wi
 
 test('the content column is longtext and the 4 MiB limit is enforced before sanitization', function () {
     $pages = app(PageManager::class);
-    $page = $pages->create('en', 'about', 'About');
+    $page = $pages->create('en', 'about', 'About', name: 'About');
 
     $expectedType = DB::getDriverName() === 'sqlite' ? 'text' : 'longtext';
 
@@ -281,7 +331,7 @@ test('the content column is longtext and the 4 MiB limit is enforced before sani
 
 test('an invalid content key is rejected', function () {
     $pages = app(PageManager::class);
-    $page = $pages->create('en', 'about', 'About');
+    $page = $pages->create('en', 'about', 'About', name: 'About');
 
     expect(fn () => $pages->setContent($page->page_id, 'en', 'Body::Content', '<p>x</p>'))
         ->toThrow(PageOperationException::class, 'content key is invalid');
@@ -290,7 +340,7 @@ test('an invalid content key is rejected', function () {
 test('content fallback uses the frontend default language in base mode', function () {
     config(['core.ui_catalog_fallback_mode' => 'base']);
     $pages = app(PageManager::class);
-    $page = $pages->create('en', 'about', 'About');
+    $page = $pages->create('en', 'about', 'About', name: 'About');
     $pages->setContent($page->page_id, 'en', 'body.content', '<p>Hello</p>');
     domainLanguage('es_ES', 'es-es');
     $pages->addLanguageStubs(Language::query()->where('locale', 'es_ES')->firstOrFail());
@@ -301,7 +351,7 @@ test('content fallback uses the frontend default language in base mode', functio
 test('content fallback returns the literal key in key mode', function () {
     config(['core.ui_catalog_fallback_mode' => 'key']);
     $pages = app(PageManager::class);
-    $page = $pages->create('en', 'about', 'About');
+    $page = $pages->create('en', 'about', 'About', name: 'About');
     $pages->setContent($page->page_id, 'en', 'body.content', '<p>Hello</p>');
     domainLanguage('es_ES', 'es-es');
     $pages->addLanguageStubs(Language::query()->where('locale', 'es_ES')->firstOrFail());
@@ -312,7 +362,7 @@ test('content fallback returns the literal key in key mode', function () {
 test('content fallback follows the frontend default dynamically', function () {
     config(['core.ui_catalog_fallback_mode' => 'base']);
     $pages = app(PageManager::class);
-    $page = $pages->create('en', 'about', 'About');
+    $page = $pages->create('en', 'about', 'About', name: 'About');
     domainLanguage('es_ES', 'es-es');
     $pages->addLanguageStubs(Language::query()->where('locale', 'es_ES')->firstOrFail());
     $pages->setContent($page->page_id, 'es_ES', 'body.content', '<p>Hola</p>');
@@ -328,15 +378,15 @@ test('content fallback follows the frontend default dynamically', function () {
 
 test('a published page can change its slug and be moved atomically', function () {
     $pages = app(PageManager::class);
-    $root = $pages->create('en', 'section', 'Section');
+    $root = $pages->create('en', 'section', 'Section', name: 'Section');
     $pages->publish($root->page_id, 'en');
-    $child = $pages->create('en', 'child', 'Child', $root->page_id);
+    $child = $pages->create('en', 'child', 'Child', $root->page_id, name: 'Child');
     $pages->publish($child->page_id, 'en');
 
     $pages->translate($child->page_id, 'en', 'renamed', 'Renamed');
     expect($child->fresh()->slug)->toBe('renamed');
 
-    $other = $pages->create('en', 'other', 'Other');
+    $other = $pages->create('en', 'other', 'Other', name: 'Other');
     $pages->publish($other->page_id, 'en');
     $pages->move($child->page_id, $other->page_id);
 
@@ -346,12 +396,12 @@ test('a published page can change its slug and be moved atomically', function ()
 test('a move that would leave a published translation inaccessible is rejected', function () {
     domainLanguage('es_ES', 'es-es');
     $pages = app(PageManager::class);
-    $root = $pages->create('en', 'section', 'Section');
+    $root = $pages->create('en', 'section', 'Section', name: 'Section');
     $pages->publish($root->page_id, 'en');
     $pages->translate($root->page_id, 'es_ES', 'seccion', 'Sección');
     $pages->publish($root->page_id, 'es_ES');
 
-    $draftParent = $pages->create('en', 'draft-parent', 'Draft parent');
+    $draftParent = $pages->create('en', 'draft-parent', 'Draft parent', name: 'Draft parent');
 
     expect(fn () => $pages->move($root->page_id, $draftParent->page_id))
         ->toThrow(PageOperationException::class, 'inaccessible');

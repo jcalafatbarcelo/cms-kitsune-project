@@ -114,7 +114,7 @@ test('server sanitization preserves semantic structure and safe links', function
 
 test('direct hostile payloads sent to the domain are sanitized before persistence', function () {
     $pages = app(PageManager::class);
-    $page = $pages->create('en', 'about', 'About');
+    $page = $pages->create('en', 'about', 'About', name: 'About');
 
     $content = $pages->setContent($page->page_id, 'en', 'body.content', '<p>Safe</p><script>alert(1)</script><img src=x onerror=alert(2)>');
 
@@ -123,7 +123,7 @@ test('direct hostile payloads sent to the domain are sanitized before persistenc
 
 test('the original unsanitized HTML is not retained', function () {
     $pages = app(PageManager::class);
-    $page = $pages->create('en', 'about', 'About');
+    $page = $pages->create('en', 'about', 'About', name: 'About');
 
     $pages->setContent($page->page_id, 'en', 'body.content', '<p>Safe</p><script>alert(1)</script>');
 
@@ -135,7 +135,7 @@ test('the original unsanitized HTML is not retained', function () {
 
 test('audit events for content save do not retain the HTML', function () {
     $pages = app(PageManager::class);
-    $page = $pages->create('en', 'about', 'About');
+    $page = $pages->create('en', 'about', 'About', name: 'About');
 
     $pages->setContent($page->page_id, 'en', 'body.content', '<p>Secret content</p><script>alert(1)</script>');
 

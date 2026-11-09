@@ -10,6 +10,12 @@ class TemplateManifestValidator
 {
     private const MAX_MANIFEST_BYTES = 65_536;
 
+    private const ADMIN_SHARED_UI_KEYS = [
+        'admin.brand', 'admin.navigation', 'admin.dashboard.title', 'admin.dashboard.logout', 'admin.pages.title', 'admin.menus.title', 'admin.audit.title',
+        'admin.pages.created', 'admin.pages.updated', 'admin.pages.published', 'admin.pages.unpublished', 'admin.pages.moved', 'admin.pages.template-updated', 'admin.pages.deleted',
+        'admin.menus.created', 'admin.menus.item-created', 'admin.menus.item-updated', 'admin.menus.item-moved', 'admin.menus.item-removed', 'admin.menus.home-assigned', 'admin.menus.home-removed',
+    ];
+
     private const REQUIRED_BASE_UI_KEYS = [
         'public.page.standard' => [
             'page.home.under-construction.heading',
@@ -18,11 +24,14 @@ class TemplateManifestValidator
         'public.navigation.menu' => ['navigation.menu.label'],
         'public.embed.default' => ['embed.default.placeholder'],
         'system.auth.login' => ['admin.login.title', 'admin.login.email', 'admin.login.password', 'admin.login.submit', 'admin.login.failed', 'admin.login.throttled'],
-        'system.admin.dashboard' => ['admin.dashboard.title', 'admin.dashboard.logout', 'admin.diagnostics.warning'],
+        'system.admin.dashboard' => ['admin.dashboard.title', 'admin.dashboard.lead', 'admin.diagnostics.warning'],
         'system.admin.audit' => ['admin.audit.title', 'admin.audit.empty', 'admin.audit.operation', 'admin.audit.entity', 'admin.audit.from', 'admin.audit.until', 'admin.audit.filter', 'admin.audit.occurred-at', 'admin.audit.actor', 'admin.audit.origin', 'admin.audit.before', 'admin.audit.after'],
-        'system.admin.pages' => ['admin.pages.title', 'admin.pages.empty', 'admin.pages.create', 'admin.pages.slug', 'admin.pages.heading', 'admin.pages.parent', 'admin.pages.type', 'admin.pages.template', 'admin.pages.actions', 'admin.pages.publish', 'admin.pages.unpublish', 'admin.pages.move', 'admin.pages.delete', 'admin.pages.home', 'admin.pages.language'],
-        'system.admin.pages.edit' => ['admin.pages.edit', 'admin.pages.save', 'admin.pages.content'],
-        'system.admin.menus' => ['admin.menus.title', 'admin.menus.create', 'admin.menus.items', 'admin.menus.mark-home', 'admin.menus.unmark-home'],
+        'system.admin.pages' => ['admin.pages.title', 'admin.pages.empty', 'admin.pages.create', 'admin.pages.id', 'admin.pages.name', 'admin.pages.type', 'admin.pages.actions', 'admin.pages.home', 'admin.pages.edit', 'admin.pages.unpublished-badge'],
+        'system.admin.pages.new' => ['admin.pages.new', 'admin.pages.create', 'admin.pages.name', 'admin.pages.name-help', 'admin.pages.language', 'admin.pages.slug', 'admin.pages.heading', 'admin.pages.parent', 'admin.pages.root', 'admin.pages.type', 'admin.pages.template', 'admin.pages.default-template'],
+        'system.admin.pages.edit' => ['admin.pages.edit', 'admin.pages.save', 'admin.pages.content', 'admin.pages.heading', 'admin.pages.slug', 'admin.pages.publish', 'admin.pages.unpublish', 'admin.pages.move', 'admin.pages.parent', 'admin.pages.root', 'admin.pages.template', 'admin.pages.default-template', 'admin.pages.delete', 'admin.pages.translations', 'admin.pages.current-language', 'admin.pages.search-language', 'admin.pages.published-badge', 'admin.pages.unpublished-badge'],
+        'system.admin.menus' => ['admin.menus.title', 'admin.menus.create', 'admin.menus.identifier', 'admin.menus.items', 'admin.menus.detail', 'admin.menus.empty', 'admin.pages.actions'],
+        'system.admin.menus.new' => ['admin.menus.new', 'admin.menus.create', 'admin.menus.identifier'],
+        'system.admin.menus.show' => ['admin.menus.detail', 'admin.menus.items', 'admin.menus.add-item', 'admin.menus.remove-home', 'admin.menus.mark-home', 'admin.menus.home-badge', 'admin.menus.page', 'admin.menus.label', 'admin.menus.position', 'admin.menus.position-first', 'admin.menus.position-after', 'admin.menus.position-last', 'admin.menus.position-last-after', 'admin.pages.language', 'admin.pages.actions', 'admin.pages.save', 'admin.pages.move', 'admin.pages.delete', 'admin.pages.parent', 'admin.pages.root', 'admin.pages.unpublished-badge'],
     ];
 
     public function __construct(private readonly string $root) {}
@@ -119,7 +128,10 @@ class TemplateManifestValidator
                 $manifest['identifier'],
             ))->snapshot('en');
             foreach ($manifest['presentations'] as $presentation) {
-                foreach (self::REQUIRED_BASE_UI_KEYS[$presentation] ?? [] as $key) {
+                $keys = str_starts_with($presentation, 'system.admin.')
+                    ? array_merge(self::ADMIN_SHARED_UI_KEYS, self::REQUIRED_BASE_UI_KEYS[$presentation] ?? [])
+                    : self::REQUIRED_BASE_UI_KEYS[$presentation] ?? [];
+                foreach ($keys as $key) {
                     if (! array_key_exists($manifest['identifier'].'::'.$key, $catalog->lines)) {
                         throw new TemplateOperationException("Template [$directory] is missing required UI key [$key].");
                     }

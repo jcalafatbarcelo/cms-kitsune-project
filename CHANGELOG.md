@@ -8,6 +8,23 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 
 ### Añadido
 
+- Identidad interna obligatoria para Pages mediante `name` y `name_key`, con
+  unicidad Unicode portable, selectores administrativos por nombre y una capa
+  visual accesible y responsive para Pages, Menus y el panel. Incluye una navbar
+  superior fija con estado activo, la normalización de los bloques CSS según
+  `metodologia-css`, mensajes flash de éxito, aviso y error que devuelven a la
+  lista del mismo tipo tras guardar, e insignias para Pages despublicadas, home
+  y destinos no públicos. El detalle de Menu incorpora tres pestañas, árbol
+  depth-first, candidatos de padre legibles y selectores de huecos de inserción;
+  los locales home de Pages se presentan como insignias independientes.
+
+- Selector accesible de traducciones de Pages, con pestañas hasta cinco idiomas
+  y selector nativo filtrable a partir de seis; TinyMCE bajo demanda por
+  traducción activa, estado publicado localizado por traducción y encabezados de
+  idioma visibles solo como fallback sin JavaScript. Separadas las entradas Vite
+  `admin.css` y `public.css`, con módulos administrativos aislados, y aplicada la
+  capa administrativa al login.
+
 - Skill `metodologia-css` y flujo obligatorio para aplicar BEM + OOCSS,
   responsive mobile-first y WCAG AA al crear o revisar estilos y marcado con
   clases.
@@ -213,4 +230,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-10-25 18:35 UTC
+Fecha de última modificación: 2026-11-08 23:17 UTC

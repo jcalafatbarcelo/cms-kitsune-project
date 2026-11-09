@@ -2,7 +2,9 @@
 <html lang="{{ str_replace('_', '-', $locale) }}">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $translation->title }}</title>
+    @vite('resources/css/public.css')
 </head>
 <body>
 <main>

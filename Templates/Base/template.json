@@ -10,7 +10,10 @@
         "system.admin.dashboard",
         "system.admin.audit",
         "system.admin.pages",
+        "system.admin.pages.new",
         "system.admin.pages.edit",
-        "system.admin.menus"
+        "system.admin.menus",
+        "system.admin.menus.new",
+        "system.admin.menus.show"
     ]
 }

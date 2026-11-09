@@ -55,7 +55,7 @@ function navigationLanguage(string $locale, string $prefix, bool $active = true)
 
 function navigationPage(string $slug = 'about'): int
 {
-    return app(PageManager::class)->create('en', $slug, ucfirst($slug))->page_id;
+    return app(PageManager::class)->create('en', $slug, ucfirst($slug), name: ucfirst($slug))->page_id;
 }
 
 test('menus have immutable technical identifiers and localized trees are isolated', function () {
@@ -138,7 +138,7 @@ test('the public resolver consumes Pages canonical URLs and filters unavailable 
     $menus->create('main-menu');
     $pages = app(PageManager::class);
     $home = DB::table('page_translations')->where('language_id', DB::table('languages')->where('locale', 'en')->value('id'))->sole();
-    $unpublished = $pages->create('en', 'draft', 'Draft');
+    $unpublished = $pages->create('en', 'draft', 'Draft', name: 'Draft');
     $parent = $menus->createItem('main-menu', 'en', $unpublished->page_id, 'Draft');
     $menus->createItem('main-menu', 'en', $home->page_id, 'Hidden child', $parent->id);
     $menus->createItem('main-menu', 'en', $home->page_id, 'Home');

@@ -25,4 +25,9 @@ class MenuItem extends Model
     {
         return $this->hasOne(MenuItemHome::class, 'menu_item_id');
     }
+
+    public function menu(): BelongsTo
+    {
+        return $this->belongsTo(Menu::class);
+    }
 }

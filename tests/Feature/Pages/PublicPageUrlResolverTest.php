@@ -42,7 +42,7 @@ test('the Pages URL contract returns only canonical URLs for publicly available 
     $englishHome = DB::table('page_translations')->where('language_id', DB::table('languages')->where('locale', 'en')->value('id'))->sole();
     $pages->translate($englishHome->page_id, 'es_ES', 'inicio', 'Inicio');
     $pages->publish($englishHome->page_id, 'es_ES');
-    $child = $pages->create('es_ES', 'equipo', 'Equipo', $englishHome->page_id);
+    $child = $pages->create('es_ES', 'equipo', 'Equipo', $englishHome->page_id, name: 'Equipo');
     $pages->publish($child->page_id, 'es_ES');
     urlResolverMarkHome('es_ES', $englishHome->page_id);
 

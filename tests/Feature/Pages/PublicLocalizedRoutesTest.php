@@ -50,8 +50,8 @@ function localizedRequest(string $uri): Request
 test('localized aliases resolve hierarchical public pages and regional aliases redirect canonically', function () {
     addPublicLanguage('es_ES', 'es-es');
     $pages = app(PageManager::class);
-    $root = $pages->create('es_ES', 'inicio', 'Inicio');
-    $child = $pages->create('es_ES', 'hijo', 'Hijo', $root->page_id);
+    $root = $pages->create('es_ES', 'inicio', 'Inicio', name: 'Inicio');
+    $child = $pages->create('es_ES', 'hijo', 'Hijo', $root->page_id, name: 'Hijo');
     $pages->publish($root->page_id, 'es_ES');
     $pages->publish($child->page_id, 'es_ES');
 
@@ -63,7 +63,7 @@ test('localized aliases resolve hierarchical public pages and regional aliases r
 
 test('URL selection, session selection, and initial browser negotiation use canonical temporary redirects', function () {
     addPublicLanguage('es_ES', 'es-es');
-    $page = app(PageManager::class)->create('es_ES', 'inicio', 'Inicio');
+    $page = app(PageManager::class)->create('es_ES', 'inicio', 'Inicio', name: 'Inicio');
     app(PageManager::class)->publish($page->page_id, 'es_ES');
     markLocalizedHome('es_ES', $page->page_id);
 
@@ -94,10 +94,10 @@ test('a general language is required before activating a second variant and alia
 test('only localized homes retain a trailing slash', function () {
     addPublicLanguage('es_ES', 'es-es');
     $pages = app(PageManager::class);
-    $root = $pages->create('es_ES', 'inicio', 'Inicio');
+    $root = $pages->create('es_ES', 'inicio', 'Inicio', name: 'Inicio');
     $pages->publish($root->page_id, 'es_ES');
     markLocalizedHome('es_ES', $root->page_id);
-    $pages->create('en', 'about', 'About');
+    $pages->create('en', 'about', 'About', name: 'About');
 
     $this->get('/es-es')->assertRedirect('/es/')->assertStatus(302);
     expect(app(PublicPageResolver::class)->handle(localizedRequest('/es/inicio/'), 'es/inicio')->getStatusCode())->toBe(301);
@@ -108,10 +108,10 @@ test('only localized homes retain a trailing slash', function () {
 
 test('root prefix-shaped slugs are reserved while nested slugs remain valid', function () {
     $pages = app(PageManager::class);
-    expect(fn () => $pages->create('en', 'es-es', 'Reserved'))
+    expect(fn () => $pages->create('en', 'es-es', 'Reserved', name: 'Reserved'))
         ->toThrow(PageOperationException::class);
-    $root = $pages->create('en', 'parent', 'Parent');
-    expect($pages->create('en', 'es-es', 'Nested', $root->page_id)->slug)->toBe('es-es');
+    $root = $pages->create('en', 'parent', 'Parent', name: 'Parent');
+    expect($pages->create('en', 'es-es', 'Nested', $root->page_id, name: 'Nested')->slug)->toBe('es-es');
 });
 
 test('the configured health endpoint bypasses the Pages catch-all', function () {

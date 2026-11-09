@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Route;
 
 uses(RefreshDatabase::class);
 
+beforeEach(function () {
+    $this->withoutVite();
+});
+
 test('shows exception details for 5XX outside production', function () {
     config(['diagnostics.error_details' => true]);
     Route::post('/__diag/boom', fn () => throw new RuntimeException('Diagnostic marker 42'));
