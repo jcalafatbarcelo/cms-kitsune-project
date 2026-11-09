@@ -89,10 +89,12 @@ test('an internal name is trimmed, normalized and rejects invalid or duplicate v
         ->and(fn () => $pages->create('en', 'forbidden', 'Forbidden', name: 'Not/allowed'))
         ->toThrow(PageOperationException::class, 'internal page name is invalid')
         ->and(fn () => $pages->create('en', 'backslash', 'Backslash', name: 'Foo\\Bar'))
-        ->not->toThrow(PageOperationException::class)
+        ->toThrow(PageOperationException::class, 'internal page name is invalid')
         ->and(fn () => $pages->create('en', 'too-long', 'Too long', name: str_repeat('é', 151)))
         ->toThrow(PageOperationException::class, 'internal page name is invalid')
-        ->and(AdminAuditEvent::query()->count())->toBe($auditEvents + 2);
+        ->and(Page::query()->where('name', 'Foo\\Bar')->doesntExist())->toBeTrue()
+        ->and(PageTranslation::query()->where('slug', 'backslash')->doesntExist())->toBeTrue()
+        ->and(AdminAuditEvent::query()->count())->toBe($auditEvents + 1);
 });
 
 test('the database index rejects a duplicate normalized page name independently of the service', function () {

@@ -537,7 +537,7 @@ class PageManager
     {
         $name = trim($name);
         if (! mb_check_encoding($name, 'UTF-8') || $name === '' || mb_strlen($name, 'UTF-8') > 150
-            || preg_match('/[\x00-\x1F\x7F!?:.,<>=()\[\]{}\/+*|@#~$%&ºª€]/u', $name)) {
+            || preg_match('/[\x00-\x1F\x7F!?:.,<>=()\[\]{}\/+*|@#~$%&ºª€\\\\]/u', $name)) {
             throw new PageOperationException('The internal page name is invalid.');
         }
 

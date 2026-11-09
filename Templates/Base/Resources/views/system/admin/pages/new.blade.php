@@ -40,10 +40,11 @@
             @endforeach
         </select>
         <label for="parent_id">{{ $text('admin.pages.parent') }}</label>
+        @php($selectedParentId = $input['parent_id'] ?? old('parent_id'))
         <select id="parent_id" name="parent_id">
             <option value="">{{ $text('admin.pages.root') }}</option>
             @foreach($pages as $candidate)
-                <option value="{{ $candidate->id }}" @selected((string) ($input['parent_id'] ?? old('parent_id')) === (string) $candidate->id)>{{ $candidate->name }}</option>
+                <option value="{{ $candidate->id }}" @selected(is_scalar($selectedParentId) && (string) $selectedParentId === (string) $candidate->id)>{{ $candidate->name }}</option>
             @endforeach
         </select>
         <button class="c-adminbutton" type="submit">{{ $text('admin.pages.create') }}</button>

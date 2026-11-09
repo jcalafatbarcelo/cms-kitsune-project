@@ -235,3 +235,41 @@ test('keeps the final English selection when a pending initialization is interru
     assert.equal(pageEdit.panels[0].hidden, false);
     assert.equal(pageEdit.panels[1].hidden, true);
 });
+
+test('keeps textarea fallback usable and changes translation when editor loading fails', async () => {
+    const pageEdit = new PageEdit(['en', 'es_ES']);
+    let attempts = 0;
+    const controller = initializePageEdit(pageEdit, async () => {
+        attempts += 1;
+        throw new Error('Editor unavailable');
+    });
+
+    await assert.doesNotReject(controller.whenIdle());
+    pageEdit.tabs[1].dispatch('click');
+    await assert.doesNotReject(controller.whenIdle());
+
+    assert.equal(pageEdit.panels[0].textarea.value, 'en saved');
+    assert.equal(pageEdit.panels[1].textarea.value, 'es_ES saved');
+    assert.equal(pageEdit.panels[0].hidden, true);
+    assert.equal(pageEdit.panels[1].hidden, false);
+    assert.equal(attempts, 3);
+});
+
+test('retries a rejected editor import and caches the later successful module', async () => {
+    const { createEditorLoader } = await import('../../resources/js/admin/page-edit.js');
+    const editor = editorHarness();
+    let attempts = 0;
+    const loadEditor = createEditorLoader(async () => {
+        attempts += 1;
+        if (attempts === 1) {
+            throw new Error('Transient import failure');
+        }
+
+        return editor;
+    });
+
+    await assert.rejects(loadEditor(), /Transient import failure/);
+    assert.equal(await loadEditor(), editor);
+    assert.equal(await loadEditor(), editor);
+    assert.equal(attempts, 2);
+});

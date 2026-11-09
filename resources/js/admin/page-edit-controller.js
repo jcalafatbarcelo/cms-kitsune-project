@@ -17,7 +17,14 @@ export function initializePageEdit(pageEdit, loadEditor) {
             return;
         }
 
-        const { saveAndDestroy } = await loadEditor();
+        let editor;
+        try {
+            editor = await loadEditor();
+        } catch {
+            return;
+        }
+
+        const { saveAndDestroy } = editor;
         fields.forEach(saveAndDestroy);
     };
 
@@ -28,7 +35,14 @@ export function initializePageEdit(pageEdit, loadEditor) {
             return;
         }
 
-        const { initialize, saveAndDestroy } = await loadEditor();
+        let editor;
+        try {
+            editor = await loadEditor();
+        } catch {
+            return;
+        }
+
+        const { initialize, saveAndDestroy } = editor;
         if (token !== generation || panel !== activePanel) {
             return;
         }

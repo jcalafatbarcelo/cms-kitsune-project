@@ -759,6 +759,21 @@ test('array input does not break the creation or edit error screen', function ()
     $this->actingAs($admin)->get('/admin/pages/'.$page->page_id)->assertOk();
 });
 
+test('an array parent id renders the page creation validation error without persistence', function () {
+    $admin = app(SuperAdminBootstrap::class)->create('Administrator', 'admin@example.test', 'Safe-Test-Password9!');
+
+    $this->actingAs($admin)->followingRedirects()->post('/admin/pages', [
+        'name' => 'Invalid parent',
+        'locale' => 'en',
+        'slug' => 'invalid-parent',
+        'title' => 'Invalid parent',
+        'parent_id' => ['1'],
+    ])->assertOk()->assertSee('validation.integer');
+
+    expect(Page::query()->where('name', 'Invalid parent')->doesntExist())->toBeTrue()
+        ->and(PageTranslation::query()->where('slug', 'invalid-parent')->doesntExist())->toBeTrue();
+});
+
 test('the menus list uses its own localized empty message', function () {
     $admin = app(SuperAdminBootstrap::class)->create('Administrator', 'admin@example.test', 'Safe-Test-Password9!');
     DB::table('menu_item_homes')->delete();

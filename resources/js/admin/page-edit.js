@@ -1,13 +1,22 @@
-import { initializePageEdit } from './page-edit-controller';
+import { initializePageEdit } from './page-edit-controller.js';
 
-let editorModule;
+export function createEditorLoader(importEditor = () => import('./tinymce')) {
+    let editorModule;
 
-const loadEditor = () => {
-    editorModule ??= import('./tinymce');
+    return () => {
+        editorModule ??= importEditor().catch((error) => {
+            editorModule = undefined;
+            throw error;
+        });
 
-    return editorModule;
-};
+        return editorModule;
+    };
+}
 
-document.querySelectorAll('[data-page-edit]').forEach((pageEdit) => {
-    initializePageEdit(pageEdit, loadEditor);
-});
+if (typeof document !== 'undefined') {
+    const loadEditor = createEditorLoader();
+
+    document.querySelectorAll('[data-page-edit]').forEach((pageEdit) => {
+        initializePageEdit(pageEdit, loadEditor);
+    });
+}
