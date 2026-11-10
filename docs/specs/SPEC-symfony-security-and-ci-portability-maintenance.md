@@ -1,6 +1,6 @@
 # SPEC: Mantenimiento de seguridad Symfony y portabilidad de CI
 
-- **Estado:** Revisión
+- **Estado:** Completada
 - **Perfil:** maintenance
 - **Origen de la planificación:** Peticion `/build` para corregir los advisories
   de Composer y el fallo de CI observados en el Pull Request #50, ejecutando el
