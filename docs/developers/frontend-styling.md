@@ -33,3 +33,11 @@ La metodología detallada es la fuente de verdad para:
 
 La skill no se aplica al contenido editorial, traducciones, menús ni catálogos de
 interfaz cuando no introducen marcado, clases o estilos.
+
+## Entradas Vite
+
+Las presentaciones administrativas cargan `resources/css/admin.css`. Las
+presentaciones públicas cargan `resources/css/public.css`; no existe una entrada
+JavaScript pública mientras no haya interactividad pública. Los módulos
+administrativos viven bajo `resources/js/admin/` y se cargan solo en las vistas
+que los requieren.

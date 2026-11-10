@@ -64,10 +64,10 @@ function homeMenu(string $locale, int $pageId): int
 
 test('a home is marked from a menu item and is unique per language across the system', function () {
     $pages = app(PageManager::class);
-    $english = $pages->create('en', 'about', 'About');
+    $english = $pages->create('en', 'about', 'About', name: 'About');
     $pages->publish($english->page_id, 'en');
     homeLanguage('es_ES', 'es-es');
-    $spanish = $pages->create('es_ES', 'inicio', 'Inicio');
+    $spanish = $pages->create('es_ES', 'inicio', 'Inicio', name: 'Inicio');
     $pages->publish($spanish->page_id, 'es_ES');
 
     $menus = app(MenuManager::class);
@@ -84,7 +84,7 @@ test('a home is marked from a menu item and is unique per language across the sy
 
 test('marking a home requires a publicly available page and one home per language', function () {
     $pages = app(PageManager::class);
-    $draft = $pages->create('en', 'draft', 'Draft');
+    $draft = $pages->create('en', 'draft', 'Draft', name: 'Draft');
     $menus = app(MenuManager::class);
     $menus->create('footer');
     $draftItem = $menus->createItem('footer', 'en', $draft->page_id, 'Draft');
@@ -92,12 +92,12 @@ test('marking a home requires a publicly available page and one home per languag
     expect(fn () => $menus->markHome($draftItem->id))
         ->toThrow(NavigationOperationException::class, 'publicly available');
 
-    $published = $pages->create('en', 'published', 'Published');
+    $published = $pages->create('en', 'published', 'Published', name: 'Published');
     $pages->publish($published->page_id, 'en');
     $publishedItem = $menus->createItem('footer', 'en', $published->page_id, 'Published');
     $menus->markHome($publishedItem->id);
 
-    $replacement = $pages->create('en', 'replacement', 'Replacement');
+    $replacement = $pages->create('en', 'replacement', 'Replacement', name: 'Replacement');
     $pages->publish($replacement->page_id, 'en');
     $replacementItem = $menus->createItem('footer', 'en', $replacement->page_id, 'Replacement');
     $menus->markHome($replacementItem->id);
@@ -108,7 +108,7 @@ test('marking a home requires a publicly available page and one home per languag
 
 test('unpublishing the home translation is blocked', function () {
     $pages = app(PageManager::class);
-    $page = $pages->create('en', 'about', 'About');
+    $page = $pages->create('en', 'about', 'About', name: 'About');
     $pages->publish($page->page_id, 'en');
     $menus = app(MenuManager::class);
     $menus->create('footer');
@@ -121,9 +121,9 @@ test('unpublishing the home translation is blocked', function () {
 
 test('unpublishing an ancestor of the home is blocked', function () {
     $pages = app(PageManager::class);
-    $root = $pages->create('en', 'section', 'Section');
+    $root = $pages->create('en', 'section', 'Section', name: 'Section');
     $pages->publish($root->page_id, 'en');
-    $child = $pages->create('en', 'child', 'Child', $root->page_id);
+    $child = $pages->create('en', 'child', 'Child', $root->page_id, name: 'Child');
     $pages->publish($child->page_id, 'en');
     $menus = app(MenuManager::class);
     $menus->create('footer');
@@ -137,7 +137,7 @@ test('unpublishing an ancestor of the home is blocked', function () {
 
 test('a home page cannot be deleted', function () {
     $pages = app(PageManager::class);
-    $page = $pages->create('en', 'about', 'About');
+    $page = $pages->create('en', 'about', 'About', name: 'About');
     $pages->publish($page->page_id, 'en');
     $menus = app(MenuManager::class);
     $menus->create('footer');
@@ -150,7 +150,7 @@ test('a home page cannot be deleted', function () {
 
 test('leaving a language without a home makes its root respond 404 while login remains available', function () {
     $pages = app(PageManager::class);
-    $page = $pages->create('en', 'about', 'About');
+    $page = $pages->create('en', 'about', 'About', name: 'About');
     $pages->publish($page->page_id, 'en');
     $menus = app(MenuManager::class);
     $menus->create('footer');
@@ -166,7 +166,7 @@ test('leaving a language without a home makes its root respond 404 while login r
 
 test('the root resolves the destination returned by Navigation', function () {
     $pages = app(PageManager::class);
-    $page = $pages->create('en', 'about', 'About');
+    $page = $pages->create('en', 'about', 'About', name: 'About');
     $pages->publish($page->page_id, 'en');
     $menus = app(MenuManager::class);
     $menus->create('footer');
@@ -180,7 +180,7 @@ test('only the seeded construction page is published on installation', function 
     expect(MenuItemHome::query()->count())->toBe(1);
 
     $pages = app(PageManager::class);
-    $draft = $pages->create('en', 'draft', 'Draft');
+    $draft = $pages->create('en', 'draft', 'Draft', name: 'Draft');
 
     expect($draft->is_published)->toBeFalse()
         ->and($draft->page->fresh()->is_published)->toBeFalse();

@@ -24,14 +24,16 @@ contenido editorial innecesario.
 
 ## Consultar el historial
 
-Iniciar sesión como superadministrador y abrir `/admin/audit`. Se puede filtrar
-por operación, entidad y rango temporal. La paginación se limita a 100 eventos
-por página.
+Iniciar sesión como superadministrador y abrir `/admin/audit`. La pantalla
+comparte la navegación superior y los componentes visuales del backoffice; sus
+filtros y la tabla se adaptan a móvil dentro de un contenedor desplazable. Se
+puede filtrar por operación, entidad y rango temporal. La paginación se limita a
+100 eventos por página.
 
-Los datos mostrados proceden de una lista permitida: identificadores,
-jerarquía, idioma, slug, título, publicación, posición, etiqueta y referencia a
-Page. No se debe usar esta pantalla como mecanismo para investigar datos no
-incluidos en ese contrato.
+Los datos mostrados proceden de una lista permitida: identificadores, nombre
+interno, jerarquía, idioma, slug, título, publicación, posición, etiqueta y
+referencia a Page. No se debe usar esta pantalla como mecanismo para investigar
+datos no incluidos en ese contrato.
 
 ## Garantías operativas
 

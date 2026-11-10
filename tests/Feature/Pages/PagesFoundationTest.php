@@ -41,6 +41,7 @@ test('a clean installation provides the published English construction home via 
     expect($translation->title)->toBe('Under construction')
         ->and($translation->is_published)->toBeTrue()
         ->and($translation->page->is_published)->toBeTrue()
+        ->and($translation->page->name)->toBe('Under construction')
         ->and($translation->page->content_type)->toBe('system.static');
 
     $this->get('/')
@@ -63,7 +64,7 @@ test('page creation produces a draft and translation stubs for every installed l
         'updated_at' => $now,
     ]);
 
-    $translation = app(PageManager::class)->create('es_ES', 'inicio', 'Inicio');
+    $translation = app(PageManager::class)->create('es_ES', 'inicio', 'Inicio', name: 'Inicio');
 
     expect($translation->is_published)->toBeFalse()
         ->and($translation->page->fresh()->is_published)->toBeFalse()
@@ -91,7 +92,7 @@ test('an incomplete translation without title or slug is not publishable', funct
         'created_at' => $now,
         'updated_at' => $now,
     ]);
-    $page = app(PageManager::class)->create('es_ES', 'inicio', 'Inicio');
+    $page = app(PageManager::class)->create('es_ES', 'inicio', 'Inicio', name: 'Inicio');
     $englishId = DB::table('languages')->where('locale', 'en')->value('id');
 
     expect(fn () => app(PageManager::class)->publish($page->page_id, 'en'))
@@ -100,16 +101,16 @@ test('an incomplete translation without title or slug is not publishable', funct
 
 test('page creation and translation reject invalid parent and duplicate records with domain errors', function () {
     $pages = app(PageManager::class);
-    $pages->create('en', 'about', 'About');
+    $pages->create('en', 'about', 'About', name: 'About');
 
-    expect(fn () => $pages->create('en', 'child', 'Child', 999))
+    expect(fn () => $pages->create('en', 'child', 'Child', 999, name: 'Child'))
         ->toThrow(PageOperationException::class, 'Parent page [999] is not available.')
-        ->and(fn () => $pages->create('en', 'about', 'Another about'))
+        ->and(fn () => $pages->create('en', 'about', 'Another about', name: 'Another about'))
         ->toThrow(PageOperationException::class, 'Slug [about] is already in use for this language.');
 });
 
 test('page commands create deterministic draft pages after the initial home', function () {
-    $this->artisan('cms:page:create', ['locale' => 'en', 'slug' => 'about', 'title' => 'About'])
+    $this->artisan('cms:page:create', ['name' => 'About page', 'locale' => 'en', 'slug' => 'about', 'title' => 'About'])
         ->expectsOutputToContain('created')
         ->assertSuccessful();
 
@@ -117,7 +118,7 @@ test('page commands create deterministic draft pages after the initial home', fu
 });
 
 test('page commands return a controlled failure for domain and catalog errors', function () {
-    $this->artisan('cms:page:create', ['locale' => 'en', 'slug' => 'child', 'title' => 'Child', '--parent' => 999])
+    $this->artisan('cms:page:create', ['name' => 'Child page', 'locale' => 'en', 'slug' => 'child', 'title' => 'Child', '--parent' => 999])
         ->expectsOutputToContain('Parent page [999] is not available.')
         ->assertFailed();
 
@@ -126,7 +127,7 @@ test('page commands return a controlled failure for domain and catalog errors', 
     rename($catalog, $missingCatalog);
 
     try {
-        $this->artisan('cms:page:create', ['locale' => 'en', 'slug' => 'catalog-error', 'title' => 'Catalog error'])
+        $this->artisan('cms:page:create', ['name' => 'Catalog error', 'locale' => 'en', 'slug' => 'catalog-error', 'title' => 'Catalog error'])
             ->expectsOutputToContain('UI catalog [en] is not a regular file.')
             ->assertFailed();
     } finally {
@@ -207,7 +208,7 @@ test('page assignment is rejected when neither the effective template nor Base r
     app(TemplateManager::class)->sync();
     app(TemplateManager::class)->activate('acme');
 
-    expect(fn () => app(PageManager::class)->create('en', 'unrenderable', 'Unrenderable', templateIdentifier: 'acme'))
+    expect(fn () => app(PageManager::class)->create('en', 'unrenderable', 'Unrenderable', templateIdentifier: 'acme', name: 'Unrenderable'))
         ->toThrow(TemplateOperationException::class, 'required template presentation is unavailable');
 });
 

@@ -36,7 +36,7 @@ test('an embed marker is resolved in place and removed from the rendered HTML', 
     });
 
     $pages = app(PageManager::class);
-    $page = $pages->create('en', 'about', 'About');
+    $page = $pages->create('en', 'about', 'About', name: 'About');
     $pages->setContent($page->page_id, 'en', 'body.content', '<p>Before</p><cms-embed data-type="acme.video" data-ref="abc" data-variant="inline"></cms-embed><p>After</p>');
     $pages->publish($page->page_id, 'en');
 
@@ -69,7 +69,7 @@ test('rendering a non-degraded embed returns valid HTML without Blade re-interpr
 
 test('rendering content with an invalid marker grammar degrades without a 500 and without the marker', function () {
     $pages = app(PageManager::class);
-    $page = $pages->create('en', 'about', 'About');
+    $page = $pages->create('en', 'about', 'About', name: 'About');
     PageTranslationContent::query()->create([
         'page_translation_id' => $page->id,
         'key' => 'body.content',
@@ -87,7 +87,7 @@ test('rendering content with an invalid marker grammar degrades without a 500 an
 
 test('an unknown embed type renders a degraded placeholder without the marker', function () {
     $pages = app(PageManager::class);
-    $page = $pages->create('en', 'about', 'About');
+    $page = $pages->create('en', 'about', 'About', name: 'About');
     $pages->setContent($page->page_id, 'en', 'body.content', '<p>Before</p><cms-embed data-type="unknown.type" data-ref="abc"></cms-embed><p>After</p>');
     $pages->publish($page->page_id, 'en');
 
@@ -124,7 +124,7 @@ test('a self-closing embed marker is normalized and the following content is pre
     });
 
     $pages = app(PageManager::class);
-    $page = $pages->create('en', 'about', 'About');
+    $page = $pages->create('en', 'about', 'About', name: 'About');
     $pages->setContent($page->page_id, 'en', 'body.content', '<p>a</p><cms-embed data-type="acme.video" data-ref="abc"/><p>b</p>');
     $pages->publish($page->page_id, 'en');
 

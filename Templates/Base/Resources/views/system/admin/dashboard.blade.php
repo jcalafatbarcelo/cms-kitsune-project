@@ -4,22 +4,17 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $text('admin.dashboard.title') }}</title>
+    @vite('resources/css/admin.css')
 </head>
 <body>
-<main>
+@include('cms-template-base::system.admin._navbar')
+<main class="c-adminshell">
     <h1>{{ $text('admin.dashboard.title') }}</h1>
+    <p class="c-adminshell__lead">{{ $text('admin.dashboard.lead') }}</p>
+    @include('cms-template-base::system.admin._alerts')
     @if($errorDetails)
-        <p role="alert">{{ $text('admin.diagnostics.warning') }}</p>
+        <p class="c-adminalert c--warning" role="alert">{{ $text('admin.diagnostics.warning') }}</p>
     @endif
-    <p>
-        <a href="{{ route('admin.pages.index') }}">{{ $text('admin.pages.title') }}</a> ·
-        <a href="{{ route('admin.menus.index') }}">{{ $text('admin.menus.title') }}</a> ·
-        <a href="{{ route('admin.audit') }}">{{ $text('admin.audit.title') }}</a>
-    </p>
-    <form method="POST" action="{{ route('admin.logout') }}">
-        @csrf
-        <button type="submit">{{ $text('admin.dashboard.logout') }}</button>
-    </form>
 </main>
 </body>
 </html>

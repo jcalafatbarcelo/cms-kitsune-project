@@ -1,0 +1,491 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+:root {
+    --admin-ink: #172033;
+    --admin-surface: #ffffff;
+    --admin-surface-muted: #f8fafc;
+    --admin-muted: #536174;
+    --admin-accent: #075985;
+    --admin-accent-strong: #0c4a6e;
+    --admin-danger: #b42318;
+    --admin-border: #cbd5e1;
+    --admin-nav-bg: #0f172a;
+    --admin-nav-ink: #e2e8f0;
+    --admin-nav-active: #38bdf8;
+    --admin-radius: 0.5rem;
+    --admin-shadow: 0 1px 2px rgb(15 23 42 / 8%), 0 10px 30px rgb(15 23 42 / 8%);
+}
+
+body {
+    background: #eef2f7;
+    color: var(--admin-ink);
+    margin: 0;
+}
+
+a { color: var(--admin-accent); }
+a:hover { color: var(--admin-accent-strong); }
+
+:focus-visible {
+    outline: 3px solid #172033;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 5px #fbbf24;
+}
+
+.c-adminalert {
+    border: 1px solid transparent;
+    border-left-width: .375rem;
+    border-radius: .375rem;
+    font-weight: 600;
+    margin: 0;
+    padding: .75rem 1rem;
+}
+
+.c-adminalert.c--success {
+    background: #ecfdf5;
+    border-color: #6ee7b7;
+    border-left-color: #047857;
+    color: #065f46;
+}
+
+.c-adminalert.c--warning {
+    background: #fffbeb;
+    border-color: #fcd34d;
+    border-left-color: #b45309;
+    color: #92400e;
+}
+
+.c-adminalert.c--error {
+    background: #fef2f2;
+    border-color: #fca5a5;
+    border-left-color: #b91c1c;
+    color: #991b1b;
+}
+
+.c-adminbadge {
+    border-radius: 999px;
+    display: inline-block;
+    font-size: .75rem;
+    font-weight: 700;
+    line-height: 1.4;
+    padding: .125rem .5rem;
+    white-space: nowrap;
+}
+
+.c-adminbadge.c--home {
+    background: #e0f2fe;
+    color: #075985;
+}
+
+.c-adminbadge.c--published {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.c-adminbadge.c--unpublished {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.c-adminbadge-group,
+.c-adminbadge-group * {
+    --c-adminbadge-group-gap: .25rem;
+}
+
+.c-adminbadge-group {
+    align-items: center;
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: var(--c-adminbadge-group-gap);
+}
+
+.c-adminmenu-tree,
+.c-adminmenu-tree * {
+    --c-adminmenu-tree-indent: 1rem;
+}
+
+.c-adminmenu-tree {
+    align-items: stretch;
+    display: flex;
+    gap: .375rem;
+    padding-inline-start: calc(var(--c-adminmenu-tree-depth, 0) * var(--c-adminmenu-tree-indent));
+}
+
+.c-adminmenu-tree__branch {
+    border-inline-start: 2px solid var(--admin-border);
+    flex: 0 0 .5rem;
+}
+
+.c-adminmenu-tree__content {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .375rem;
+}
+
+.c-adminmenu-tree__label {
+    font-weight: 700;
+}
+
+.c-adminmenu-tree__meta {
+    color: var(--admin-muted);
+    flex-basis: 100%;
+    font-size: .75rem;
+}
+
+.c-adminnav {
+    --c-adminnav-gap: 1rem;
+    background: var(--admin-nav-bg);
+    border-bottom: 1px solid rgb(255 255 255 / 12%);
+    box-shadow: 0 2px 14px rgb(15 23 42 / 28%);
+    color: var(--admin-nav-ink);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.c-adminnav__inner {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--c-adminnav-gap);
+    justify-content: space-between;
+    margin: 0 auto;
+    max-width: 72rem;
+    padding: .75rem 1.25rem;
+}
+
+.c-adminnav__brand {
+    color: #ffffff;
+    font-weight: 700;
+    letter-spacing: .01em;
+    text-decoration: none;
+}
+
+.c-adminnav__links {
+    display: flex;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    gap: .25rem;
+}
+
+.c-adminnav__links a {
+    border-radius: 999px;
+    color: var(--admin-nav-ink);
+    padding: .5rem .875rem;
+    text-decoration: none;
+}
+
+.c-adminnav__links a:hover {
+    background: rgb(255 255 255 / 10%);
+    color: #ffffff;
+}
+
+.c-adminnav__links a.is-active {
+    background: var(--admin-nav-active);
+    color: #082f49;
+    font-weight: 700;
+}
+
+.c-adminnav__logout { margin: 0; }
+
+.c-adminnav__logout button {
+    background: transparent;
+    border: 1px solid rgb(255 255 255 / 40%);
+    border-radius: .375rem;
+    color: var(--admin-nav-ink);
+    cursor: pointer;
+    font: inherit;
+    min-height: 2.75rem;
+    padding: .5rem 1rem;
+}
+
+.c-adminnav__logout button:hover {
+    background: rgb(255 255 255 / 10%);
+    color: #ffffff;
+}
+
+.c-adminshell {
+    --c-adminshell-gap: 1.25rem;
+    display: grid;
+    gap: var(--c-adminshell-gap);
+    margin: 0 auto;
+    max-width: 72rem;
+    padding: 1.25rem;
+}
+
+.c-adminshell h1 {
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    margin: 0;
+}
+
+.c-adminshell h2 {
+    font-size: 1.125rem;
+    margin: 0;
+}
+
+.c-adminshell__lead {
+    color: var(--admin-muted);
+    margin: 0;
+    max-width: 65ch;
+}
+
+@media (min-width: 768px) {
+    .c-adminshell {
+        --c-adminshell-gap: 1.75rem;
+        padding: 2rem 1.5rem;
+    }
+}
+
+.c-adminsection {
+    display: grid;
+    gap: .75rem;
+}
+
+.c-adminform,
+.c-adminform * {
+    --c-adminform-gap: .875rem;
+}
+
+.c-adminform {
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius);
+    box-shadow: var(--admin-shadow);
+    display: grid;
+    gap: var(--c-adminform-gap);
+    padding: 1.25rem;
+}
+
+.c-adminform label { font-weight: 600; }
+
+.c-adminform input:not([type='hidden']),
+.c-adminform select,
+.c-adminform textarea {
+    background: #ffffff;
+    border: 1px solid #64748b;
+    border-radius: .375rem;
+    color: var(--admin-ink);
+    font: inherit;
+    min-height: 2.75rem;
+    padding: .5rem .625rem;
+    width: 100%;
+}
+
+.c-adminform textarea {
+    min-height: 14rem;
+    resize: vertical;
+}
+
+.c-adminform input[type='checkbox'] {
+    min-height: auto;
+    width: auto;
+}
+
+.c-adminform input:focus-visible,
+.c-adminform select:focus-visible,
+.c-adminform textarea:focus-visible {
+    outline: 3px solid #172033;
+    outline-offset: 1px;
+}
+
+.c-adminform__help {
+    color: var(--admin-muted);
+    font-size: .875rem;
+    margin: 0;
+}
+
+@media (min-width: 768px) {
+    .c-adminform {
+        align-items: start;
+        grid-template-columns: minmax(10rem, 16rem) minmax(0, 1fr);
+    }
+
+    .c-adminform button,
+    .c-adminform__help {
+        grid-column: 2;
+        justify-self: start;
+    }
+}
+
+.c-adminbutton {
+    background: var(--admin-accent);
+    border: 1px solid transparent;
+    border-radius: .375rem;
+    color: #ffffff;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    min-height: 2.75rem;
+    padding: .5rem 1rem;
+}
+
+.c-adminbutton:hover { background: var(--admin-accent-strong); }
+
+.c-adminbutton.c--secondary {
+    background: transparent;
+    border-color: var(--admin-border);
+    color: var(--admin-ink);
+}
+
+.c-adminbutton.c--secondary:hover { background: var(--admin-surface-muted); }
+
+.c-adminbutton.c--danger { background: var(--admin-danger); }
+
+.c-adminbutton.c--danger:hover { filter: brightness(.9); }
+
+.c-adminactions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.c-adminactions form { margin: 0; }
+
+.c-admintabs,
+.c-admintabs * {
+    --c-admintabs-gap: .5rem;
+}
+
+.c-admintabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--c-admintabs-gap);
+}
+
+.c-admintabs__tab {
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-border);
+    border-radius: .375rem;
+    color: var(--admin-ink);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    min-height: 2.75rem;
+    padding: .5rem 1rem;
+}
+
+.c-admintabs__tab[aria-selected='true'] {
+    background: var(--admin-accent);
+    border-color: var(--admin-accent);
+    color: #ffffff;
+}
+
+.c-admintabs__panel { margin-top: .75rem; }
+
+.c-admininline {
+    align-items: end;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin: 0 0 .5rem;
+}
+
+.c-admininline:last-child { margin-bottom: 0; }
+
+.c-admininline label {
+    display: grid;
+    font-size: .8125rem;
+    gap: .125rem;
+}
+
+.c-admininline input,
+.c-admininline select {
+    border: 1px solid #64748b;
+    border-radius: .375rem;
+    font: inherit;
+    min-height: 2.5rem;
+    padding: .375rem .5rem;
+}
+
+.c-admininline .c-adminbutton {
+    font-size: .875rem;
+    min-height: 2.5rem;
+    padding: .375rem .75rem;
+}
+
+.c-admintable {
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius);
+    box-shadow: var(--admin-shadow);
+    overflow-x: auto;
+}
+
+.c-admintable table {
+    border-collapse: collapse;
+    min-width: 38rem;
+    width: 100%;
+}
+
+.c-admintable th,
+.c-admintable td {
+    border-bottom: 1px solid var(--admin-border);
+    padding: .75rem;
+    text-align: left;
+    vertical-align: top;
+}
+
+.c-admintable thead th {
+    background: var(--admin-surface-muted);
+    font-size: .8125rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.c-admintable tbody tr:hover { background: var(--admin-surface-muted); }
+
+.c-admintable tbody tr:last-child td { border-bottom: 0; }
+
+.c-admintable pre {
+    margin: 0;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.c-adminlanguage-selector {
+    --c-adminlanguage-selector-gap: .5rem;
+    display: grid;
+    gap: var(--c-adminlanguage-selector-gap);
+}
+
+.c-adminlanguage-selector input,
+.c-adminlanguage-selector select {
+    background: #ffffff;
+    border: 1px solid #64748b;
+    border-radius: .375rem;
+    color: var(--admin-ink);
+    font: inherit;
+    min-height: 2.75rem;
+    padding: .5rem .625rem;
+}
+
+.c-admintranslation__status {
+    justify-self: start;
+}
+
+.c-admintranslations.is-enhanced .c-admintranslation__fallback-heading {
+    display: none;
+}
+
+.c-adminlogin {
+    --c-adminlogin-gap: 1rem;
+    display: grid;
+    gap: var(--c-adminlogin-gap);
+    margin: 0 auto;
+    max-width: 34rem;
+    min-height: 100vh;
+    padding: 1.25rem;
+    place-content: center;
+}
+
+.c-adminlogin .c-adminform {
+    min-width: min(100%, 22rem);
+}

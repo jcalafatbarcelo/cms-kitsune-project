@@ -36,11 +36,15 @@ class PageManager
         private readonly MenuReferenceResolver $menuReferences,
     ) {}
 
-    public function create(string $locale, string $slug, string $title, ?int $parentId = null, ?string $templateIdentifier = null, ?string $contentType = null): PageTranslation
+    public function create(string $locale, string $slug, string $title, ?int $parentId = null, ?string $templateIdentifier = null, ?string $contentType = null, ?string $name = null): PageTranslation
     {
         try {
-            return DB::transaction(function () use ($locale, $slug, $title, $parentId, $templateIdentifier, $contentType) {
+            return DB::transaction(function () use ($name, $locale, $slug, $title, $parentId, $templateIdentifier, $contentType) {
                 $language = $this->language($locale);
+                if ($name === null) {
+                    throw new PageOperationException('An internal page name is required.');
+                }
+                [$name, $nameKey] = $this->validatedName($name);
                 $this->validateText($slug, $title, $parentId === null);
                 if ($parentId !== null && Page::query()->lockForUpdate()->find($parentId) === null) {
                     throw new PageOperationException("Parent page [$parentId] is not available.");
@@ -49,6 +53,8 @@ class PageManager
                 $type = $this->contentType($contentType);
                 $template = $this->template($templateIdentifier);
                 $page = Page::query()->create([
+                    'name' => $name,
+                    'name_key' => $nameKey,
                     'parent_id' => $parentId,
                     'uses_explicit_template' => $templateIdentifier !== null,
                     'explicit_template_id' => $templateIdentifier === null ? null : $template->id,
@@ -175,7 +181,7 @@ class PageManager
             $before = $page->parent_id;
             if ($page->parent_id !== $parentId) {
                 $page->update(['parent_id' => $parentId]);
-                $this->audit->record('page.move', 'page', $page->id, ['parent_id' => $before], ['parent_id' => $parentId]);
+                $this->audit->record('page.move', 'page', $page->id, ['name' => $page->name, 'parent_id' => $before], ['name' => $page->name, 'parent_id' => $parentId]);
             }
         }, attempts: 5);
     }
@@ -526,6 +532,23 @@ class PageManager
         }
     }
 
+    /** @return array{string, string} */
+    private function validatedName(string $name): array
+    {
+        $name = trim($name);
+        if (! mb_check_encoding($name, 'UTF-8') || $name === '' || mb_strlen($name, 'UTF-8') > 150
+            || preg_match('/[\x00-\x1F\x7F!?:.,<>=()\[\]{}\/+*|@#~$%&ºª€\\\\]/u', $name)) {
+            throw new PageOperationException('The internal page name is invalid.');
+        }
+
+        $normalized = \Normalizer::normalize($name, \Normalizer::FORM_C);
+        if ($normalized === false) {
+            throw new PageOperationException('The internal page name is invalid.');
+        }
+
+        return [$name, mb_strtolower($normalized, 'UTF-8')];
+    }
+
     private function validateContentKey(string $key): void
     {
         if (! preg_match('/^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9]*)*$/D', $key) || strlen($key) > 255) {
@@ -556,6 +579,7 @@ class PageManager
     {
         return [
             'page_id' => $page->id,
+            'name' => $page->name,
             'parent_id' => $page->parent_id,
             'uses_explicit_template' => $page->uses_explicit_template,
             'explicit_template_id' => $page->explicit_template_id,
@@ -575,6 +599,7 @@ class PageManager
     {
         return [
             'page_id' => $page->id,
+            'name' => $page->name,
             'parent_id' => $page->parent_id,
             'uses_explicit_template' => $page->uses_explicit_template,
             'explicit_template_id' => $page->explicit_template_id,

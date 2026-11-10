@@ -9,8 +9,8 @@ import 'tinymce/plugins/link';
 import 'tinymce/plugins/table';
 import 'tinymce/plugins/code';
 
-document.querySelectorAll('.js-editor[data-editor="tinymce"]').forEach((textarea) => {
-    tinymce.init({
+export function initialize(textarea) {
+    return tinymce.init({
         target: textarea,
         license_key: 'gpl',
         skin: false,
@@ -22,4 +22,13 @@ document.querySelectorAll('.js-editor[data-editor="tinymce"]').forEach((textarea
         menubar: false,
         height: 320,
     });
-});
+}
+
+export function saveAndDestroy(textarea) {
+    const editor = tinymce.get(textarea.id);
+
+    if (editor) {
+        editor.save();
+        editor.remove();
+    }
+}

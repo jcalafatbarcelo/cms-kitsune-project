@@ -11,6 +11,9 @@ enum CmsPresentation: string
     case SystemAdminDashboard = 'system.admin.dashboard';
     case SystemAdminAudit = 'system.admin.audit';
     case SystemAdminPages = 'system.admin.pages';
+    case SystemAdminPagesNew = 'system.admin.pages.new';
     case SystemAdminPagesEdit = 'system.admin.pages.edit';
     case SystemAdminMenus = 'system.admin.menus';
+    case SystemAdminMenusNew = 'system.admin.menus.new';
+    case SystemAdminMenusShow = 'system.admin.menus.show';
 }
