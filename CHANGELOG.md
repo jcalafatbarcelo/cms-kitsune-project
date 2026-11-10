@@ -220,8 +220,9 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 
 ### Seguridad
 
-- Actualizado `symfony/http-foundation` a `8.1.9` para corregir
-  `CVE-2026-108082` en el procesamiento de cabeceras `Cache-Control`.
+- Actualizados seis componentes Symfony a sus versiones de seguridad `8.1.10` y
+  `8.1.11`, corrigiendo los advisories detectados y restableciendo los gates de
+  Composer y la regresión HTTP portable del backoffice.
 
 ### Eliminado
 
@@ -230,4 +231,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-11-08 23:17 UTC
+Fecha de última modificación: 2026-11-09 23:08 UTC

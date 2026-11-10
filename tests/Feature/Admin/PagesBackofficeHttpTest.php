@@ -762,13 +762,15 @@ test('array input does not break the creation or edit error screen', function ()
 test('an array parent id renders the page creation validation error without persistence', function () {
     $admin = app(SuperAdminBootstrap::class)->create('Administrator', 'admin@example.test', 'Safe-Test-Password9!');
 
-    $this->actingAs($admin)->followingRedirects()->post('/admin/pages', [
+    $this->actingAs($admin)->post('/admin/pages', [
         'name' => 'Invalid parent',
         'locale' => 'en',
         'slug' => 'invalid-parent',
         'title' => 'Invalid parent',
         'parent_id' => ['1'],
-    ])->assertOk()->assertSee('validation.integer');
+    ])->assertRedirect('/admin/pages/new')->assertSessionHasErrors('parent_id');
+
+    $this->actingAs($admin)->get('/admin/pages/new')->assertOk();
 
     expect(Page::query()->where('name', 'Invalid parent')->doesntExist())->toBeTrue()
         ->and(PageTranslation::query()->where('slug', 'invalid-parent')->doesntExist())->toBeTrue();
