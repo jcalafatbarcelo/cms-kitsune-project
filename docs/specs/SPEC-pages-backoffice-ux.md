@@ -1,6 +1,6 @@
 # SPEC: Identidad interna, recorridos y UX del backoffice de Pages y Menus
 
-- **Estado:** Revisión
+- **Estado:** Completada
 - **Perfil:** feature
 - **Origen de la planificación:** Petición del responsable del proyecto para
   diferenciar la identidad interna de una Page de sus traducciones y mejorar la
