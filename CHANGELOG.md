@@ -220,6 +220,8 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 
 ### Seguridad
 
+- Actualizado `laravel/framework` a `v13.40.0`, primera versión corregida de
+  `CVE-2026-128083` (`PKSA-yxbx-3c9s-cjt9`) en `Illuminate\Concurrency`.
 - Actualizados seis componentes Symfony a sus versiones de seguridad `8.1.10` y
   `8.1.11`, corrigiendo los advisories detectados y restableciendo los gates de
   Composer y la regresión HTTP portable del backoffice.
@@ -231,4 +233,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-11-09 23:08 UTC
+Fecha de última modificación: 2026-11-22 19:36 UTC
