@@ -78,8 +78,14 @@ consola autorizada. Véase
 proxies de confianza.
 
 La validación de `UI catalogs` debe repetirse en cada despliegue que cambie un
-catálogo. La gestión web de contenido, la administración de usuarios, los
-prefijos de URL y los overrides todavía no están disponibles.
+catálogo. El backoffice permite gestionar Pages y Menus; Media, PageBuilder y la
+administración web de idiomas u overrides todavía no están disponibles.
+
+En esta fase, la preparación técnica y la recuperación de overrides se realizan
+por Artisan. La gestión ordinaria de idiomas y overrides se incorporará al
+backoffice en LOC-04. Artisan seguirá disponible para instalación, automatización,
+CI y recuperación, pero no será la vía administrativa habitual del CMS. Véase
+[Administración de overrides de UI catalogs](../administration/ui-catalog-overrides.md).
 
 ## Actualizar un template desplegado
 

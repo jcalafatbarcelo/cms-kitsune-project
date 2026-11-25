@@ -17,6 +17,7 @@ class UiCatalogResolver
         private readonly string $fallbackMode,
         private readonly LoggerInterface $logger,
         private readonly string $owner = 'core',
+        private readonly ?UiCatalogOverrides $overrides = null,
     ) {
         if (! in_array($fallbackMode, ['base', 'key'], true)) {
             throw new InvalidArgumentException(
@@ -62,6 +63,12 @@ class UiCatalogResolver
 
     private function line(string $key, string $locale): ?string
     {
+        $override = $this->overrides?->line($key, $locale);
+
+        if ($override !== null) {
+            return $override;
+        }
+
         try {
             return $this->repository->snapshot($locale)->lines[$key] ?? null;
         } catch (CatalogValidationException $exception) {

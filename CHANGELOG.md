@@ -138,6 +138,13 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
   manifiesto declarativo, resolver de dominio y degradación controlada.
 - Assets del editor TinyMCE compilados con Vite y cargados únicamente en las
   pantallas de edición del backoffice; la web pública no los descarga.
+- Overrides de `UI catalogs` persistidos por locale y clave, con validación contra
+  el `en` del propietario, resolución previa al catálogo localizado en Core y CMS
+  Templates, interruptor global versionado, caché invalidada tras commit,
+  snapshots de actor y comandos Artisan de alta, baja, listado, validación y
+  conmutación.
+- Guía de administración de overrides y actualización del contrato de desarrollo
+  de `UI catalogs`.
 
 ### Modificado
 
@@ -196,8 +203,21 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
   posterior) en `LICENSE`, `composer.json`, los `composer.json` de los módulos y
   `package.json`, para permitir distribuir TinyMCE 8 sin licencia comercial.
 
+- Ampliada la resolución de `UI catalogs` con una capa de overrides previa al
+  catálogo localizado, modos `base` y `key` sin cambios y fallback seguro cuando
+  faltan las tablas, falla la caché o falla el almacén.
+- Documentada la operación de overrides en administración, desarrollo, roadmap de
+  localización y guía de instalación.
+
 ### Fijado
 
+- Endurecida la capa de overrides: invalidación por cambios en el `en` del
+  propietario aunque la caché esté caliente, reutilización acotada de snapshots,
+  tratamiento de caché malformada como miss, reserva del identificador `core`
+  para templates, rechazo de mutaciones web realizadas por usuarios que no sean
+  el superadministrador —incluida la autorización previa a la validación y los
+  cambios no-op del interruptor—, rechazo de controles Unicode y bidi peligrosos,
+  y limpieza de claves malformadas mediante `remove` sin relajar `set`.
 - Corregidas las rutas de descubrimiento, enlaces internos, nombres Unicode y
   ejemplos de animación, media queries y cascada de `metodologia-css`; retiradas
   guías heredadas y referencias ajenas al CMS.
@@ -233,4 +253,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-11-22 19:36 UTC
+Fecha de última modificación: 2026-11-25 02:24 UTC

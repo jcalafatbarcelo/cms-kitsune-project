@@ -3,9 +3,13 @@
 ## Alcance disponible
 
 Core permite instalar manualmente idiomas ya desplegados, validarlos, activarlos,
-desactivarlos y cambiar los predeterminados globales mediante Artisan. No existe
-todavía interfaz de backoffice, descarga remota, subida ni instalación dinámica
-de paquetes.
+desactivarlos y cambiar los predeterminados globales mediante Artisan. En esta
+fase no existe interfaz de backoffice, descarga remota, subida ni instalación
+dinámica de paquetes.
+
+Artisan es la vía técnica de bootstrap, automatización y recuperación; no es la
+experiencia administrativa final. La gestión ordinaria de idiomas y overrides se
+incorporará al backoffice en LOC-04.
 
 `en` se instala con las migraciones y nunca se desinstala. Debe existir
 exactamente un idioma predeterminado para frontend y otro para backoffice; pueden

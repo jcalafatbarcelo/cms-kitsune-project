@@ -31,7 +31,35 @@ Templates/Acme/
 
 Los nombres de directorio son ASCII alfanuméricos y no pueden diferir solo por
 mayúsculas/minúsculas. El identificador y directorio quedan inmutables tras la
-sincronización.
+sincronización. El identificador `core` está reservado para Core y se rechaza en
+la validación y sincronización de templates.
+
+### Actualización de un template con identificador reservado
+
+Un template ya registrado con `identifier: core` debe recuperarse mediante una
+intervención controlada de un operador con acceso a la base de datos. El
+procedimiento es:
+
+1. Realizar una copia de seguridad de la base de datos y del directorio del
+   template.
+2. Cambiar el `identifier` del `template.json` y las claves de su `UI catalog`
+   al nuevo identificador.
+3. Actualizar la fila registrada para que `identifier` coincida con el nuevo
+   manifiesto, manteniendo `directory` y `directory_key`. Por ejemplo, con el
+   operador conectado a la base de datos:
+
+   ```sql
+   UPDATE cms_templates SET identifier = 'legacy-core' WHERE directory_key = 'core';
+   ```
+
+4. Ejecutar `php artisan cms:template:sync`.
+5. Si el template estaba activo o era predeterminado, revisar el estado y las
+   presentaciones antes de volver a servir tráfico.
+
+No se debe borrar la fila si existen referencias desde
+`cms_template_settings.default_template_id` u otras tablas. El CMS no elimina ni
+modifica automáticamente filas con `identifier: core`; un `sync()` rechazado
+deja el registro intacto.
 
 Cada paquete validado expone sus vistas privadas mediante el namespace Blade
 estable `cms-template-<identifier>::`. Por ejemplo, el paquete `acme` puede usar
