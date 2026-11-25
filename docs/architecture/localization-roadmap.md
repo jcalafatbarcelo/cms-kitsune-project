@@ -12,9 +12,10 @@ mezclar incrementos ni presentar capacidades previstas como disponibles.
 > globales, los `UI catalogs` estáticos, sus prefijos URL y la operación mediante
 > Artisan. LOC-02 añade overrides gestionados por Artisan en esta fase y resueltos
 > en Core y CMS Templates; la gestión ordinaria de idiomas y overrides se
-> incorporará al backoffice en LOC-04. La pantalla de backoffice, la auditoría de
-> idiomas y overrides y el contenido editorial multiidioma siguen sin estar
-> implementados.
+> incorporará al backoffice en LOC-04. El contenido editorial `rich-text` de Pages
+> ya admite valores por traducción con fallback. La pantalla de backoffice para
+> idiomas y overrides, su auditoría, Media localizada y PageBuilder traducible
+> siguen pendientes.
 
 Fuentes prescriptivas relacionadas:
 
@@ -57,7 +58,7 @@ documentación técnica empleará siempre `UI catalog`.
 | LOC-04 | Backoffice de idiomas y overrides | Pendiente | LOC-01, LOC-02 y garantías de LOC-03 | Gestión autorizada, protegida y auditable |
 | LOC-05 | Selección temporal y negociación HTTP | Completado parcialmente | Registro de idiomas estable | Sesión y primera visita por navegador; cookie consentida diferida |
 | LOC-06 | URL amigables, idioma e items de menú | Completado | Modelo de páginas y menús especificado | Rutas canónicas, precedencia URL/locale y árboles de Navigation localizados |
-| LOC-07 | Contenido y PageBuilder traducibles | Pendiente | Entidades y schemas aprobados | Valores por locale e instancia, separados de la UI |
+| LOC-07 | Contenido y PageBuilder traducibles | Parcial: `rich-text` de Pages disponible; PageBuilder pendiente | Entidades y schemas aprobados | Valores por locale e instancia, separados de la UI |
 | LOC-08 | Paquetes dinámicos de idioma | Fuera del MVP/TFM | Distribución real y auditoría disponibles | Instalación segura sin ejecutar código del paquete |
 
 Estados de LOC-01:
@@ -276,6 +277,11 @@ idioma) y eliminó la auto-publicación de la primera traducción. El contenido
 editorial `rich-text` aplica fallback de contenido por clave reutilizando el modo
 global de `UI catalogs` y el idioma predeterminado de frontend, sin convertir las
 claves editoriales en claves de interfaz.
+
+El contenido `rich-text` de Pages ya está disponible por `PageTranslation` y
+aplica el fallback descrito. PageBuilder no forma parte de ese estado: sus
+bloques, schemas, valores por instancia y Media localizada siguen pendientes de
+sus propias Specs.
 
 El contenido de páginas y PageBuilder se mantendrá separado de los `UI catalogs`.
 Una plantilla del PageBuilder define claves de campos; cada instancia mantiene
