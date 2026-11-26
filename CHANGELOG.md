@@ -233,8 +233,8 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
   si un email está registrado.
 - Precisado que un `TRUSTED_PROXIES` inválido responde `500` en la primera
   petición y no durante el arranque.
-- Incluido el catálogo `es_ES` de Base para que el backoffice use de forma
-  reproducible el idioma configurado.
+- Las pruebas del backoffice usan un catálogo `es_ES` temporal en lugar de
+  distribuir el catálogo con Base.
 - Actualizado `league/commonmark` a `2.10.2` para corregir los advisories
   `GHSA-97jj-33gv-5xf9` y `GHSA-3q6v-r5mr-hxv8`.
 
@@ -245,6 +245,11 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Actualizados seis componentes Symfony a sus versiones de seguridad `8.1.10` y
   `8.1.11`, corrigiendo los advisories detectados y restableciendo los gates de
   Composer y la regresión HTTP portable del backoffice.
+- Actualizados `symfony/html-sanitizer`, `symfony/http-foundation`,
+  `symfony/http-kernel`, `symfony/mailer` y `symfony/routing` a `8.1.12`,
+  corrigiendo los advisories `PKSA-8dv1-1nwm-344v`, `PKSA-k1tg-4k6j-w4xf`,
+  `PKSA-vqxj-j8fm-1q3k`, `PKSA-9r8k-3vgs-8f3v`, `PKSA-pbtx-4qgh-mmkh` y
+  `PKSA-2vy6-qchn-f13r`, y restableciendo `Composer security audit`.
 
 ### Eliminado
 
@@ -256,4 +261,4 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-11-25 22:46 UTC
+Fecha de última modificación: 2026-11-26 18:45 UTC
