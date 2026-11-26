@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Template\Services;
 
+use Modules\Core\Localization\Services\UiCatalogOverrides;
 use Modules\Core\Localization\Services\UiCatalogRepository;
 use Modules\Core\Template\Exceptions\TemplateOperationException;
 use Modules\Core\Template\Models\CmsTemplate;
@@ -14,7 +15,11 @@ class TemplateUiCatalogs
         'page.home.under-construction.message',
     ];
 
-    public function __construct(private readonly string $root, private readonly LoggerInterface $logger) {}
+    public function __construct(
+        private readonly string $root,
+        private readonly LoggerInterface $logger,
+        private readonly ?UiCatalogOverrides $overrides = null,
+    ) {}
 
     public function text(CmsTemplate $effectiveTemplate, CmsTemplate $presentationTemplate, string $key, string $locale): string
     {
@@ -52,6 +57,13 @@ class TemplateUiCatalogs
 
     private function line(CmsTemplate $template, string $key, string $locale): ?string
     {
+        $fullKey = $template->identifier.'::'.$key;
+        $override = $this->overrides?->line($fullKey, $locale);
+
+        if ($override !== null) {
+            return $override;
+        }
+
         $path = $this->catalogPath($template);
         $catalog = $path.DIRECTORY_SEPARATOR.$locale.'.json';
         $baseCatalog = $path.DIRECTORY_SEPARATOR.'en.json';

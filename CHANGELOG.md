@@ -138,6 +138,13 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
   manifiesto declarativo, resolver de dominio y degradación controlada.
 - Assets del editor TinyMCE compilados con Vite y cargados únicamente en las
   pantallas de edición del backoffice; la web pública no los descarga.
+- Overrides de `UI catalogs` persistidos por locale y clave, con validación contra
+  el `en` del propietario, resolución previa al catálogo localizado en Core y CMS
+  Templates, interruptor global versionado, caché invalidada tras commit,
+  snapshots de actor y comandos Artisan de alta, baja, listado, validación y
+  conmutación.
+- Guía de administración de overrides y actualización del contrato de desarrollo
+  de `UI catalogs`.
 
 ### Modificado
 
@@ -196,8 +203,21 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
   posterior) en `LICENSE`, `composer.json`, los `composer.json` de los módulos y
   `package.json`, para permitir distribuir TinyMCE 8 sin licencia comercial.
 
+- Ampliada la resolución de `UI catalogs` con una capa de overrides previa al
+  catálogo localizado, modos `base` y `key` sin cambios y fallback seguro cuando
+  faltan las tablas, falla la caché o falla el almacén.
+- Documentada la operación de overrides en administración, desarrollo, roadmap de
+  localización y guía de instalación.
+
 ### Fijado
 
+- Endurecida la capa de overrides: invalidación por cambios en el `en` del
+  propietario aunque la caché esté caliente, reutilización acotada de snapshots,
+  tratamiento de caché malformada como miss, reserva del identificador `core`
+  para templates, rechazo de mutaciones web realizadas por usuarios que no sean
+  el superadministrador —incluida la autorización previa a la validación y los
+  cambios no-op del interruptor—, rechazo de controles Unicode y bidi peligrosos,
+  y limpieza de claves malformadas mediante `remove` sin relajar `set`.
 - Corregidas las rutas de descubrimiento, enlaces internos, nombres Unicode y
   ejemplos de animación, media queries y cascada de `metodologia-css`; retiradas
   guías heredadas y referencias ajenas al CMS.
@@ -213,8 +233,8 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
   si un email está registrado.
 - Precisado que un `TRUSTED_PROXIES` inválido responde `500` en la primera
   petición y no durante el arranque.
-- Incluido el catálogo `es_ES` de Base para que el backoffice use de forma
-  reproducible el idioma configurado.
+- Las pruebas del backoffice usan un catálogo `es_ES` temporal en lugar de
+  distribuir el catálogo con Base.
 - Actualizado `league/commonmark` a `2.10.2` para corregir los advisories
   `GHSA-97jj-33gv-5xf9` y `GHSA-3q6v-r5mr-hxv8`.
 
@@ -225,12 +245,20 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 - Actualizados seis componentes Symfony a sus versiones de seguridad `8.1.10` y
   `8.1.11`, corrigiendo los advisories detectados y restableciendo los gates de
   Composer y la regresión HTTP portable del backoffice.
+- Actualizados `symfony/html-sanitizer`, `symfony/http-foundation`,
+  `symfony/http-kernel`, `symfony/mailer` y `symfony/routing` a `8.1.12`,
+  corrigiendo los advisories `PKSA-8dv1-1nwm-344v`, `PKSA-k1tg-4k6j-w4xf`,
+  `PKSA-vqxj-j8fm-1q3k`, `PKSA-9r8k-3vgs-8f3v`, `PKSA-pbtx-4qgh-mmkh` y
+  `PKSA-2vy6-qchn-f13r`, y restableciendo `Composer security audit`.
 
 ### Eliminado
 
+- Catálogos `es_ES` distribuidos con Core y Base; el producto solo incluye `en` y
+  las pruebas usan fixtures temporales. Un paquete de idioma debe aportar el
+  catálogo Core del locale.
 - Skills genéricas instaladas por Boost que no aportaban una ventaja neta frente
   a `AGENTS.md`, la documentación consultable por MCP y las skills propias.
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-11-22 19:36 UTC
+Fecha de última modificación: 2026-11-26 18:45 UTC

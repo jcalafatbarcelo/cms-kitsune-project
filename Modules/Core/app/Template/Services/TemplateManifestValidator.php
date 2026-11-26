@@ -95,6 +95,12 @@ class TemplateManifestValidator
             throw new TemplateOperationException("Template manifest [$directory] has an unsupported schema.");
         }
 
+        if ($manifest['identifier'] === 'core') {
+            throw new TemplateOperationException(
+                "Template [$directory] cannot use the reserved [core] identifier.",
+            );
+        }
+
         $viewsPath = $resolvedPath.DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR.'views';
         $this->assertSafeDirectory($resolvedPath.DIRECTORY_SEPARATOR.'Resources', $resolvedPath);
         $this->assertSafeDirectory($viewsPath, $resolvedPath);

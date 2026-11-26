@@ -3,9 +3,13 @@
 ## Alcance disponible
 
 Core permite instalar manualmente idiomas ya desplegados, validarlos, activarlos,
-desactivarlos y cambiar los predeterminados globales mediante Artisan. No existe
-todavía interfaz de backoffice, descarga remota, subida ni instalación dinámica
-de paquetes.
+desactivarlos y cambiar los predeterminados globales mediante Artisan. En esta
+fase no existe interfaz de backoffice, descarga remota, subida ni instalación
+dinámica de paquetes.
+
+Artisan es la vía técnica de bootstrap, automatización y recuperación; no es la
+experiencia administrativa final. La gestión ordinaria de idiomas y overrides se
+incorporará al backoffice en LOC-04.
 
 `en` se instala con las migraciones y nunca se desinstala. Debe existir
 exactamente un idioma predeterminado para frontend y otro para backoffice; pueden
@@ -28,7 +32,8 @@ contenido completo del `UI catalog`.
 ## Instalar manualmente
 
 1. Crear el `UI catalog` completo en
-   `Modules/Core/Resources/lang/<locale>.json`.
+   `Modules/Core/Resources/lang/<locale>.json`. El CMS solo distribuye `en`; los
+   catálogos de otros idiomas son artefactos de despliegue y no se versionan.
 2. Ejecutar `php artisan cms:language:validate en` para confirmar que el catálogo
    base sigue siendo válido.
 3. Crear un manifiesto local como el siguiente:
@@ -54,6 +59,9 @@ contenido completo del `UI catalog`.
 php artisan cms:language:install /ruta/segura/es_ES-manifest.json
 php artisan cms:language:validate es_ES
 ```
+
+El template Base tampoco incluye catálogos localizados. Su interfaz usa `en` o
+los overrides aplicables hasta que el template aporte un catálogo para el locale.
 
 El idioma queda inactivo. `url_prefix` usa `xx` o `xx-xx`, es único incluso para
 idiomas inactivos y no puede cambiarse después de la instalación. Repetir la instalación falla sin modificar datos. El

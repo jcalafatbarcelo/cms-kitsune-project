@@ -10,6 +10,12 @@ node_modules/
 auth.json
 /storage/*.key
 
+# Catálogos localizados de Core y Base; el producto solo distribuye en.json
+/Modules/Core/Resources/lang/*.json
+!/Modules/Core/Resources/lang/en.json
+/Templates/Base/Resources/lang/*.json
+!/Templates/Base/Resources/lang/en.json
+
 # Artefactos de Laravel y Vite
 /public/build/
 /public/fonts-manifest.dev.json

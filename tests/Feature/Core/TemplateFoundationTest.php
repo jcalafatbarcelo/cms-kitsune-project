@@ -47,6 +47,55 @@ test('a clean installation registers Base and enforces the template settings sin
         ->toThrow(QueryException::class);
 })->group('database-integration');
 
+test('sync rejects the core identifier reserved for Core without modifying registered templates', function () {
+    writeTemplate($this->templateRoot, 'Acme', 'acme');
+    $this->templates->sync();
+
+    $before = DB::table('cms_templates')->orderBy('id')->get()->map(fn ($row) => (array) $row)->all();
+
+    writeTemplate($this->templateRoot, 'Core', 'core');
+
+    expect(fn () => $this->templates->sync())
+        ->toThrow(TemplateOperationException::class, 'reserved');
+
+    $after = DB::table('cms_templates')->orderBy('id')->get()->map(fn ($row) => (array) $row)->all();
+
+    expect($after)->toBe($before);
+});
+
+test('a legacy core template requires a controlled identifier update before sync', function () {
+    writeTemplate($this->templateRoot, 'Core', 'core');
+
+    DB::table('cms_templates')->insert([
+        'directory' => 'Core',
+        'directory_key' => 'core',
+        'identifier' => 'core',
+        'name' => 'Core',
+        'manifest_hash' => str_repeat('a', 64),
+        'is_active' => false,
+        'registered_at' => now(),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $before = DB::table('cms_templates')->orderBy('id')->get()->map(fn ($row) => (array) $row)->all();
+
+    expect(fn () => $this->templates->sync())
+        ->toThrow(TemplateOperationException::class, 'reserved');
+
+    $after = DB::table('cms_templates')->orderBy('id')->get()->map(fn ($row) => (array) $row)->all();
+
+    expect($after)->toBe($before);
+
+    writeTemplate($this->templateRoot, 'Core', 'legacy-core');
+    DB::table('cms_templates')->where('directory_key', 'core')->update(['identifier' => 'legacy-core']);
+
+    $this->templates->sync();
+
+    expect(DB::table('cms_templates')->where('directory_key', 'core')->value('identifier'))
+        ->toBe('legacy-core');
+});
+
 test('sync registers a valid deployed template and preserves transactional safety', function () {
     file_put_contents($this->templateRoot.DIRECTORY_SEPARATOR.'README.md', 'not a package');
     mkdir($this->templateRoot.DIRECTORY_SEPARATOR.'.metadata');

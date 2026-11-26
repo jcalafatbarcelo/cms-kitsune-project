@@ -101,9 +101,9 @@ Los hitos que deben coordinarse son:
 - Navigation necesita la disponibilidad pública localizada para no ofrecer
   destinos sin traducción publicable; su integración con los items de menú de
   LOC-06 se concretará en su propia Spec.
-- LOC-02 (overrides) puede retomarse como incremento de localización
-  independiente. LOC-03 es obligatorio antes de exponer mutaciones de idiomas u
-  overrides en el backoffice mediante LOC-04.
+- LOC-02 (overrides) está implementado con gestión por Artisan en esta fase y
+  resolución en Core y CMS Templates. LOC-03 es obligatorio antes de exponer
+  mutaciones de idiomas u overrides en el backoffice mediante LOC-04.
 - PageBuilder corresponde a LOC-07 para sus valores traducibles; sus bloques no
   son CMS Templates ni UI catalogs.
 

@@ -14,8 +14,6 @@ class UiCatalogRepository
 
     private const MAX_KEY_BYTES = 191;
 
-    private const MAX_VALUE_BYTES = 16_384;
-
     /** @var array<string, UiCatalogSnapshot> */
     private array $cache = [];
 
@@ -134,16 +132,11 @@ class UiCatalogRepository
 
             self::assertKey($key, $this->owner);
 
-            if (! is_string($value)
-                || $value === ''
-                || strlen($value) > self::MAX_VALUE_BYTES
-                || str_contains($value, '<')
-                || str_contains($value, '>')
-                || preg_match('/[\x00-\x1F\x7F]/', $value)) {
+            if (! is_string($value)) {
                 throw new CatalogValidationException("UI catalog value [$key] is invalid.");
             }
 
-            $this->validatePluralization($key, $value);
+            UiCatalogValueValidator::assertValue($key, $value);
         }
 
         if ($baseLines === null) {
@@ -158,45 +151,7 @@ class UiCatalogRepository
         }
 
         foreach ($baseLines as $key => $baseValue) {
-            $localizedValue = $lines[$key];
-
-            if ($this->placeholders($baseValue) !== $this->placeholders($localizedValue)) {
-                throw new CatalogValidationException("UI catalog placeholders differ for [$key].");
-            }
-
-            if (str_contains($baseValue, '|') !== str_contains($localizedValue, '|')) {
-                throw new CatalogValidationException("UI catalog pluralization differs for [$key].");
-            }
-        }
-    }
-
-    /** @return list<string> */
-    private function placeholders(string $value): array
-    {
-        preg_match_all('/:([A-Za-z][A-Za-z0-9_]*)/', $value, $matches);
-        $placeholders = array_values(array_unique(array_map('strtolower', $matches[1])));
-        sort($placeholders);
-
-        return $placeholders;
-    }
-
-    private function validatePluralization(string $key, string $value): void
-    {
-        if (! str_contains($value, '|')) {
-            return;
-        }
-
-        if (! in_array('count', $this->placeholders($value), true)) {
-            throw new CatalogValidationException("Pluralized UI catalog value [$key] requires :count.");
-        }
-
-        foreach (explode('|', $value) as $segment) {
-            $segment = trim($segment);
-
-            if ($segment === '' || (($segment[0] === '{' || $segment[0] === '[')
-                && ! preg_match('/^[{[][-?\d*,.]+[}\]]\s*.+$/sD', $segment))) {
-                throw new CatalogValidationException("UI catalog pluralization is invalid for [$key].");
-            }
+            UiCatalogValueValidator::assertCompatible($key, $baseValue, $lines[$key]);
         }
     }
 

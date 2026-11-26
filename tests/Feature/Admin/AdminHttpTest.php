@@ -7,11 +7,19 @@ use Illuminate\Support\Facades\DB;
 use Modules\Core\Language\Models\LanguageSetting;
 use Modules\Core\Template\Exceptions\TemplateOperationException;
 use Modules\Core\Template\Services\TemplatePresentationResolver;
+use Modules\Core\Template\Services\TemplateUiCatalogs;
+use Tests\Support\UiCatalogFixture;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->withoutVite();
+});
+
+afterEach(function () {
+    if (isset($this->baseCatalogRoot)) {
+        UiCatalogFixture::remove($this->baseCatalogRoot);
+    }
 });
 
 test('guests reach the Blade login and cannot reach the dashboard', function () {
@@ -140,6 +148,12 @@ test('login accepts a valid CSRF token and rejects expired sessions', function (
 });
 
 test('administrative templates use the configured backoffice locale and escape old input', function () {
+    $this->baseCatalogRoot = UiCatalogFixture::baseTemplateRoot();
+    $this->app->instance(
+        TemplateUiCatalogs::class,
+        new TemplateUiCatalogs($this->baseCatalogRoot, app('log')),
+    );
+
     $spanishId = DB::table('languages')->insertGetId([
         'locale' => 'es_ES', 'url_prefix' => 'es-es', 'name' => 'Spanish (Spain)',
         'native_name' => 'Español (España)', 'text_direction' => 'ltr', 'is_active' => true,

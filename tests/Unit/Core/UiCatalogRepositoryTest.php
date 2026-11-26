@@ -170,6 +170,38 @@ test('resolver rejects invalid identifiers before querying or logging them', fun
     }
 });
 
+test('catalog validation rejects unicode control and bidi override characters', function (string $value) {
+    $directory = catalogDirectory();
+
+    try {
+        writeCatalog($directory, 'en', ['core::unsafe' => $value]);
+
+        expect(fn () => (new UiCatalogRepository($directory))->snapshot('en'))
+            ->toThrow(CatalogValidationException::class);
+    } finally {
+        removeCatalogDirectory($directory);
+    }
+})->with([
+    'C1 NEL' => ["\u{0085}"],
+    'RIGHT-TO-LEFT OVERRIDE' => ["\u{202E}"],
+]);
+
+test('catalog validation accepts legitimate zero-width joiner and RTL marks', function (string $value) {
+    $directory = catalogDirectory();
+
+    try {
+        writeCatalog($directory, 'en', ['core::greeting' => $value]);
+
+        expect((new UiCatalogRepository($directory))->snapshot('en')->lines['core::greeting'])
+            ->toBe($value);
+    } finally {
+        removeCatalogDirectory($directory);
+    }
+})->with([
+    'ZERO WIDTH JOINER' => ["Hello\u{200D}World"],
+    'RIGHT-TO-LEFT MARK' => ["Hello\u{200F}World"],
+]);
+
 test('catalog validation rejects html oversized files invalid utf8 and unsafe locales', function () {
     $directory = catalogDirectory();
 

@@ -88,7 +88,8 @@ el formato de almacenamiento de su contenido.
   secuencia prevista para idiomas, `UI catalogs`, overrides, negociación HTTP y
   contenido localizado, con su estado de avance.
 - [`docs/administration/languages.md`](docs/administration/languages.md):
-  operación de idiomas mediante los comandos Artisan disponibles.
+  operación técnica de idiomas mediante Artisan; la gestión ordinaria se
+  incorporará al backoffice en LOC-04.
 - [`docs/administration/pages-and-menus.md`](docs/administration/pages-and-menus.md):
   gestión de Pages, Menus, publicación, home y contenido enriquecido desde el
   backoffice.

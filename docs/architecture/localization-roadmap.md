@@ -10,8 +10,12 @@ mezclar incrementos ni presentar capacidades previstas como disponibles.
 > [!IMPORTANT]
 > El módulo Core ya proporciona el registro de idiomas, los predeterminados
 > globales, los `UI catalogs` estáticos, sus prefijos URL y la operación mediante
-> Artisan. Overrides, backoffice y contenido editorial multiidioma siguen sin estar
-> implementados.
+> Artisan. LOC-02 añade overrides gestionados por Artisan en esta fase y resueltos
+> en Core y CMS Templates; la gestión ordinaria de idiomas y overrides se
+> incorporará al backoffice en LOC-04. El contenido editorial `rich-text` de Pages
+> ya admite valores por traducción con fallback. La pantalla de backoffice para
+> idiomas y overrides, su auditoría, Media localizada y PageBuilder traducible
+> siguen pendientes.
 
 Fuentes prescriptivas relacionadas:
 
@@ -22,6 +26,8 @@ Fuentes prescriptivas relacionadas:
   versiones mínimas y política de soporte de persistencia.
 - [SPEC de fundación estática](../specs/SPEC-static-language-foundation.md):
   contrato completado del primer incremento.
+- [SPEC de distribución solo en inglés](../specs/SPEC-english-only-ui-catalogs.md):
+  corrección del alcance de catálogos distribuidos.
 - [Roadmap de calidad](quality-roadmap.md): momento de evaluación de auditoría,
   seguridad y observabilidad.
 
@@ -49,12 +55,12 @@ documentación técnica empleará siempre `UI catalog`.
 | :--- | :--- | :--- | :--- | :--- |
 | LOC-00 | Planificación y decisión de `UI catalogs` | Completado | Fundación modular disponible | ADR aceptado, vocabulario y secuencia documentados |
 | LOC-01 | Fundación de idiomas estáticos | Completado | LOC-00 completado y Spec aprobada | Core, `en`, registro, predeterminados, JSON, fallback y Artisan |
-| LOC-02 | Overrides | Pendiente | LOC-01 completado | Sustituciones y traducciones locales validadas, con actor y caché |
+| LOC-02 | Overrides | Completado | LOC-01 completado | Sustituciones y traducciones locales validadas, con actor y caché |
 | LOC-03 | Auditoría administrativa | En curso: fundación de Pages y Navigation completada | Antes del primer backoffice mutable | Historial durable independiente de logs operativos |
 | LOC-04 | Backoffice de idiomas y overrides | Pendiente | LOC-01, LOC-02 y garantías de LOC-03 | Gestión autorizada, protegida y auditable |
 | LOC-05 | Selección temporal y negociación HTTP | Completado parcialmente | Registro de idiomas estable | Sesión y primera visita por navegador; cookie consentida diferida |
 | LOC-06 | URL amigables, idioma e items de menú | Completado | Modelo de páginas y menús especificado | Rutas canónicas, precedencia URL/locale y árboles de Navigation localizados |
-| LOC-07 | Contenido y PageBuilder traducibles | Pendiente | Entidades y schemas aprobados | Valores por locale e instancia, separados de la UI |
+| LOC-07 | Contenido y PageBuilder traducibles | Parcial: `rich-text` de Pages disponible; PageBuilder pendiente | Entidades y schemas aprobados | Valores por locale e instancia, separados de la UI |
 | LOC-08 | Paquetes dinámicos de idioma | Fuera del MVP/TFM | Distribución real y auditoría disponibles | Instalación segura sin ejecutar código del paquete |
 
 Estados de LOC-01:
@@ -128,16 +134,26 @@ override del locale
 -> clave literal
 ```
 
-Los overrides no existen en LOC-01, por lo que esa primera precedencia comienza
-temporalmente en el `UI catalog`. El valor por defecto será `base` en producción
-y `key` en desarrollo, testing y E2E; una configuración explícita válida podrá
-cambiarlo en cualquier entorno.
+Los overrides no existían en LOC-01. LOC-02 incorpora la primera precedencia
+documentada; el valor por defecto será `base` en producción y `key` en desarrollo,
+testing y E2E; una configuración explícita válida podrá cambiarlo en cualquier
+entorno.
 
-## Incrementos pendientes
+## Detalle de incrementos
 
 ### LOC-02: overrides
 
-La Spec de overrides deberá definir:
+`SPEC-ui-catalog-overrides` definió e implementó este incremento. En esta fase, la
+gestión disponible es exclusivamente por Artisan, como vía técnica de bootstrap,
+automatización y recuperación; la pantalla, la autorización y la auditoría de
+overrides se retomarán en LOC-04 después de completar LOC-03.
+
+El producto distribuye solo el catálogo `en` de Core y del template Base. Los
+catálogos de otros locales son artefactos de despliegue o fixtures de prueba. Un
+paquete de idioma debe aportar el catálogo Core del locale, y un template puede
+aportar los suyos; el manifiesto actual no instala catálogos de templates.
+
+La Spec de overrides definió:
 
 - clave con propietario y locale instalado;
 - referencia obligatoria a una clave existente en el `UI catalog` `en`;
@@ -148,8 +164,19 @@ La Spec de overrides deberá definir:
 - código del usuario creador y del último modificador, almacenados sin claves
   foráneas hacia `users`;
 - actor `console` o `system` cuando no exista usuario autenticado;
-- comportamiento al desactivar o retirar el propietario, que se decidirá con el
-  ciclo de vida de módulos y templates.
+- comportamiento al desactivar o retirar el propietario: la fila se conserva, se
+  ignora en resolución y la validación la reporta como huérfana.
+
+Estados de LOC-02:
+
+- [x] Tablas, restricciones, modelos y validación de escritura.
+- [x] Resolución en Core y CMS Templates con modos `base` y `key`.
+- [x] Interruptor global, versión, caché y degradación segura.
+- [x] Actores históricos y comandos Artisan de alta, baja, listado, validación y
+      conmutación.
+- [x] Documentación de administración, desarrollo y changelog.
+- [x] Pruebas enfocadas, suite afectada, formato, frontend y matriz de motores.
+- [x] Auditoría independiente y cierre formal del estado de la Spec.
 
 Los códigos de actor son snapshots históricos y no deben reutilizarse. Antes de
 implementar borrado de usuarios se comparará conservar el snapshot en auditoría
@@ -187,6 +214,31 @@ fallida no debe registrarse como cambio realizado.
 `SPEC-admin-audit-foundation` concreta el mecanismo de auditoría y lo aplica a las
 mutaciones de Pages, Menus y publicación; la cobertura de idiomas, overrides e
 intentos denegados se completará con LOC-04.
+
+### LOC-04: backoffice de idiomas y overrides
+
+LOC-04 requerirá una Spec propia y no está implementado. Su entrada exige LOC-01,
+LOC-02 y las garantías de auditoría de LOC-03. El objetivo es trasladar la gestión
+ordinaria de idiomas y overrides al backoffice sin convertir Artisan en la vía
+administrativa final.
+
+Alcance previsto:
+
+- pantallas autorizadas para idiomas y overrides, con CSRF y superadministrador;
+- auditoría durable de cada mutación e intento denegado;
+- uso de los mismos servicios de dominio, sin ejecutar comandos Artisan desde la
+  web;
+- mensajes de presentación en `base::admin.languages.*` y
+  `base::admin.overrides.*`;
+- mensajes de resultado de dominio en `core::language.*`;
+- mapeo controlado de excepciones a claves estables y mensaje genérico para
+  errores desconocidos;
+- reutilización de `core::language.installed`;
+- pruebas de resolución en `en` y `es_ES`, fallback y errores;
+- Artisan conservado para bootstrap, automatización, CI y recuperación.
+
+Fuera de alcance: API pública, roles granulares, propietarios de módulos y paquetes
+dinámicos de idioma.
 
 ### LOC-05: selección temporal y navegador
 
@@ -233,6 +285,11 @@ editorial `rich-text` aplica fallback de contenido por clave reutilizando el mod
 global de `UI catalogs` y el idioma predeterminado de frontend, sin convertir las
 claves editoriales en claves de interfaz.
 
+El contenido `rich-text` de Pages ya está disponible por `PageTranslation` y
+aplica el fallback descrito. PageBuilder no forma parte de ese estado: sus
+bloques, schemas, valores por instancia y Media localizada siguen pendientes de
+sus propias Specs.
+
 El contenido de páginas y PageBuilder se mantendrá separado de los `UI catalogs`.
 Una plantilla del PageBuilder define claves de campos; cada instancia mantiene
 sus propios valores por locale. Compartir una clave de campo no comparte el
@@ -261,9 +318,10 @@ Antes de continuar cualquier incremento:
 7. No marcar un incremento como completado hasta cerrar aceptación, pruebas,
    documentación y quality gate.
 
-El siguiente incremento candidato dentro de la línea de localización es LOC-02.
-Requiere planificación, una Spec concreta y aprobación antes de implementar
-overrides; la finalización de LOC-01 no autoriza ese alcance posterior. La
-secuencia independiente de CMS Templates, Pages, navegación y PageBuilder se
-coordina en el [roadmap de contenido, templates y navegación](content-delivery-roadmap.md)
-y no altera por sí misma el estado de ninguna fila `LOC-*`.
+El siguiente paso de la línea de localización es cerrar LOC-03 y abordar LOC-04,
+que requiere las garantías de auditoría y las dependencias ya satisfechas por
+LOC-01 y LOC-02. La implementación de overrides no autoriza por sí sola su
+exposición web ni la auditoría durable. La secuencia independiente de CMS
+Templates, Pages, navegación y PageBuilder se coordina en el
+[roadmap de contenido, templates y navegación](content-delivery-roadmap.md) y no
+altera por sí misma el estado de ninguna fila `LOC-*`.
