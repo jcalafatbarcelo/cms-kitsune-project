@@ -40,9 +40,11 @@ Los textos visibles se resuelven por dos caminos:
   incluido `base::*`, con fallback entre el template efectivo y su presentación.
 
 El catálogo Core contiene una única clave y el template Base contiene el inventario
-principal de la interfaz. Ambos distribuyen `en` y `es_ES`. Instalar un segundo
-idioma para pruebas E2E no requiere inventar contenido editorial: solo hace falta
-un manifiesto temporal con los metadatos del locale.
+principal de la interfaz. Ambos distribuyen `en`; los catálogos de otros locales no
+forman parte del paquete y se aportan como artefacto de despliegue o fixture de
+prueba. Instalar un segundo idioma para pruebas E2E no requiere inventar contenido
+editorial: solo hace falta un catálogo temporal del locale y un manifiesto con sus
+metadatos.
 
 Los propietarios actuales son Core y los templates registrados en `cms_templates`,
 cuyo `identifier` es único. `UiCatalogOwnerRegistry` solo registra Core; los
@@ -422,7 +424,7 @@ oculta en el alcance entregado.
 4. Integrar la capa de overrides en Core y en `TemplateUiCatalogs`, con interruptor,
    fallback y caché; cubrir CA-02, CA-03 y CA-06.
 5. Implementar los comandos Artisan y sus pruebas hasta CA-07.
-6. Añadir una prueba HTTP/E2E con `es_ES` y un override de
+6. Añadir una prueba HTTP/E2E con un catálogo `es_ES` de prueba y un override de
    `base::admin.login.title`, más la degradación segura hasta CA-08.
 7. Actualizar la guía de administración, la documentación de desarrollo, el
    roadmap y el changelog; ejecutar Pint, suite afectada, build de Vite y matriz

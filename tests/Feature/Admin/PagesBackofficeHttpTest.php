@@ -4,6 +4,7 @@ use App\Models\User;
 use App\Services\Admin\SuperAdminBootstrap;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Template\Services\TemplateUiCatalogs;
 use Modules\Navigation\Exceptions\NavigationOperationException;
 use Modules\Navigation\Models\Menu;
 use Modules\Navigation\Models\MenuItem;
@@ -12,11 +13,18 @@ use Modules\Pages\Models\Page;
 use Modules\Pages\Models\PageTranslation;
 use Modules\Pages\Models\PageTranslationContent;
 use Modules\Pages\Services\PageManager;
+use Tests\Support\UiCatalogFixture;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->withoutVite();
+});
+
+afterEach(function () {
+    if (isset($this->baseCatalogRoot)) {
+        UiCatalogFixture::remove($this->baseCatalogRoot);
+    }
 });
 
 test('only the superadministrator can reach the Pages and Menus screens', function () {
@@ -790,6 +798,11 @@ test('the menus list uses its own localized empty message', function () {
 
 test('the Spanish menu UI localizes the item CTA and page selectors', function () {
     $admin = app(SuperAdminBootstrap::class)->create('Administrator', 'admin@example.test', 'Safe-Test-Password9!');
+    $this->baseCatalogRoot = UiCatalogFixture::baseTemplateRoot();
+    $this->app->instance(
+        TemplateUiCatalogs::class,
+        new TemplateUiCatalogs($this->baseCatalogRoot, app('log')),
+    );
     DB::table('languages')->insert([
         'locale' => 'es_ES', 'url_prefix' => 'es-es', 'name' => 'Spanish', 'native_name' => 'Español',
         'text_direction' => 'ltr', 'is_active' => true, 'is_url_general' => false, 'installed_at' => now(), 'created_at' => now(), 'updated_at' => now(),
@@ -957,6 +970,11 @@ test('the page edit screen activates the configured locale and restores the subm
 
 test('the page edit screen localizes each translation status and keeps locale headings only as progressive enhancement fallbacks', function () {
     $admin = app(SuperAdminBootstrap::class)->create('Administrator', 'admin@example.test', 'Safe-Test-Password9!');
+    $this->baseCatalogRoot = UiCatalogFixture::baseTemplateRoot();
+    $this->app->instance(
+        TemplateUiCatalogs::class,
+        new TemplateUiCatalogs($this->baseCatalogRoot, app('log')),
+    );
     $spanishId = DB::table('languages')->insertGetId([
         'locale' => 'es_ES', 'url_prefix' => 'es-es', 'name' => 'Spanish', 'native_name' => 'Español',
         'text_direction' => 'ltr', 'is_active' => true, 'is_url_general' => false, 'installed_at' => now(), 'created_at' => now(), 'updated_at' => now(),

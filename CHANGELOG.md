@@ -248,9 +248,12 @@ El formato está basado en [Keep a Changelog 1.1.0](https://keepachangelog.com/e
 
 ### Eliminado
 
+- Catálogos `es_ES` distribuidos con Core y Base; el producto solo incluye `en` y
+  las pruebas usan fixtures temporales. Un paquete de idioma debe aportar el
+  catálogo Core del locale.
 - Skills genéricas instaladas por Boost que no aportaban una ventaja neta frente
   a `AGENTS.md`, la documentación consultable por MCP y las skills propias.
 - Configuración generada para Claude Code (`.claude/`, `.mcp.json`), no utilizada
   por el proyecto.
 
-Fecha de última modificación: 2026-11-25 02:24 UTC
+Fecha de última modificación: 2026-11-25 22:46 UTC

@@ -17,6 +17,7 @@ use Modules\Core\Template\Models\CmsTemplate;
 use Modules\Core\Template\Services\TemplateUiCatalogs;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Tests\Support\UiCatalogFixture;
 
 uses(RefreshDatabase::class);
 
@@ -95,6 +96,30 @@ function overrideResolutionRemoveTree(string $path): void
 beforeEach(function () {
     overrideResolutionInstallLanguage();
     overrideResolutionInstallLanguage('fr_FR', 'fr', false);
+
+    $this->coreCatalog = UiCatalogFixture::core();
+    $this->baseCatalogRoot = UiCatalogFixture::baseTemplateRoot();
+
+    config(['core.catalog_path' => $this->coreCatalog]);
+
+    $this->app->instance(
+        TemplateUiCatalogs::class,
+        new TemplateUiCatalogs(
+            $this->baseCatalogRoot,
+            app(LoggerInterface::class),
+            app(UiCatalogOverrides::class),
+        ),
+    );
+});
+
+afterEach(function () {
+    if (isset($this->coreCatalog)) {
+        UiCatalogFixture::remove($this->coreCatalog);
+    }
+
+    if (isset($this->baseCatalogRoot)) {
+        UiCatalogFixture::remove($this->baseCatalogRoot);
+    }
 });
 
 test('core resolution applies overrides local catalogs and base fallback in order', function () {

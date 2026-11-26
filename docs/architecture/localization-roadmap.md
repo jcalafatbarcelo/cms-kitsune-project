@@ -26,6 +26,8 @@ Fuentes prescriptivas relacionadas:
   versiones mínimas y política de soporte de persistencia.
 - [SPEC de fundación estática](../specs/SPEC-static-language-foundation.md):
   contrato completado del primer incremento.
+- [SPEC de distribución solo en inglés](../specs/SPEC-english-only-ui-catalogs.md):
+  corrección del alcance de catálogos distribuidos.
 - [Roadmap de calidad](quality-roadmap.md): momento de evaluación de auditoría,
   seguridad y observabilidad.
 
@@ -145,6 +147,11 @@ entorno.
 gestión disponible es exclusivamente por Artisan, como vía técnica de bootstrap,
 automatización y recuperación; la pantalla, la autorización y la auditoría de
 overrides se retomarán en LOC-04 después de completar LOC-03.
+
+El producto distribuye solo el catálogo `en` de Core y del template Base. Los
+catálogos de otros locales son artefactos de despliegue o fixtures de prueba. Un
+paquete de idioma debe aportar el catálogo Core del locale, y un template puede
+aportar los suyos; el manifiesto actual no instala catálogos de templates.
 
 La Spec de overrides definió:
 

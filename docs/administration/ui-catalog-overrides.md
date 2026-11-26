@@ -15,7 +15,8 @@ un `en.json` válido para poder ser propietario de overrides.
 
 No se permite crear claves nuevas: toda clave debe existir en el `en` de su
 propietario. `en.json` sigue siendo la autoridad de claves, placeholders y
-pluralización.
+pluralización. El producto solo distribuye `en`; los overrides pueden aportar
+traducciones de locales no distribuidos, pero no crear claves.
 
 ## Vía de gestión
 

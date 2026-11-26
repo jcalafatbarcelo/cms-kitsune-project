@@ -29,6 +29,16 @@ para Core; un template usa su `identifier` registrado en `cms_templates`.
 debe contener exactamente las mismas claves. Una clave localizada ausente de
 `en` se rechaza y nunca se registra ni resuelve.
 
+## Distribución
+
+El producto distribuye únicamente `en.json` para Core y para el template Base.
+Los catálogos de otros locales no se versionan ni forman parte del paquete: son
+artefactos de despliegue o fixtures de prueba. Las pruebas construyen catálogos
+temporales a partir del `en.json` real y no dependen de archivos locales. Un
+paquete de idioma debe aportar el catálogo Core del locale; un template puede
+distribuir sus propios catálogos, pero el manifiesto de idioma actual no los
+instala.
+
 ## Reglas de validación
 
 - Archivo regular dentro de `Modules/Core/Resources/lang`; no se admiten enlaces

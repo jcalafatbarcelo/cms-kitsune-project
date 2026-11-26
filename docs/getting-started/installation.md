@@ -30,7 +30,8 @@ genera `APP_KEY`, ejecuta las migraciones y compila los assets. La migración de
 Core crea `languages` y el singleton `language_settings`, instala `en` como
 idioma activo y lo asigna como base y predeterminado de frontend y backoffice.
 Esos son dos predeterminados obligatorios, uno por contexto, que pueden apuntar
-al mismo idioma o a idiomas distintos.
+al mismo idioma o a idiomas distintos. El paquete solo distribuye el catálogo
+`en`; para instalar otro idioma hay que aportar su catálogo Core.
 
 Comprobar el resultado con:
 

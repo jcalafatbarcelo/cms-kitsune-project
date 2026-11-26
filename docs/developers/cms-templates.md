@@ -85,6 +85,10 @@ declarar el Blade ni siquiera distribuir un catálogo completo. La búsqueda de
 texto consulta el catálogo del template efectivo antes que el del template que
 aporta la presentación, respetando `CMS_UI_CATALOG_FALLBACK_MODE`.
 
+El template Base distribuido solo incluye `en.json`. Los catálogos de otros
+locales no forman parte del producto; un template puede aportar los suyos, pero
+un manifiesto de idioma no los instala.
+
 La etiqueta accesible del menú Base usa la clave
 `navigation.menu.label` y sigue esa misma precedencia de catálogos. Un template
 Custom puede cambiarla aunque herede el Blade de navegación de Base.
