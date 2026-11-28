@@ -3,8 +3,8 @@
 ## Propósito y estado
 
 Este documento conserva el orden previsto para entregar contenido editorial,
-CMS Templates, localización pública, navegación y PageBuilder sin mezclar sus
-fronteras. Está dirigido a contributors del core que reanuden el trabajo tras
+Media, CMS Templates, localización pública, navegación y PageBuilder sin mezclar
+sus fronteras. Está dirigido a contributors del core que reanuden el trabajo tras
 completar un incremento.
 
 > [!IMPORTANT]
@@ -16,7 +16,7 @@ completar un incremento.
 Fuentes relacionadas:
 
 - [SDD inicial](../context/SDD_Inicial.md): visión, `Page`/`PageTranslation`,
-  publicación en cascada y menús independientes.
+  Media con metadatos traducibles, publicación en cascada y menús independientes.
 - [ADR-0001](../adr/ADR-0001-blade-vue-bajo-demanda.md): Blade como renderizado
   esencial y Vue bajo demanda.
 - [ADR-0002](../adr/ADR-0002-ui-catalogs-json-modulares.md): textos estáticos
@@ -38,9 +38,11 @@ Fuentes relacionadas:
 | 6 | Auditoría administrativa durable | Completado | Backoffice mínimo completado y primer flujo mutable planificado | Eventos inmutables y transaccionales de Pages, Menus y publicación, consultables por el superadministrador |
 | 7 | Backoffice de Pages | Completado | Auditoría durable y fundación de Pages | Gestión web de páginas, traducciones, jerarquía, publicación, tipos de contenido y contenido editorial |
 | 8 | Backoffice de Menus | Completado | Auditoría durable y fundación de Navigation | Gestión web de menús e ítems con referencia a Pages, selección de home por ítem y aislamiento por idioma |
-| 9 | Fundación de PageBuilder | Previsto | Backoffice de Pages y Menus y contrato de presentación estables | Bloques declarativos, valores por instancia y locale, validación y renderizado Blade desde el backoffice |
-| 10 | Extensiones de CMS Templates | Previsto | PageBuilder o una necesidad de presentación comprobable | UI catalogs propios, configuración, assets, presentaciones y bloques aportados por templates |
-| 11 | Tematización de vistas de sistema | Previsto | Módulo funcional y contrato de cada vista disponibles | Apariencia intercambiable de login, recuperación o backoffice sin alterar sus rutas, autorización o lógica |
+| 9 | Fundación de Media | Previsto | Backoffice de Pages y Menus, auditoría durable y contrato de embeds disponible | `Media` reutilizable con almacenamiento, metadatos localizados, validación, ciclo de vida, auditoría y referencia estable |
+| 10 | Perfiles y representaciones de Media | Previsto | Fundación de Media completada | Perfiles de uso y representaciones responsive/OpenGraph resueltos sin rutas ni HTML editable |
+| 11 | Fundación de PageBuilder | Previsto | Fundación y representaciones de Media completadas; Backoffice de Pages y Menus y contrato de presentación estables | Bloques declarativos, valores por instancia y locale, validación y renderizado Blade desde el backoffice |
+| 12 | Extensiones de CMS Templates | Previsto | PageBuilder o una necesidad de presentación comprobable | UI catalogs propios, configuración, assets, presentaciones y bloques aportados por templates |
+| 13 | Tematización de vistas de sistema | Previsto | Módulo funcional y contrato de cada vista disponibles | Apariencia intercambiable de login, recuperación o backoffice sin alterar sus rutas, autorización o lógica |
 
 El primer paso está implementado mediante `SPEC-template-foundation` y su matriz
 SQLite, MySQL y MariaDB está verificada. La finalización no autoriza
@@ -85,6 +87,19 @@ contenido editorial `rich-text` con TinyMCE, sanitización en servidor y el cont
 de elementos insertables (embeds). La home deja de autoasignarse y ninguna Page
 creada por el usuario se publica automáticamente.
 
+La fundación de Media se planifica después del backoffice editorial y antes de
+PageBuilder. Debe entregar una entidad reutilizable con almacenamiento,
+metadatos localizados (`alt` y `title`), validación de ficheros, autorización,
+auditoría, ciclo de vida y una referencia estable que no dependa de rutas ni de
+HTML editable. Media será el primer consumidor del contrato de embeds y su Spec
+fijará el ADR correspondiente, incluida la estrategia de almacenamiento y
+entrega. Los perfiles de uso y las representaciones responsive/OpenGraph se
+concretan en el incremento siguiente; PageBuilder consume ambos sin administrar
+ficheros ni inventar otra estrategia de traducción.
+
+`og_media_id` y el resto del SEO editorial se retomarán en su propio incremento,
+después de que Media exponga una referencia y un perfil OpenGraph estables.
+
 ## Dependencias de localización
 
 La secuencia principal no sustituye `LOC-02` a `LOC-08` ni altera sus estados.
@@ -104,6 +119,10 @@ Los hitos que deben coordinarse son:
 - LOC-02 (overrides) está implementado con gestión por Artisan en esta fase y
   resolución en Core y CMS Templates. LOC-03 es obligatorio antes de exponer
   mutaciones de idiomas u overrides en el backoffice mediante LOC-04.
+- Media debe estar estable antes de PageBuilder: este consume una referencia
+  tipada y un perfil de representación, pero no administra ficheros ni metadatos
+  localizados. El contrato de embeds se fija con Media y no convierte las
+  referencias editoriales en rutas o HTML ejecutable.
 - PageBuilder corresponde a LOC-07 para sus valores traducibles; sus bloques no
   son CMS Templates ni UI catalogs.
 
